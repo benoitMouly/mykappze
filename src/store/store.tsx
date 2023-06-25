@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux'
 import authReducer from '../features/user/userSlice';
-// import associationsReducer from '../features/associations/associationSlice.js';
+import associationsReducer from '../features/associations/associationSlice.tsx';
 // import citiesReducer from '../features/cities/citySlice.js';
 // import sectorsReducer from '../features/sectors/sectorSlice.js';
 // import animalsReducer from '../features/animals/animalSlice.js';
@@ -10,7 +10,7 @@ import authReducer from '../features/user/userSlice';
 export const store = configureStore({
     reducer: {
         auth: authReducer,
-        // associations: associationsReducer,
+        associations: associationsReducer,
         // cities: citiesReducer,
         // animals: animalsReducer,
         // sectors: sectorsReducer,

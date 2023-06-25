@@ -15,14 +15,15 @@ import {
   StyleSheet, Alert
 } from "react-native";
 import * as Font from "expo-font";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the navigation type
 type RootStackParamList = {
-  Login: undefined;
-  Home: undefined;
+  LoginPage: any;
+  MyKappze: any;
 };
 
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
+type LoginScreenNavigationProp = StackNavigationProp<RootStackParamList, 'LoginPage'>;
 
 
 
@@ -51,7 +52,8 @@ const LoginPage: React.FC = () => {
     if (loginUser.fulfilled.match(actionResult)) {
       
       console.log("Bonjour, nous sommes connectés.");
-      navigation.navigate("Home");
+      await AsyncStorage.setItem('userLoggedIn', 'true');
+      navigation.navigate("MyKappze");
     } else {
       // Si l'action échoue, affichez le message d'erreur
       if (actionResult.payload) {
