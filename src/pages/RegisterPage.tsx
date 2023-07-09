@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 // import { useDispatch } from "react-redux";
-import { useAppDispatch } from "../store/store";
-import { loginUser } from "../features/user/userSlice.tsx";
+import { useAppDispatch, useAppSelector } from "../store/store";
+import { loginUser, registerUser } from "../features/user/userSlice.tsx";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import Modal from "react-native-modal";
 
 import {
   View,
@@ -14,23 +15,23 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Pressable,
 } from "react-native";
 import * as Font from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define the navigation type
 type RootStackParamList = {
-  LoginPage: any;
+  Login: any;
   MyKappze: any;
-  Register: any;
 };
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Register"
+  "Login"
 >;
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   // const navigation = useNavigation();
 
@@ -39,6 +40,35 @@ const LoginPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [phone, setPhone] = useState("");
+  const [errMail, setErrMail] = useState("");
+  const [errName, setErrName] = useState("");
+  const [errSurname, setErrSurname] = useState("");
+  const [errPassword, setErrPassword] = useState("");
+  const [errPhoneNumber, setErrPhoneNumber] = useState("");
+  const [err, setErr] = useState("");
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
+
+  const [errorMessage, setError] = useState("");
+  const { error: errorCode } = useAppSelector((state) => state.auth);
+
+  //   useEffect(() => {
+  //     if (errorCode) {
+  //         setError(getErrorMsg(errorCode));
+  //     } else {
+  //         setError(null);
+  //     }
+
+  //     return () => {
+  //         setError('null'); // réinitialisez l'erreur lorsque le composant se démonte
+  //     };
+
+  // }, [errorCode]);
+
   // const navigation = useNavigation();
   // AsyncStorage.getAllKeys((err, keys) => {
   //   AsyncStorage.multiGet(keys, (error, stores) => {
@@ -48,31 +78,36 @@ const LoginPage: React.FC = () => {
   //     });
   //   });
   // });
-  // Dans LoginPage
+  // Dans Login
   const handleLogin = async () => {
-    if (email === "" || password === "") {
-      Alert.alert("Erreur", "Veuillez remplir tous les champs.");
+    if (email === "" || password === "" || name === "" || surname === "" || phone === "") {
+        setModalTitle("Erreur");
+      setModalMessage("Veuillez remplir tous les champs.");
+      setModalVisible(true);
       return;
     }
 
-    const actionResult = await dispatch(loginUser({ email, password }));
+    const actionResult = await dispatch(registerUser({ email, password, name, surname }));
 
-    if (loginUser.fulfilled.match(actionResult)) {
-      await AsyncStorage.setItem("@userIsLoggedIn", "true");
+    if (registerUser.fulfilled.match(actionResult)) {
+    //   await AsyncStorage.setItem("@userIsLoggedIn", "true");
       try {
-        const token = await AsyncStorage.getItem("@userIsLoggedIn");
-        if (token === "true") {
-          console.log(token);
-          console.log("ON Y VA");
-        }
+        // const token = await AsyncStorage.getItem("@userIsLoggedIn");
+        // if (token === "true") {
+        setModalTitle('Inscription réussie ! ')
+          setModalMessage("Vous allez être redirigé vers la page de connexion.");
+          setModalVisible(true);
+          setTimeout(() => {
+            navigation.navigate('Login');
+          }, 2000);
+        // }
       } catch (error) {
         console.log(error);
       }
     } else {
-      // Si l'action échoue, affichez le message d'erreur
       if (actionResult.payload) {
-        console.log("actionResult a un payload");
-        Alert.alert("Erreur", actionResult.payload);
+        setModalMessage(actionResult.payload);
+        setModalVisible(true);
       }
     }
   };
@@ -94,7 +129,7 @@ const LoginPage: React.FC = () => {
     return (
       <View style={styles.container}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Kappze</Text>
+          <Text style={styles.title}>Inscription</Text>
           <Image
             style={styles.logo}
             source={require("../assets/transparent-without-circle.png")} // Remplacer par le chemin de votre image
@@ -103,35 +138,65 @@ const LoginPage: React.FC = () => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
+            placeholder="Nom"
+            placeholderTextColor="#FFF"
+            onChangeText={(text) => setName(text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Prenom"
+            placeholderTextColor="#FFF"
+            onChangeText={(text) => setSurname(text)}
+          />
+
+          <TextInput
+            style={styles.input}
             placeholder="Email"
             placeholderTextColor="#FFF"
             onChangeText={(text) => setEmail(text)}
           />
           <TextInput
             style={styles.input}
+            placeholder="Telephone"
+            placeholderTextColor="#FFF"
+            onChangeText={(text) => setPhone(text)}
+          />
+          <TextInput
+            style={styles.input}
             secureTextEntry
-            placeholder="Password"
+            placeholder="Mot de passe"
             placeholderTextColor="#FFF"
             onChangeText={(text) => setPassword(text)}
           />
+
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Se connecter</Text>
+            <Text style={styles.buttonText}>S'inscrire</Text>
             <Image
               source={require("../assets/icon-paw.png")}
               style={styles.buttonIcon}
             />
           </TouchableOpacity>
-          <Text
-            style={styles.link}
-            onPress={() => navigation.navigate("Register")}
-          >
-            Pas encore de compte ? S'inscrire
-          </Text>
-          <Text style={styles.link} onPress={() => {}}>
-            Mot de passe oublié
+          <Text style={styles.link} onPress={() => {navigation.navigate("Login")}}>
+            Déja inscrit ? Se connecter
           </Text>
         </View>
+
+        <Modal isVisible={isModalVisible}   animationIn="slideInLeft"
+  animationOut="slideOutRight"
+  animationInTiming={600}
+  animationOutTiming={600}>
+      <View style={styles.modalElt}>
+      <Text style={styles.title}>{modalTitle}</Text>
+        <Text style={{color: 'white'}}>{modalMessage}</Text>
+        <Pressable style={styles.button} onPress={() => setModalVisible(false)}>
+        <Text style={{color: 'white'}}>Fermer</Text>
+        </Pressable>
       </View>
+    </Modal>
+
+      </View>
+
+      
     );
   }
 };
@@ -190,6 +255,14 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontFamily: "WixMadeforDisplay-Regular",
   },
+  modalElt: {
+    display: 'flex',
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    rowGap: 30
+  }
 });
 
-export default LoginPage;
+export default RegisterPage;

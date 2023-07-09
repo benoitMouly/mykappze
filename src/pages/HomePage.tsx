@@ -6,7 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type RootStackParamList = {
-  ListingAssociation: any;
+  ListingAssociation: undefined;
 };
 
 type ListingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ListingAssociation'>;

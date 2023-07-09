@@ -2,51 +2,65 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getFirestore, collection, doc, getDoc, query, where, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
 
 
-export const fetchAssociationUsers = createAsyncThunk(
-    'associations/fetchAssociationUsers',
-    async (associationId) => {
-        const db = getFirestore();
-
-        // Get the association data
-        const associationRef = doc(db, 'associations', associationId);
-        const associationSnapshot = await getDoc(associationRef);
-        const associationData = associationSnapshot.data();
-
-        // Get the users associated with this association
-        const usersQuery = query(collection(db, 'userAssociations'), where('associationId', '==', associationId));
-        const usersSnapshot = await getDocs(usersQuery);
-
-        const usersData = [];
-        for (const userDoc of usersSnapshot.docs) {
-            const userAssociationData = userDoc.data();
-            const userId = userAssociationData.userId;
-
-            // Get the user's information from its reference
-            const userRef = doc(db, 'users', userId);
-            const userSnapshot = await getDoc(userRef);
-
-            if (userSnapshot.exists()) {
-                const userData = { id: userId, ...userSnapshot.data() };
-
-                // Check if the user is an admin
-                let isAdmin = false;
-                if (Array.isArray(associationData.role)) {
-                    for (let role of associationData.role) {
-                        if (role.uid === userId && role.isAdmin) {
-                            isAdmin = true;
-                            break;
-                        }
-                    }
-                }
-                userData.isAdmin = isAdmin;
-
-                usersData.push(userData);
+interface User {
+    id: string;
+    isAdmin: boolean;
+    // Inclure ici d'autres propriétés de l'utilisateur si nécessaire
+  }
+  
+  interface Role {
+    uid: string;
+    isAdmin: boolean;
+  }
+  
+  interface AssociationData {
+    role: Role[];
+  }
+  
+  export const fetchAssociationUsers = createAsyncThunk<
+    User[], // Le type de la valeur de retour de la promesse
+    string, // Le type du payload
+    {} // Le type des informations de rejet si la promesse est rejetée
+  >('associations/fetchAssociationUsers', async (associationId) => {
+    const db = getFirestore();
+  
+    // Get the association data
+    const associationRef = doc(db, 'associations', associationId);
+    const associationSnapshot = await getDoc(associationRef);
+    const associationData = associationSnapshot.data() as AssociationData;
+  
+    // Get the users associated with this association
+    const usersQuery = query(collection(db, 'userAssociations'), where('associationId', '==', associationId));
+    const usersSnapshot = await getDocs(usersQuery);
+  
+    const usersData: User[] = [];
+    for (const userDoc of usersSnapshot.docs) {
+      const userAssociationData = userDoc.data();
+      const userId = userAssociationData.userId;
+  
+      // Get the user's information from its reference
+      const userRef = doc(db, 'users', userId);
+      const userSnapshot = await getDoc(userRef);
+  
+      if (userSnapshot.exists()) {
+        const userData: User = { id: userId, ...userSnapshot.data(), isAdmin: false };
+  
+        // Check if the user is an admin
+        if (Array.isArray(associationData.role)) {
+          for (let role of associationData.role) {
+            if (role.uid === userId && role.isAdmin) {
+              userData.isAdmin = true;
+              break;
             }
+          }
         }
-
-        return usersData;
+  
+        usersData.push(userData);
+      }
     }
-);
+  
+    return usersData;
+  });
 
 
 export const removeUserFromAssociation = createAsyncThunk(

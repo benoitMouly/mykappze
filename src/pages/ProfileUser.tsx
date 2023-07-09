@@ -8,10 +8,6 @@ import { RootState, useAppDispatch } from "../store/store";
 
 import LoadingPage from '../components/general/loadingPage'; // Importez votre composant de chargement ici
 
-
-
-// import BackButton from '../components/general/BackButton' 
-
 const ProfileUser = () => {
     const { uid, isAuthenticated } = useSelector((state: RootState) => state.auth);
     const { data: associations, status, error } = useSelector((state: RootState) => state.associations);
@@ -23,36 +19,24 @@ const ProfileUser = () => {
         }
     }, [dispatch, uid, isAuthenticated]);
 
-    // if (status === 'loading') {
-    //     return <LoadingPage />
-    // } else if (status === 'failed') {
-    //     return (
-    //         <View style={styles.errorContainer}>
-    //             <Text>Error: {error}</Text>
-    //         </View>
-    //     )
-    // } else {
-        return (
-            <View style={styles.container}>
-                {/* <BackButton /> */}
-                {associations.length ? 
-                    <>
-                        <Text style={styles.title}>Voici la liste de vos associations :</Text>
-                        <View style={styles.listAssociation}>
-                            {associations.map((association) => (
-                                <AssociationCard key={association.id} association={association} />
-                            ))}
-                        </View>
-                    </> : (
-                        <View style={styles.authPage}>
-                            <Text>Vous n'avez pas encore d'associations. </Text>
-                            {/* <BackButton /> */}
-                        </View>
-                    )
-                }
-            </View>
-        );
-    // }
+    return (
+        <View style={styles.container}>
+            {associations.length ? 
+                <>
+                    <Text style={styles.title}>Voici la liste de vos associations :</Text>
+                    <View style={styles.listAssociation}>
+                        {associations.map((association) => (
+                            <AssociationCard key={association.id} association={association} />
+                        ))}
+                    </View>
+                </> : (
+                    <View style={styles.authPage}>
+                        <Text>Vous n'avez pas encore d'associations. </Text>
+                    </View>
+                )
+            }
+        </View>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -62,13 +46,15 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 20,
-        color: '#fff',
+        color: '#000',
         padding: 10,
         marginTop: 0,
     },
     listAssociation: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        paddingTop: 30
     },
     authPage: {
         flex: 1,

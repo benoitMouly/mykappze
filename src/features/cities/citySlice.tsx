@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getFirestore, collection, where, query, getDocs, addDoc, updateDoc, deleteDoc, getDoc, doc } from 'firebase/firestore';
-import { fetchSectors } from '../../features/sectors/sectorSlice';
+import { fetchSectors } from '../sectors/sectorSlice';
 
 
 /*
@@ -8,17 +8,44 @@ import { fetchSectors } from '../../features/sectors/sectorSlice';
 ***    
 */
 
-export const fetchCities = createAsyncThunk('cities/fetchCities', async (associationId) => {
-    const db = getFirestore();
-    const q = query(collection(db, 'cities'), where('associationId', '==', associationId));
-    const querySnapshot = await getDocs(q);
-    const citiesData = [];
-    querySnapshot.forEach((doc) => {
-        citiesData.push({ id: doc.id, ...doc.data() });
-    });
-    return citiesData;
-});
+// export const fetchCities = createAsyncThunk<
+// { associationId: string }
+// >('cities/fetchCities', async (associationId) => {
+//     const db = getFirestore();
+//     const q = query(collection(db, 'cities'), where('associationId', '==', associationId));
+//     const querySnapshot = await getDocs(q);
+//     const citiesData = [];
+//     querySnapshot.forEach((doc) => {
+//         citiesData.push({ id: doc.id, ...doc.data() });
+//     });
+//     return citiesData;
+// });
 
+
+
+
+// Définir le type de chaque ville
+interface City {
+  id: string;
+  associationId: string;
+  // Inclure ici d'autres propriétés de la ville si nécessaire
+}
+
+export const fetchCities = createAsyncThunk<
+  City[], // Le type de la valeur de retour de la promesse
+  string, // Le type du payload
+  {} // Le type des informations de rejet si la promesse est rejetée
+>('cities/fetchCities', async (associationId) => {
+  const db = getFirestore();
+  console.log(associationId)
+  const q = query(collection(db, 'cities'), where('associationId', '==', associationId));
+  const querySnapshot = await getDocs(q);
+  const citiesData: City[] = [];
+  querySnapshot.forEach((doc) => {
+    citiesData.push({ id: doc.id, ...doc.data() } as City);
+  });
+  return citiesData;
+});
 
 /*
 * Fetch sectors from cities
@@ -33,6 +60,9 @@ export const fetchAllSectors = async (cities, dispatch) => {
         const sectors = sectorsAction.payload; // unwrap the result of the dispatched action
         allSectors.push(...sectors);
     }
+
+    console.log('ALL SECTORS : ')
+    console.log(allSectors)
 
     return allSectors;
 };

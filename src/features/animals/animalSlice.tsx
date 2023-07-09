@@ -7,16 +7,30 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'fire
 ***    
 */
 
-export const fetchAnimalsByAssociation = createAsyncThunk('animals/fetchAnimalsByAssociation', async (associationId) => {
+// Définir le type de chaque animal
+interface AnimalData {
+    id: string;
+    associationId: string;
+    // Inclure ici d'autres propriétés de l'animal si nécessaire
+  }
+  
+  export const fetchAnimalsByAssociation = createAsyncThunk<
+    AnimalData[], // Le type de la valeur de retour de la promesse
+    string, // Le type du payload
+    {} // Le type des informations de rejet si la promesse est rejetée
+  >('animals/fetchAnimalsByAssociation', async (associationId) => {
     const db = getFirestore();
     const q = query(collection(db, 'animals'), where('associationId', '==', associationId));
     const querySnapshot = await getDocs(q);
-    const animalsData = [];
+    const animalsData: AnimalData[] = [];
     querySnapshot.forEach((doc) => {
-        animalsData.push({ id: doc.id, ...doc.data() });
+      const data = doc.data();
+      if ('associationId' in data) {
+        animalsData.push({ id: doc.id, associationId: data.associationId, ...data });
+      }
     });
     return animalsData;
-});
+  });
 
 
 /*
