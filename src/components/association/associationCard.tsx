@@ -20,6 +20,7 @@ const AssociationCard = ({ association }) => {
 
   const handlePress = () => {
     navigation.navigate("AssociationDetails", {
+      // id: association.id,
       associationId: association.id,
     });
   };
@@ -31,7 +32,7 @@ const AssociationCard = ({ association }) => {
       ) : (
         <Image style={styles.image} source={require('../../assets/transparent-without-circle.png') } />
       )}
-      <Text style={styles.text}>{association.name}</Text>
+      <Text style={styles.textName}>{association.name}</Text>
       <TouchableOpacity style={styles.button} onPress={handlePress}>
         <Text style={styles.buttonText}>Accéder</Text>
       </TouchableOpacity>
@@ -51,14 +52,21 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
-    elevation: 2,
+    // elevation: 2,
     marginBottom: 20,
-    padding: 10,
+    padding: 5,
     alignItems: "center",
   },
-  text: {
+  textName: {
     marginBottom: 10,
+    fontFamily: "WixMadeforDisplay-Bold",
+    alignSelf: "flex-start",
   },
+  // text: {
+  //   marginBottom: 10,
+  //   fontFamily: "WixMadeforDisplay-Bold",
+  //   alignSelf: "center",
+  // },
   image: {
     width: 100, // Remplacez par les dimensions souhaitées
     height: 100, // Remplacez par les dimensions souhaitées
@@ -67,12 +75,13 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#2F4F4F",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 2,
+    alignItems: 'center',
     width: "100%",
-    alignItems: "center",
   },
   buttonText: {
     color: "#ffffff",
+    fontFamily: "WixMadeforDisplay-Bold",
   },
 });
 

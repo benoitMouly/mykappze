@@ -1,6 +1,6 @@
 // ProfileUser.tsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAssociations } from '../features/associations/associationSlice';
 import AssociationCard from '../components/association/associationCard'
@@ -17,10 +17,12 @@ const ProfileUser = () => {
         if (isAuthenticated && uid) {
             dispatch(fetchAssociations(uid));
         }
+
+        console.log(associations)
     }, [dispatch, uid, isAuthenticated]);
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             {associations.length ? 
                 <>
                     <Text style={styles.title}>Voici la liste de vos associations :</Text>
@@ -35,7 +37,7 @@ const ProfileUser = () => {
                     </View>
                 )
             }
-        </View>
+        </ScrollView>
     );
 };
 
@@ -43,18 +45,23 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
+        backgroundColor: '#2F4F4F'
     },
     title: {
         fontSize: 20,
-        color: '#000',
+        color: '#fff',
         padding: 10,
         marginTop: 0,
+        fontFamily: "WixMadeforDisplay-Bold",
     },
     listAssociation: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
-        paddingTop: 30
+        rowGap: 10,
+        columnGap: 0,
+        paddingTop: 30,
+        paddingHorizontal: 5
     },
     authPage: {
         flex: 1,

@@ -151,113 +151,113 @@ export const registerUser = createAsyncThunk<
 }
 );
 
-// export const updateUserName = createAsyncThunk(
-//     'user/updateUserName',
-//     async ({ userId, newName }) => {
-//         const db = getFirestore();
-//         const userRef = doc(db, 'users', userId);
-//         await updateDoc(userRef, { name: newName });
-//         return { newName };
-//     }
-// );
+export const updateUserName = createAsyncThunk(
+    'user/updateUserName',
+    async ({ userId, newName }) => {
+        const db = getFirestore();
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { name: newName });
+        return { newName };
+    }
+);
 
-// export const updateUserSurname = createAsyncThunk(
-//     'user/updateUserSurname',
-//     async ({ userId, newSurname }) => {
-//         const db = getFirestore();
-//         const userRef = doc(db, 'users', userId);
-//         await updateDoc(userRef, { surname: newSurname });
-//         return { newSurname }
-//     }
-// );
+export const updateUserSurname = createAsyncThunk(
+    'user/updateUserSurname',
+    async ({ userId, newSurname }) => {
+        const db = getFirestore();
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { surname: newSurname });
+        return { newSurname }
+    }
+);
 
-// export const resetPassword = createAsyncThunk(
-//     'auth/resetPassword',
-//     async (email) => {
-//         const auth = getAuth();
-//         await sendPasswordResetEmail(auth, email);
-//     }
-// );
+export const resetPassword = createAsyncThunk(
+    'auth/resetPassword',
+    async (email) => {
+        const auth = getAuth();
+        await sendPasswordResetEmail(auth, email);
+    }
+);
 
-// export const resetStatus = createAction('auth/resetStatus');
+export const resetStatus = createAction('auth/resetStatus');
 
-// const checkEmailExistsInDatabase = async (email) => {
-//     const db = getFirestore();
-//     const usersCollection = collection(db, 'users');
-//     const emailQuery = query(usersCollection, where('email', '==', email));
-//     const querySnapshot = await getDocs(emailQuery);
-//     return querySnapshot.size > 0; // Vérifiez si la taille du querySnapshot est supérieure à zéro pour déterminer si l'e-mail existe
-// };
+const checkEmailExistsInDatabase = async (email) => {
+    const db = getFirestore();
+    const usersCollection = collection(db, 'users');
+    const emailQuery = query(usersCollection, where('email', '==', email));
+    const querySnapshot = await getDocs(emailQuery);
+    return querySnapshot.size > 0; // Vérifiez si la taille du querySnapshot est supérieure à zéro pour déterminer si l'e-mail existe
+};
 
-// export const checkEmailExists = createAsyncThunk(
-//     'auth/checkEmailExists',
-//     async (email) => {
-//         // Vérifier si l'adresse e-mail existe dans votre base de données ou autre source de données
-//         const exists = await checkEmailExistsInDatabase(email);
+export const checkEmailExists = createAsyncThunk(
+    'auth/checkEmailExists',
+    async (email) => {
+        // Vérifier si l'adresse e-mail existe dans votre base de données ou autre source de données
+        const exists = await checkEmailExistsInDatabase(email);
 
-//         if (!exists) {
-//             throw new Error('Adresse e-mail non valide');
-//         }
-//     }
-// );
+        if (!exists) {
+            throw new Error('Adresse e-mail non valide');
+        }
+    }
+);
 
-// export const updateEmail = createAsyncThunk(
-//     'user/updateEmail',
-//     async (newEmail) => {
-//         const auth = getAuth();
-//         const user = auth.currentUser;
-//         if (user) {
-//             await updateEmailAuth(user, newEmail);
-//         }
-//     }
-// );
+export const updateEmail = createAsyncThunk(
+    'user/updateEmail',
+    async (newEmail) => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+            await updateEmailAuth(user, newEmail);
+        }
+    }
+);
 
-// export const updateUserEmail = createAsyncThunk(
-//     'user/updateUserEmail',
-//     async ({ userId, newEmail }) => {
-//         const auth = getAuth();
-//         const user = auth.currentUser;
-//         if (user) {
-//             await signOut(auth); // Déconnecter l'utilisateur
+export const updateUserEmail = createAsyncThunk(
+    'user/updateUserEmail',
+    async ({ userId, newEmail }) => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+            await signOut(auth); // Déconnecter l'utilisateur
 
-//             await updateEmailAuth(user, newEmail);
-//             const db = getFirestore();
-//             const userRef = doc(db, 'users', userId);
-//             await updateDoc(userRef, { email: newEmail });
-//         }
+            await updateEmailAuth(user, newEmail);
+            const db = getFirestore();
+            const userRef = doc(db, 'users', userId);
+            await updateDoc(userRef, { email: newEmail });
+        }
 
-//         return { newEmail };
-//     }
-// );
+        return { newEmail };
+    }
+);
 
-// export const updatePassword = createAsyncThunk(
-//     'user/updatePassword',
-//     async (newPassword) => {
-//         const auth = getAuth();
-//         const user = auth.currentUser;
-//         if (user) {
-//             await updatePasswordAuth(user, newPassword);
-//         }
-//     }
-// );
+export const updatePassword = createAsyncThunk(
+    'user/updatePassword',
+    async (newPassword) => {
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+            await updatePasswordAuth(user, newPassword);
+        }
+    }
+);
 
-// export const deleteUser = createAsyncThunk(
-//     'user/deleteUser',
-//     async (_, { getState }) => {
-//         const state = getState();
-//         const { uid } = state.auth;
+export const deleteUser = createAsyncThunk(
+    'user/deleteUser',
+    async (_, { getState }) => {
+        const state = getState();
+        const { uid } = state.auth;
 
-//         const auth = getAuth();
-//         const user = auth.currentUser;
+        const auth = getAuth();
+        const user = auth.currentUser;
 
-//         // Supprimez l'utilisateur de Firebase Authentication
-//         await deleteAuthUser(user);
-//         const db = getFirestore();
-//         const userRef = doc(db, 'users', uid);
-//         await deleteDoc(userRef);
-//         return uid;
-//     }
-// );
+        // Supprimez l'utilisateur de Firebase Authentication
+        await deleteAuthUser(user);
+        const db = getFirestore();
+        const userRef = doc(db, 'users', uid);
+        await deleteDoc(userRef);
+        return uid;
+    }
+);
 
 interface AuthState {
   uid: string | null;

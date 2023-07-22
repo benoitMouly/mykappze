@@ -1,20 +1,55 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { useSelector } from "react-redux";
+import { Text, View, StyleSheet, TouchableOpacity, Image, Alert } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
+import TextInputModal from "../components/general/TextUpdateModal";
+import ConfirmationModal from "../components/general/ConfirmationModal";
+import { joinAssociation } from "../features/associations/associationSlice";
 
 type RootStackParamList = {
   ListingAssociation: undefined;
+  CreateAssociation: undefined;
 };
 
 type ListingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'ListingAssociation'>;
+type CreateAssociationScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CreateAssociation'>;
 
 
 const HomePage: React.FC = () => {
-  const { name, surname } = useSelector((state: RootState) => state.auth);
+  const { name, surname, uid } = useSelector((state: RootState) => state.auth);
   const navigation = useNavigation<ListingScreenNavigationProp>();
+  const navigationCreateAssociation = useNavigation<CreateAssociationScreenNavigationProp>();
+  const [alertMessage, setAlertMessage] = useState("");
+  const [isAlertVisible, setAlertVisible] = useState(false);
+  const [isEditNameVisible, setEditVisible] = useState(false);
+  const [editedName, setEditedName] = useState("");
+  const [settedAssociationId, setAssociationId] = useState("");
+
+  const dispatch = useDispatch();
+
+
+  const handleJoinAssociation = (associationId) => {
+    dispatch(joinAssociation({ userId: uid, associationId }))
+    .then(() => {
+      Alert.alert(
+          "Association créée avec succès !",
+          "L'association est désormais disponible dans votre listing.",
+          [{ text: "OK", onPress: () => navigation.navigate('Home') }],
+          { cancelable: false }
+      );
+  })
+  .catch((error) => {
+      console.error('Error adding association: ', error);
+      Alert.alert(
+          "L'association n'a pas pu être créée.",
+          `En cas de besoin, transmettez le message d'erreur suivant au support : ${error}`,
+          [{ text: "OK" }],
+          { cancelable: false }
+      );
+  });
+  }
 
   return (
     <View style={styles.container}>
@@ -37,7 +72,7 @@ const HomePage: React.FC = () => {
           />
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity style={styles.button} onPress={() => navigationCreateAssociation.navigate('CreateAssociation')}>
           <Text style={styles.buttonText}>Créer une association</Text>
           <View style={styles.buttonGroupIcons}>
           <Image
@@ -51,8 +86,24 @@ const HomePage: React.FC = () => {
           </View>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity
+              onPress={() => setEditVisible(true)}
+              style={styles.sectionHeader}
+            >
+              <Text style={styles.text}>Rejoindre un canal d'associatioon</Text>
+            </TouchableOpacity>
 
-      <Text style={styles.text}>Rejoindre un canal d'association</Text>
+      <TextInputModal
+        visible={isEditNameVisible}
+        onClose={() => setEditVisible(false)} // Fermeture de la modale
+        onConfirm={handleJoinAssociation}
+        messageType={"Rejoindre une association"}
+        subMessageType={"Veuillez rentrer l'appId de l'association"}
+        onChangeText={setAssociationId}
+        placeholder={"Exemple: 9dJh453HJszana ... "}
+
+      />
+
     </View>
   );
 };
@@ -67,9 +118,10 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 20,
-    fontWeight: "bold",
+    // fontWeight: "bold",
     color: "white",
-    marginBottom: 20,
+    marginBottom: 5,
+    fontFamily: "WixMadeforDisplay-Bold",
   },
   buttonContainer: {
     flexDirection: "column",
@@ -97,6 +149,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     marginRight: 5,
+    fontFamily: "WixMadeforDisplay-Bold",
   },
   buttonIcon: {
     marginRight: 10,
@@ -105,6 +158,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: "white",
+    fontFamily: "WixMadeforDisplay-Regular",
   },
 });
 

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getFirestore, collection, where, doc, query, getDocs, addDoc, getDoc, deleteDoc, writeBatch, updateDoc, arrayUnion } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { v4 as uuidv4 } from 'uuid'; // à installer avec npm ou yarn
 
 /*
 * Retrieve animals by Association
@@ -262,12 +263,30 @@ export const removeCityFromAnimals = createAsyncThunk(
 */
 
 
-export const uploadImage = async (image) => {
+// export const uploadImage = async (image) => {
+//     try {
+//         const storage = getStorage();
+//         const storageRef = ref(storage, `images/${image.name}`);
+//         await uploadBytes(storageRef, image);
+//         const imageUrl = await getDownloadURL(storageRef);
+//         return imageUrl;
+//     } catch (error) {
+//         throw new Error(`Une erreur s'est produite lors du téléchargement de l'image : ${error.message}`);
+//     }
+// };
+
+export const uploadImage = async (imageUri) => {
     try {
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+
         const storage = getStorage();
-        const storageRef = ref(storage, `images/${image.name}`);
-        await uploadBytes(storageRef, image);
+        const imageName = uuidv4(); // générer un nom unique pour l'image
+        const storageRef = ref(storage, `images/${imageName}`);
+        
+        await uploadBytes(storageRef, blob);
         const imageUrl = await getDownloadURL(storageRef);
+        
         return imageUrl;
     } catch (error) {
         throw new Error(`Une erreur s'est produite lors du téléchargement de l'image : ${error.message}`);
@@ -332,6 +351,7 @@ export const addDocumentToAnimal = createAsyncThunk(
         }
     }
 );
+
 export const uploadFile = createAsyncThunk(
     'animals/uploadFile',
     async (file, thunkAPI) => {

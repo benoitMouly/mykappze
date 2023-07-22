@@ -8,17 +8,28 @@ import {
   Touchable,
   ScrollView,
   SafeAreaView,
+  Button,
 } from "react-native";
+// import Clipboard from '@react-native-clipboard/clipboard';
+
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
 import { fetchCities, fetchAllSectors } from "../features/cities/citySlice";
 import { fetchAnimalsByAssociation } from "../features/animals/animalSlice";
+import { fetchSectorById } from "../features/sectors/sectorSlice";
 import { fetchAssociationUsers } from "../features/associations/associationUsersSlice";
 import { useRoute } from "@react-navigation/native";
 import * as Font from "expo-font";
 import Icon from "react-native-vector-icons/Ionicons";
-import AnimalList  from "../components/animals/animalList";
+import AnimalList from "../components/animals/animalList";
 import AnimalFilters from "../components/animals/animalFilter";
+import AddCityModal from "../components/cities/addCityModal";
+import AddSectorModal from "../components/sectors/addSectorModal";
+import AddCat from "./AddCat";
+import { fetchSectors } from "../features/sectors/sectorSlice";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import * as Clipboard from 'expo-clipboard';
 
 // définir les interfaces
 interface Association {
@@ -71,13 +82,38 @@ interface RootState {
 interface RouteParams {
   id: string;
   associationId: string;
+  cityId: string;
 }
+
+type RootStackParamList = {
+  AddCat: undefined;
+  CityDetails: undefined;
+  EditAssociation: undefined;
+};
+
+type AddCatScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "AddCat"
+>;
+
+type CityDetailScreen = StackNavigationProp<RootStackParamList, "CityDetails">;
+
+type EditAssociationScreen = StackNavigationProp<
+  RootStackParamList,
+  "EditAssociation"
+>;
 
 const AssociationDetails: React.FC = () => {
   const route = useRoute();
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<AddCatScreenNavigationProp>();
+  const navigationCity = useNavigation<CityDetailScreen>();
+  const navigationEdit = useNavigation<EditAssociationScreen>();
+  const [copiedText, setCopiedText] = useState('');
 
-  const { id, associationId } = route.params as RouteParams;
+
+
+  const { associationId } = route.params as RouteParams;
 
   const { isAuthenticated, uid } = useSelector(
     (state: RootState) => state.auth
@@ -94,21 +130,22 @@ const AssociationDetails: React.FC = () => {
   const { data: users, status: usersStatus } = useSelector(
     (state: RootState) => state.associationUsers
   );
-  const { data: sectors, status: sectorsStatus } = useSelector(
-    (state: RootState) => state.sectors
-  );
+  // const { data: sectors, status: sectorsStatus } = useSelector(
+  //   (state: RootState) => state.sectors
+  // );
 
   const association = associations.find((asso) => asso.id === associationId);
 
   const [editableFields, setEditableFields] = useState<string[]>([]);
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
-  const [isOpenBlock1, setIsOpenBlock1] = useState<boolean>(true);
+  const [isOpenBlock1, setIsOpenBlock1] = useState<boolean>(false);
   const [isOpenBlock2, setIsOpenBlock2] = useState<boolean>(false);
   const [isOpenBlock3, setIsOpenBlock3] = useState<boolean>(false);
   const [isOpenBlock4, setIsOpenBlock4] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [sectorsList, setSectors] = useState<Sector[]>([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
+  const archiveType = "association";
 
   const loadFonts = async () => {
     await Font.loadAsync({
@@ -121,6 +158,10 @@ const AssociationDetails: React.FC = () => {
   useEffect(() => {
     loadFonts();
   }, []);
+
+  // useEffect(() => {
+  //   dispatch(fetchSectors());
+  // }, [sectors, dispatch]);
 
   const numSterilizedCats = animals.filter(
     (animal) => animal.isSterilise
@@ -140,34 +181,21 @@ const AssociationDetails: React.FC = () => {
       dispatch(fetchCities(associationId));
       dispatch(fetchAnimalsByAssociation(associationId));
       dispatch(fetchAssociationUsers(associationId));
-
-
     }
-  }, [association, dispatch, id, isAuthenticated]);
+  }, [associationId, isAuthenticated]);
 
   useEffect(() => {
     const fetchData = async () => {
-        if (isAuthenticated) {
-            const sectores = await fetchAllSectors(cities, dispatch);
-            setSectors(sectores);
-            
-        }
+      if (isAuthenticated) {
+        // console.log(association)
+        const sectores = await fetchAllSectors(cities, dispatch);
+        setSectors(sectores);
+      }
     };
 
     fetchData();
-}, [association, cities, dispatch, id, isAuthenticated]);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (isAuthenticated) {
-  //       console.log(association)
-  //       const sectors = await fetchAllSectors(cities, dispatch);
-  //       setSectors(sectors);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [association, cities, dispatch, id, isAuthenticated]);
+    console.log(associationId);
+  }, [associationId, cities, isAuthenticated]);
 
   useEffect(() => {
     users.forEach((user) => {
@@ -191,103 +219,215 @@ const AssociationDetails: React.FC = () => {
     }
   };
 
+  const copyToClipboard = async (value) => {
+    await Clipboard.setStringAsync(value);
+    setIsCopied(true)
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   return (
-    <ScrollView  style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.header1st}>
-          <Image source={{ uri: association?.image }} style={styles.image} />
-          <Text style={styles.title}>{association?.name}</Text>
-        </View>
-        <View style={styles.sectionShare}>
-          <Text style={styles.sectionShare_title}>Partager le canal : </Text>
+    <View>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.header1st}>
+            <Image source={{ uri: association?.image }} style={styles.image} />
+            <Text style={styles.title}>{association?.name}</Text>
+            <View style={styles.settingsBtn}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigationEdit.navigate("EditAssociation", {
+                    associationId: association?.id,
+                  })
+                }
+                style={styles.sectionBtns_btnSettings}
+              >
+                <Icon name={"settings-outline"} size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View style={styles.sectionShare}>
+          
+            <Text style={styles.sectionShare_title}>Partager le canal : </Text>
+            <TouchableOpacity
+              // value={association.id}
+              // onPress={copyToClipboard}
+              onPress = {() => {copyToClipboard(association.id)}}
+              style={styles.sectionShare_button}
+            >
+              <Text style={styles.sectionShare_buttonText} selectable={true} >
+                {/* {association?.id} */}
+                {/* {isCopied && <Text style={{color: 'white'}}>Copié !</Text>} */}
+                {isCopied ? ('Copié !') : (association?.id)}
+              </Text>
+            </TouchableOpacity>
+            
+          </View>
+          
+
+          {/* <View style={styles.sectionBtns}>
+          <AddCityModal
+            style={styles.sectionBtns_btn}
+            associationId={association?.id}
+          />
+          <AddSectorModal
+            style={styles.sectionBtns_btn}
+            associationId={association?.id}
+          />
+        </View> */}
+
+          {/* <View style={styles.addCat}>
+        <View style={styles.iconAddCat}>
           <TouchableOpacity
-            onPress={() => handleCopy}
-            style={styles.sectionShare_button}
+            onPress={() =>
+              navigation.navigate("AddCat", { associationId: association?.id })
+            }
+            style={styles.sectionBtns_btn}
           >
-            <Text style={styles.sectionShare_buttonText}>
-              {association?.id}
-            </Text>
+            <Text style={styles.sectionBtns_btnText}>Ajouter un chat</Text>
+            <View style={styles.buttonGroupIcons}>
+            <Image
+            source={require("../assets/icon-paw.png")}
+            style={styles.buttonIcon}
+          />
+          <Image
+            source={require("../assets/icons/icon-add.png")}
+            style={styles.buttonIcon}
+          />
+          </View>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <View style={styles.containerSection}>
-        <TouchableOpacity
-          onPress={() => setIsOpenBlock1(!isOpenBlock1)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Informations générales</Text>
-          <Icon
-            name={isOpenBlock1 ? "chevron-down" : "chevron-forward"}
-            size={24}
-            color="#000"
-          />
-        </TouchableOpacity>
-        {isOpenBlock1 && (
-          <View style={styles.section}>
-            <Text>{association?.name}</Text>
-            <Text>{association?.email}</Text>
-            <Text>{association?.city}</Text>
-            <Text>{association?.postalCode}</Text>
+</View> */}
+
+          <View style={styles.addCat}>
+            <View style={styles.iconAddCat}></View>
           </View>
-        )}
+        </View>
 
-        <TouchableOpacity
-          onPress={() => setIsOpenBlock2(!isOpenBlock2)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Membres : ({users.length})</Text>
-          <Icon
-            name={isOpenBlock2 ? "chevron-down" : "chevron-forward"}
-            size={24}
-            color="#000"
-          />
-        </TouchableOpacity>
-        {isOpenBlock2 && (
-          <View style={styles.section}>
-            {users.map((user) => (
-              <View key={user.id}>
-                <Text>{user.name}</Text>
-                <Text>{user.email}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+        <View style={styles.containerSection}>
+          <TouchableOpacity
+            onPress={() => setIsOpenBlock1(!isOpenBlock1)}
+            style={styles.sectionHeader}
+          >
+            <Text style={styles.sectionTitle}>Informations générales</Text>
+            <Icon
+              name={isOpenBlock1 ? "chevron-down" : "chevron-forward"}
+              size={24}
+              color="#000"
+            />
+          </TouchableOpacity>
+          {isOpenBlock1 && (
+            <View style={styles.section}>
+              <Text>{association?.name}</Text>
+              <Text>{association?.email}</Text>
+              <Text>{association?.city}</Text>
+              <Text>{association?.postalCode}</Text>
+            </View>
+          )}
 
-        <TouchableOpacity
-          onPress={() => setIsOpenBlock3(!isOpenBlock3)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Villes Couvertes : ({ cities.length })</Text>
-          <Icon
-            name={isOpenBlock3 ? "chevron-down" : "chevron-forward"}
-            size={24}
-            color="#000"
-          />
-        </TouchableOpacity>
-        {isOpenBlock3 && (
-          <View style={styles.section}>
-            {cities.map((city) => (
-              <View key={city.id}>
-                <Text>{city.name}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
+          <TouchableOpacity
+            onPress={() => setIsOpenBlock2(!isOpenBlock2)}
+            style={styles.sectionHeader}
+          >
+            <Text style={styles.sectionTitle}>Membres : ({users.length})</Text>
+            <Icon
+              name={isOpenBlock2 ? "chevron-down" : "chevron-forward"}
+              size={24}
+              color="#000"
+            />
+          </TouchableOpacity>
+          {isOpenBlock2 && (
+            <View style={styles.section}>
+              {users.map((user) => (
+                <View key={user.id}>
+                  <Text>{user.name}</Text>
+                  <Text>{user.email}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
-      {/* <SafeAreaView style={{flex: 1}}> */}
-        <AnimalFilters animals={animals} sectorized={sectorsList}/>
+          <TouchableOpacity
+            onPress={() => setIsOpenBlock3(!isOpenBlock3)}
+            style={styles.sectionHeader}
+          >
+            <Text style={styles.sectionTitle}>
+              Villes Couvertes : ({cities.length})
+            </Text>
+            <Icon
+              name={isOpenBlock3 ? "chevron-down" : "chevron-forward"}
+              size={24}
+              color="#000"
+            />
+          </TouchableOpacity>
+          {isOpenBlock3 && (
+            <View style={styles.sectionCity}>
+              {cities.map((city) => (
+                <View style={styles.cityList} key={city.id}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigationCity.navigate("CityDetails", {
+                        associationId: associationId,
+                        cityId: city?.id,
+                      })
+                    }
+                    style={styles.sectionBtns_btnCity}
+                  >
+                    <Text style={styles.sectionTitleCity}>{city?.name}</Text>
+                    <Icon name={"chevron-forward"} size={24} color="#FFF" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* <SafeAreaView style={{flex: 1}}> */}
+        {/* <View style={styles.line} /> */}
+
+        <AnimalFilters
+          animals={animals}
+          sectorized={sectorsList}
+          archiveType={archiveType}
+        />
         {/* </SafeAreaView> */}
-
-    </ScrollView >
+      </ScrollView>
+      <View style={styles.footer}>
+        <AddCityModal
+          style={styles.sectionBtns_btn}
+          associationId={association?.id}
+        />
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate("AddCat", { associationId: association?.id })
+          }
+          style={styles.sectionBtns_btn}
+        >
+          <View style={styles.buttonGroupIcons}>
+            <Image
+              source={require("../assets/icon-paw.png")}
+              style={styles.buttonIcon}
+            />
+            {/* <Image
+              source={require("../assets/icons/icon-add.png")}
+              style={styles.buttonIcon}
+            /> */}
+            <Text style={{color: 'white'}}>+</Text>
+          </View>
+        </TouchableOpacity>
+        <AddSectorModal
+          style={styles.sectionBtns_btn}
+          associationId={association?.id}
+        />
+      </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     padding: 0,
-    heigt: "100%"
+    height: "100%",
   },
   header: {
     flexDirection: "column",
@@ -307,6 +447,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#2F4F4F",
     color: "#FFF",
+    
     // padding: 5
   },
   sectionShare_title: {
@@ -315,14 +456,52 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: "#FFF",
     paddingTop: 5,
+    fontFamily: "WixMadeforDisplay-Bold",
   },
   sectionShare_button: {
     backgroundColor: "#fff",
     color: "#000",
     padding: 5,
+    width: '60%'
+    
   },
   sectionShare_buttonText: {
     color: "#000",
+    fontFamily: "WixMadeforDisplay-Regular",
+    marginBottom: 5,
+    width: '100%',
+    textAlign: 'center'
+  },
+  sectionBtns: {
+    flexDirection: "row",
+    // flexWrap: "nowrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    rowGap: 40,
+    columnGap: 10,
+    padding: 6,
+    marginTop: 20,
+  },
+  sectionBtns_btn: {
+    flexDirection: "row",
+    columnGap: 8,
+    backgroundColor: "#000",
+    color: "#FFF",
+    padding: 10,
+    borderRadius: 2,
+  },
+  sectionBtns_btnSettings: {
+    flexDirection: "row",
+    columnGap: 8,
+    backgroundColor: "transparent",
+    color: "#FFF",
+    padding: 10,
+    borderRadius: 2,
+  },
+  sectionBtns_btnText: {
+    color: "#FFF",
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontSize: 10,
   },
   image: {
     width: 50,
@@ -331,8 +510,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   title: {
-    // fontSize: 18,
-    // fontWeight: 'bold',
     color: "#FFF",
     fontSize: 32,
     fontFamily: "WixMadeforDisplay-Bold",
@@ -340,21 +517,23 @@ const styles = StyleSheet.create({
   },
 
   containerSection: {
-    padding: 10
+    padding: 10,
+    // backgroundColor: '#C40030',
+    // margin: 5
   },
 
   section: {
     marginBottom: 20,
     padding: 25,
-    paddingTop: 0
+    paddingTop: 0,
     // borderWidth: 2,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 25,
-    paddingBottom: 5
+    paddingBottom: 5,
   },
 
   sectionTitle: {
@@ -365,6 +544,74 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
   },
+  buttonGroupIcons: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  buttonIcon: {
+    marginRight: 5,
+    width: 20,
+    height: 20,
+  },
+  addCat: {
+    flexDirection: "column",
+    // justifyContent: 'center',
+    alignItems: "center",
+    // width: '100%'
+  },
+  iconAddCat: {
+    flexDirection: "row",
+    marginTop: 20,
+  },
+  sectionCity: {
+    flexDirection: "column",
+    rowGap: 5,
+    // alignItems: 'center',
+    justifyContent: "center",
+  },
+  cityList: {
+    maxWidth: 200,
+    // backgroundColor: 'blue'
+  },
+  sectionBtns_btnCity: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    color: "#FFF",
+    padding: 10,
+    borderRadius: 2,
+  },
+  sectionTitleCity: {
+    color: "#FFF",
+    fontSize: 14,
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontWeight: "600",
+  },
+  line: {
+    height: 2,
+    backgroundColor: "#000", // change this to fit your design
+    alignSelf: "center",
+    marginVertical: 20, // space above and below the line
+    width: "80%", // change this to fit your design
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60, // Vous pouvez modifier cette valeur en fonction de vos besoins
+    backgroundColor: "#000", // Pour la visibilité
+    flexDirection: "row",
+    justifyContent: "space-around", // Pour espacer les boutons
+    alignItems: "center",
+    padding: 10,
+    marginTop: 10
+  },
+  settingsBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 0
+  }
 });
 
 export default AssociationDetails;

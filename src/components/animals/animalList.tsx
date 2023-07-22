@@ -42,9 +42,17 @@
 
 // export default AnimalList;
 
-import React, { useState, useEffect } from 'react';
-import { FlatList, Text, View, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import AnimalCard from './animalCard';
+import React, { useState, useEffect } from "react";
+import {
+  FlatList,
+  Text,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
+import AnimalCard from "./animalCard";
+import Icon from "react-native-vector-icons/Ionicons";
 
 interface Animal {
   id: string;
@@ -63,9 +71,10 @@ interface AnimalListProps {
 const AnimalList: React.FC<AnimalListProps> = ({ animals }) => {
   const [displayedAnimals, setDisplayedAnimals] = useState<Animal[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2;
+  const itemsPerPage = 6;
   const totalPages = Math.ceil(animals.length / itemsPerPage);
 
+  // console.log(displayedAnimals)
   useEffect(() => {
     loadCurrentPageAnimals();
   }, []);
@@ -99,42 +108,50 @@ const AnimalList: React.FC<AnimalListProps> = ({ animals }) => {
   }, [animals]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View>
       {/* <SafeAreaView style={{flex: 1}}> */}
       {displayedAnimals.length > 0 ? (
-              <FlatList
-              data={displayedAnimals}
-              renderItem={({ item }) => <AnimalCard key={item.id} animal={item} />}
-              keyExtractor={item => item.id}
-              numColumns={2}
-              contentContainerStyle={styles.flatListContent}
-            />
-            
-      ) : (              <View>
-                <Text>Aucun animal</Text>
-              </View>)
-            }
+        <FlatList
+          data={displayedAnimals}
+          renderItem={({ item }) => <AnimalCard key={item.id} animal={item} />}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.flatListContent}
+          nestedScrollEnabled={true}
+          scrollEnabled={false}
+        />
+      ) : (
+        <View>
+          <Text>Aucun animal</Text>
+        </View>
+      )}
       {displayedAnimals.length > 0 ? (
-              <View style={styles.paginationContainer}>
-              <TouchableOpacity
-                style={styles.paginationButton}
-                onPress={handlePreviousPage}
-                disabled={currentPage === 1}
-              >
-                <Text style={styles.paginationButtonText}>Précédent</Text>
-              </TouchableOpacity>
-              <Text style={styles.paginationText}>{currentPage} / {totalPages}</Text>
-              <TouchableOpacity
-                style={styles.paginationButton}
-                onPress={handleNextPage}
-                disabled={currentPage === totalPages}
-              >
-                <Text style={styles.paginationButtonText}>Suivant</Text>
-              </TouchableOpacity>
-            </View>
-      ) : (null)}
+        <View style={styles.paginationContainer}>
+          <TouchableOpacity
+            style={styles.paginationButton}
+            onPress={handlePreviousPage}
+            disabled={currentPage === 1}
+          >
+            {/* <Text style={styles.paginationButtonText}>Précédent</Text> */}
+            <Icon name={"chevron-back-outline"} size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.paginationText}>
+            {currentPage} / {totalPages}
+          </Text>
+          <TouchableOpacity
+            style={styles.paginationButton}
+            onPress={handleNextPage}
+            disabled={currentPage === totalPages}
+          >
+            {/* <Text style={styles.paginationButtonText}>Suivant</Text> */}
+            <Icon name={"chevron-forward-outline"} size={24} color="#000" />
+          </TouchableOpacity>
+        </View>
+      ) : null}
       {/* </SafeAreaView> */}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -143,34 +160,36 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 50
   },
   flatListContent: {
     paddingBottom: 20,
   },
   paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: 'center',
     marginTop: 10,
+    // marginBottom: 20,
+    paddingBottom: 40
   },
   paginationButton: {
-    backgroundColor: '#000',
+    backgroundColor: "transparent",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 4,
     marginHorizontal: 5,
   },
   paginationButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   paginationText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginHorizontal: 5,
   },
 });
 
 export default AnimalList;
-
-

@@ -1,6 +1,6 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createAction } from '@reduxjs/toolkit';
 import { getFirestore, collection, where, query, doc, getDocs, addDoc, getDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
-
+import { useDispatch } from 'react-redux';
 /*
 * Fetch sectors by city
 ***    
@@ -8,7 +8,7 @@ import { getFirestore, collection, where, query, doc, getDocs, addDoc, getDoc, u
 
 export const fetchSectors = createAsyncThunk('sectors/fetchSectors', async (cityId) => {
     const db = getFirestore();
-    // console.log('CITY ID SLICE : ',  cityId);
+    console.log('CITY ID SLICE : ',  cityId);
     const q = query(collection(db, 'sectors'), where('cityId', '==', cityId));
     const querySnapshot = await getDocs(q);
     const sectorsData = [];
@@ -19,6 +19,28 @@ export const fetchSectors = createAsyncThunk('sectors/fetchSectors', async (city
     return sectorsData;
 });
 
+
+
+/*
+* Fetch the sector by is id
+***
+*/
+
+export const fetchSectorById = createAsyncThunk('sectors/fetchSectorById', async (sectorId) => {
+    const db = getFirestore();
+    // Utilisez doc pour créer une référence au document de secteur spécifique
+    const docRef = doc(db, 'sectors', sectorId);
+    const docSnap = await getDoc(docRef);
+
+    // S'il existe, renvoyez les données du document
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+    } else {
+        throw new Error("No such sector!");
+    }
+});
+
+
 /*
 * Create sector
 ***    
@@ -28,6 +50,10 @@ export const addSector = createAsyncThunk(
     'sectors/addSector',
     async (associationData, { rejectWithValue }) => {
         try {
+
+            console.log('ASSOCIATION DATAAA : ' )
+            console.log(associationData);
+
             const db = getFirestore();
             const associationRef = collection(db, 'sectors');
             const newAssociationRef = await addDoc(associationRef, associationData);
@@ -134,12 +160,16 @@ const sectorsSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.error.message;
             })
+            .addCase(fetchSectorById.fulfilled, (state, action) => {
+                // Ajoutez le nouveau secteur à votre state
+                state.data.push(action.payload);
+              })
             .addCase(addSector.pending, (state) => {
                 state.status = 'loading';
             })
             .addCase(addSector.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.data.push(action.payload);
+                // state.data.push(action.payload);
             })
             .addCase(addSector.rejected, (state, action) => {
                 state.status = 'failed';
@@ -172,6 +202,7 @@ const sectorsSlice = createSlice({
 });
 
 export default sectorsSlice.reducer;
+
 
 
 

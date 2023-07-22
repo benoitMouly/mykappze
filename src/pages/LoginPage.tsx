@@ -127,7 +127,7 @@ const LoginPage: React.FC = () => {
           >
             Pas encore de compte ? S'inscrire
           </Text>
-          <Text style={styles.link} onPress={() => {}}>
+          <Text style={styles.link} onPress={() => navigation.navigate("ForgotPassword")}>
             Mot de passe oublié
           </Text>
         </View>

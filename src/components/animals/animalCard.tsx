@@ -1,7 +1,17 @@
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 import React from "react";
-import { Image, StyleSheet, Text, View, TouchableOpacity, Dimensions } from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
 
-const windowWidth = Dimensions.get('window').width;
+const windowWidth = Dimensions.get("window").width;
 
 interface AnimalProps {
   animal: {
@@ -14,25 +24,78 @@ interface AnimalProps {
     sectorName: string;
   };
 }
+// Define the navigation type
+type RootStackParamList = {
+  Login: undefined;
+  Home: undefined;
+  AnimalDetails: { animalId: string }; // Add this line
+};
+
+type AssociationDetailsScreen = StackNavigationProp<
+  RootStackParamList,
+  "AnimalDetails"
+>;
 
 const AnimalCard: React.FC<AnimalProps> = (props) => {
+  const navigation = useNavigation<AssociationDetailsScreen>();
+
+  const handlePress = () => {
+    navigation.navigate("AnimalDetails", {
+      animalId: props.animal.id,
+    });
+  };
 
   return (
     <View style={styles.cardContainer}>
       <View style={styles.card}>
-        <Image style={styles.image} source={props.animal.image ? { uri: props.animal.image } : require("../../assets/kappze_logo_circle_noir_roigne.png")} />
 
+        <Image
+          style={styles.image}
+          source={
+            props.animal.image
+              ? { uri: props.animal.image }
+              : require("../../assets/kappze_logo_circle_noir_roigne.png")
+          }
+        />
         <View style={styles.infoContainer}>
-          <Text style={styles.title}>Nom : {props.animal.name}</Text>
-          <Text style={styles.info}>{props.animal.sex} {props.animal.isMother ? ' / Mère' : ''}</Text>
-          <Text style={styles.info}>Ville: {props.animal.cityName}</Text>
-          <Text style={styles.info}>Secteur: {props.animal.sectorName}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.title}>{props.animal.name}</Text>
+            {props.animal.sex === "Mâle" ? (
+              <Icon name={"male-outline"} size={20} color="#000" />
+            ) : props.animal.sex === "Femelle" ? (
+              <Icon name={"female-outline"} size={20} color="#000" />
+            ) : (<Text>?</Text>)}
+          </View>
+          <View
+            style={{ flexDirection: "column", rowGap: 10, marginVertical: 5 }}
+          >
+            <View style={styles.buttonGroupIcons}>
+              <Image
+                source={require("../../assets/icons/icon-city.png")}
+                style={styles.buttonIcon}
+              />
+              <Text>{props.animal.cityName}</Text>
+            </View>
+
+            <View style={styles.buttonGroupIcons}>
+              <Image
+                source={require("../../assets/icons/icon-compass.png")}
+                style={styles.buttonIcon}
+              />
+              <Text>{props.animal.sectorName}</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handlePress}>
+            <Icon name={"arrow-forward-outline"} size={20} color="#000" />
+          </TouchableOpacity>
         </View>
       </View>
-
-      <TouchableOpacity style={styles.button} onPress={() => console.log("Voir")}>
-        <Text style={styles.buttonText}>Voir</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -40,51 +103,61 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
 const styles = StyleSheet.create({
   cardContainer: {
     marginBottom: 20,
-    width: '50%',
+    width: "50%",
     paddingHorizontal: 10,
   },
   card: {
-    // borderWidth: 2,
-    // borderColor: '#000',
     borderRadius: 3,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
+    backgroundColor: "#fff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 2,
+    position: 'relative'
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 100,
-    resizeMode: 'contain',
+    resizeMode: "cover",
     borderRadius: 4,
-    overflow: 'hidden'
+    overflow: "hidden",
   },
   infoContainer: {
     padding: 10,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 15,
     marginBottom: 5,
+    fontFamily: "WixMadeforDisplay-Bold",
   },
   info: {
     fontSize: 14,
     marginBottom: 2,
+    fontFamily: "WixMadeforDisplay-Regular",
   },
   button: {
-    backgroundColor: '#000',
+    backgroundColor: "transparent",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 4,
-    alignSelf: 'center',
+    alignSelf: "flex-end",
     marginTop: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+  },
+  buttonGroupIcons: {
+    display: "flex",
+    flexDirection: "row",
+  },
+  buttonIcon: {
+    marginRight: 5,
+    width: 20,
+    height: 20,
+    backgroundColor: "black",
+    borderRadius: 40,
   },
 });
 

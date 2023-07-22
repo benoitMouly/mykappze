@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getFirestore, collection, where, query, getDocs, addDoc, updateDoc, deleteDoc, getDoc, doc } from 'firebase/firestore';
 import { fetchSectors } from '../sectors/sectorSlice';
-
+import { useAppDispatch } from "../../store/store";
 
 /*
 * Fetch cities
@@ -37,7 +37,7 @@ export const fetchCities = createAsyncThunk<
   {} // Le type des informations de rejet si la promesse est rejetée
 >('cities/fetchCities', async (associationId) => {
   const db = getFirestore();
-  console.log(associationId)
+//   console.log(associationId)
   const q = query(collection(db, 'cities'), where('associationId', '==', associationId));
   const querySnapshot = await getDocs(q);
   const citiesData: City[] = [];
@@ -54,15 +54,17 @@ export const fetchCities = createAsyncThunk<
 
 export const fetchAllSectors = async (cities, dispatch) => {
     const allSectors = [];
+    // const dispatch = useAppDispatch();
 
     for (const city of cities) {
+        // console.log(city.id)
         const sectorsAction = await dispatch(fetchSectors(city.id));
         const sectors = sectorsAction.payload; // unwrap the result of the dispatched action
         allSectors.push(...sectors);
     }
 
-    console.log('ALL SECTORS : ')
-    console.log(allSectors)
+    // console.log('ALL SECTORS : ')
+    // console.log(allSectors)
 
     return allSectors;
 };
@@ -77,14 +79,21 @@ export const fetchAllSectors = async (cities, dispatch) => {
 export const addCity = createAsyncThunk(
     'cities/addCity',
     async (associationData, { rejectWithValue }) => {
+
+        // console.log('ASSOCIATION DATA : ')
+        // console.log(associationData)
         try {
             const db = getFirestore();
             const associationRef = collection(db, 'cities');
             const newAssociationRef = await addDoc(associationRef, associationData);
             const newcitiesnapshot = await getDoc(newAssociationRef);
             const newAssociation = { id: newAssociationRef.id, ...newcitiesnapshot.data() };
+            // console.log('OK ON EST BON')
+            // console.log(newAssociation)
             return newAssociation;
         } catch (error) {
+            console.log('OH MON DIEU')
+            console.log(error)
             return rejectWithValue(error.message);
         }
     }
