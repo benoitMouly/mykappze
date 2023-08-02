@@ -36,7 +36,7 @@ const HomePage: React.FC = () => {
       Alert.alert(
           "Association créée avec succès !",
           "L'association est désormais disponible dans votre listing.",
-          [{ text: "OK", onPress: () => navigation.navigate('Home') }],
+          [{ text: "OK", onPress: () => navigation.navigate('Main') }],
           { cancelable: false }
       );
   })
@@ -66,10 +66,10 @@ const HomePage: React.FC = () => {
             source={require("../assets/icon-paw.png")}
             style={styles.buttonIcon}
           />
-          <Image
+          {/* <Image
             source={require("../assets/icons/icon-add.png")}
             style={styles.buttonIcon}
-          />
+          /> */}
           </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={() => navigationCreateAssociation.navigate('CreateAssociation')}>
@@ -79,10 +79,7 @@ const HomePage: React.FC = () => {
             source={require("../assets/icons/icon-house.png")}
             style={styles.buttonIcon}
           />
-          <Image
-            source={require("../assets/icons/icon-add.png")}
-            style={styles.buttonIcon}
-          />
+<Text style={styles.text}>+</Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -152,13 +149,13 @@ const styles = StyleSheet.create({
     fontFamily: "WixMadeforDisplay-Bold",
   },
   buttonIcon: {
-    marginRight: 10,
+    marginRight: 5,
     width: 20,
     height: 20,
   },
   text: {
     color: "white",
-    fontFamily: "WixMadeforDisplay-Regular",
+    fontFamily: "WixMadeforDisplay-Bold",
   },
 });
 

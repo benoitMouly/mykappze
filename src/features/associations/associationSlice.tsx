@@ -413,6 +413,7 @@ const associationsSlice = createSlice({
       })
       .addCase(updateAssociation.fulfilled, (state, action) => {
         state.status = "succeeded";
+        console.log('ouyai')
         state.data = state.data.map((association) => {
           if (association.id === action.payload.associationId) {
             return { ...association, ...action.payload.associationData };

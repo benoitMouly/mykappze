@@ -38,7 +38,7 @@ const TextInputModal = ({
       onRequestClose={onClose}
     >
       <View style={styles.centeredView}>
-        <View style={styles.centerBlock}>
+        <View style={styles.centeredBlock}>
         <View style={styles.backGroundLogo}>
       <Image source={require('../../assets/transparent-without-circle.png')} style={styles.logo} /> 
       </View>
@@ -75,73 +75,6 @@ const TextInputModal = ({
 };
 
 const styles = StyleSheet.create({
-  // ... les mêmes styles que vous aviez précédemment
-  // centeredView: {
-  //     flex: 1,
-  //     justifyContent: "center",
-  //     alignItems: "center",
-  //     backgroundColor: "rgba(0,0,0,0.5)", // demi-transparent
-  //   },
-  //   modalView: {
-  //     margin: 20,
-  //     backgroundColor: "white",
-  //     borderRadius: 3,
-  //     padding: 35,
-  //     alignItems: "center",
-  //     shadowColor: "#000",
-  //     shadowOffset: { width: 0, height: 2 },
-  //     shadowOpacity: 0.25,
-  //     shadowRadius: 4,
-  //     elevation: 5,
-  //   },
-  //   modalText: {
-  //     marginBottom: 15,
-  //     textAlign: "center",
-  //     fontFamily: "WixMadeforDisplay-Bold",
-  //     fontSize: 20
-  //   },
-  //   modalInfo: {
-  //     marginBottom: 15,
-  //     textAlign: "center",
-  //     fontFamily: "WixMadeforDisplay-Bold",
-  //     fontSize: 20
-  //   },
-  //   logo: {
-  //     width: 200,
-  //     height: 200,
-  //     marginRight: 10,
-  //   },
-  //   buttonsPicker: {
-  //     backgroundColor: "transparent",
-  //     padding: 15,
-  //     borderRadius: 3,
-  //   },
-  //   buttonText: {
-  //     padding: 2,
-  //     color: "white",
-  //     fontFamily: "WixMadeforDisplay-Bold",
-  //     fontSize: 15
-  //   },
-  //   buttonTextYes: {
-  //     paddingVertical: 10,
-  //     paddingHorizontal: 20,
-  //     color: "white",
-  //     fontFamily: "WixMadeforDisplay-Bold",
-  //     fontSize: 15,
-  //     backgroundColor: 'red'
-  //   },
-  //   buttonTextNo: {
-  //     paddingVertical: 10,
-  //     paddingHorizontal: 20,
-  //     color: "white",
-  //     fontFamily: "WixMadeforDisplay-Bold",
-  //     fontSize: 15,
-  //     backgroundColor: 'green'
-  //   },
-  //   btnChoice: {
-  //     flexDirection: 'row',
-  //     columnGap: 30
-  //   }
   centeredView: {
     flex: 1,
     justifyContent: "center",
@@ -150,11 +83,7 @@ const styles = StyleSheet.create({
     rowGap: 0,
   },
   centeredBlock: {
-    flex: 1,
-    width: '100%',
-    margin: 20,
-    // justifyContent: "center",
-    alignItems: "center",
+    margin: 4
   },
   modalView: {
     margin: 20,
@@ -216,7 +145,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    // elevation: 5,
+    elevation: 5,
     zIndex: 100
     // width: '100%',
   },

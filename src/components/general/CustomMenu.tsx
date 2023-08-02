@@ -16,7 +16,7 @@ const CustomMenu: React.FC<CustomMenuProps> = ({ closeDrawer, navigation }) => {
   return (
     <View>
       <Text>Menu</Text>
-      <Button title="Home" onPress={() => handleNavigation('Home')} />
+      <Button title="Main" onPress={() => handleNavigation('Home')} />
       <Button title="Profile" onPress={() => handleNavigation('Profile')} />
       <Button title="Settings" onPress={() => handleNavigation('Settings')} />
     </View>

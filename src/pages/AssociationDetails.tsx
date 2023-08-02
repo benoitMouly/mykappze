@@ -9,6 +9,7 @@ import {
   ScrollView,
   SafeAreaView,
   Button,
+  RefreshControl
 } from "react-native";
 // import Clipboard from '@react-native-clipboard/clipboard';
 
@@ -159,9 +160,17 @@ const AssociationDetails: React.FC = () => {
     loadFonts();
   }, []);
 
-  // useEffect(() => {
-  //   dispatch(fetchSectors());
-  // }, [sectors, dispatch]);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  }
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    // Simuler une requête de réseau
+    wait(2000).then(
+      () => {setRefreshing(false), dispatch(fetchAnimalsByAssociation(associationId));});
+  }, []);
 
   const numSterilizedCats = animals.filter(
     (animal) => animal.isSterilise
@@ -176,7 +185,6 @@ const AssociationDetails: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // console.log("ID : ", associationId);
 
       dispatch(fetchCities(associationId));
       dispatch(fetchAnimalsByAssociation(associationId));
@@ -209,15 +217,6 @@ const AssociationDetails: React.FC = () => {
   //     return <LoadingPage />;
   // }
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(id);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000); // Réinitialiser après 2 secondes
-    } catch (err) {
-      console.error("Erreur de copie", err);
-    }
-  };
 
   const copyToClipboard = async (value) => {
     await Clipboard.setStringAsync(value);
@@ -227,7 +226,12 @@ const AssociationDetails: React.FC = () => {
 
   return (
     <View>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container}   refreshControl={
+      <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+      />
+    }>
         <View style={styles.header}>
           <View style={styles.header1st}>
             <Image source={{ uri: association?.image }} style={styles.image} />
@@ -249,55 +253,15 @@ const AssociationDetails: React.FC = () => {
           
             <Text style={styles.sectionShare_title}>Partager le canal : </Text>
             <TouchableOpacity
-              // value={association.id}
-              // onPress={copyToClipboard}
               onPress = {() => {copyToClipboard(association.id)}}
               style={styles.sectionShare_button}
             >
               <Text style={styles.sectionShare_buttonText} selectable={true} >
-                {/* {association?.id} */}
-                {/* {isCopied && <Text style={{color: 'white'}}>Copié !</Text>} */}
                 {isCopied ? ('Copié !') : (association?.id)}
               </Text>
             </TouchableOpacity>
             
           </View>
-          
-
-          {/* <View style={styles.sectionBtns}>
-          <AddCityModal
-            style={styles.sectionBtns_btn}
-            associationId={association?.id}
-          />
-          <AddSectorModal
-            style={styles.sectionBtns_btn}
-            associationId={association?.id}
-          />
-        </View> */}
-
-          {/* <View style={styles.addCat}>
-        <View style={styles.iconAddCat}>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("AddCat", { associationId: association?.id })
-            }
-            style={styles.sectionBtns_btn}
-          >
-            <Text style={styles.sectionBtns_btnText}>Ajouter un chat</Text>
-            <View style={styles.buttonGroupIcons}>
-            <Image
-            source={require("../assets/icon-paw.png")}
-            style={styles.buttonIcon}
-          />
-          <Image
-            source={require("../assets/icons/icon-add.png")}
-            style={styles.buttonIcon}
-          />
-          </View>
-          </TouchableOpacity>
-        </View>
-
-</View> */}
 
           <View style={styles.addCat}>
             <View style={styles.iconAddCat}></View>
@@ -391,6 +355,7 @@ const AssociationDetails: React.FC = () => {
           archiveType={archiveType}
         />
         {/* </SafeAreaView> */}
+        <Text>Pull down to see RefreshControl indicator</Text>
       </ScrollView>
       <View style={styles.footer}>
         <AddCityModal

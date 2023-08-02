@@ -25,7 +25,8 @@ import {
 import { removeUserFromAssociation } from "../features/associations/associationUsersSlice";
 import CustomAlert from "../components/general/CustomAlert";
 import ConfirmationModal from "../components/general/ConfirmationModal";
-
+import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
+import Icon from "react-native-vector-icons/Ionicons";
 const Settings = () => {
   //   const {
   //     params: { userId },
@@ -214,200 +215,244 @@ const Settings = () => {
   // Add all your handler functions here
 
   return (
-    <ScrollView style={styles.mainView}>
-      <Text style={styles.title1}>Paramètres de {surname} :</Text>
+    <View style={styles.container}>
+    {/* <> */}
+      <HeaderEditAnimal navigation={navigate} animalName={surname} />
+      <ScrollView style={styles.mainView}>
+        <View style={styles.sectionGeneral}>
+          <Text style={styles.title2}>
+            Informations générales de l'utilisateur
+          </Text>
 
-      <View style={styles.sectionGeneral}>
-        <Text style={styles.title2}>
-          Informations générales de l'utilisateur
-        </Text>
-
-        <View style={styles.inputsModify}>
-          <View style={styles.inputModify}>
-            <Text style={styles.text}>{name}</Text>
-            <TouchableOpacity
-              onPress={() => setEditVisible(true)}
-              style={styles.sectionHeader}
-            >
-              <Text style={styles.sectionTitle}>Modifier</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputModify}>
-            <Text style={styles.text}>{surname}</Text>
-            <TouchableOpacity
-              onPress={() => setEditVisibleSurname(true)}
-              style={styles.sectionHeader}
-            >
-              <Text style={styles.sectionTitle}>Modifier</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputModify}>
-            <Text style={styles.text}>{email}</Text>
-            <TouchableOpacity
-              onPress={() => setEditVisibleEmail(true)}
-              style={styles.sectionHeader}
-            >
-              <Text style={styles.sectionTitle}>Modifier</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.inputModify}>
-            <Text style={styles.text}>Modifier le mot de passe</Text>
-            <TouchableOpacity
-              onPress={() => setEditVisiblePassword(true)}
-              style={styles.sectionHeader}
-            >
-              <Text style={styles.sectionTitle}>Modifier</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.sectionAssociationMember}>
-        {associations.length > 0 && (
-          <>
-            <Text style={styles.title2}>
-              Associations dont vous êtes membres
-            </Text>
-            <View style={styles.inputsModify}>
-              {associations.map((association, index) => (
-                <View style={styles.inputModify} key={index}>
-                  {association.adminId !== userId ? (
-                    <>
-                      <Text style={styles.text}>
-                        {association.name} ({userIsAdmin ? "admin" : "visiteur"}
-                        )
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() =>
-                          openDeassociateModal(
-                            uid,
-                            association.id,
-                            "Se désassocier de cette association ?"
-                          )
-                        }
-                        style={styles.sectionShare_button}
-                      >
-                        <Text style={styles.sectionShare_buttonText}>
-                          Retirer de vos associations
-                        </Text>
-                      </TouchableOpacity>
-                    </>
-                  ) : (
-                    <Text style={styles.text}>
-                      {association.name} (Super admin)
-                    </Text>
-                  )}
-                </View>
-              ))}
-            </View>
-          </>
-        )}
-      </View>
-
-      <View style={styles.sectionAssociationAdmin}>
-        <Text style={styles.title2}>
-          Associations dont vous avez la gestion :{" "}
-        </Text>
-
-        <View style={styles.inputsModify}>
-          {creatorAssociation.map((asso, index) => (
-            <>
-              <View key={index}>
-                <Text key={index} style={styles.text}>
-                  {asso.name} (
-                  {asso.adminId === userId ? "Super admin" : "admin"})
-                </Text>
-              </View>
+          <View style={styles.inputsModify}>
+            <View style={styles.inputModify}>
+              <Text style={styles.text}>{name}</Text>
               <TouchableOpacity
-                onPress={() =>
-                  openDeleteModal(uid, asso.id, "Supprimer cette association ?")
-                }
-                style={styles.sectionShare_button}
+                onPress={() => setEditVisible(true)}
+                style={styles.sectionHeader}
               >
-                <Text style={styles.sectionShare_buttonText}>
-                  Supprimer cette association
-                </Text>
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
               </TouchableOpacity>
-            </>
-          ))}
+            </View>
+            <View style={styles.inputModify}>
+              <Text style={styles.text}>{surname}</Text>
+              <TouchableOpacity
+                onPress={() => setEditVisibleSurname(true)}
+                style={styles.sectionHeader}
+              >
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.inputModify}>
+              <Text style={styles.text}>{email}</Text>
+              <TouchableOpacity
+                onPress={() => setEditVisibleEmail(true)}
+                style={styles.sectionHeader}
+              >
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.inputModify}>
+              <Text style={styles.text}>Modifier le mot de passe</Text>
+              <TouchableOpacity
+                onPress={() => setEditVisiblePassword(true)}
+                style={styles.sectionHeader}
+              >
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
-      <View>
-        <TouchableOpacity
-          onPress={() =>
-            openDeleteAccountModal()
-          }
-          style={styles.btnSupp}
-        >
-          <Text style={styles.buttonSuppText}>SUPPRIMER LE COMPTE</Text>
-        </TouchableOpacity>
 
-        {/* Add all the other interface elements here */}
-      </View>
+        <View style={styles.sectionAssociationMember}>
+          {associations.length > 0 && (
+            <>
+              <Text style={styles.title2}>
+                Associations dont vous êtes membres
+              </Text>
+              <View style={styles.inputsModify}>
+                {associations.map((association, index) => (
+                  <View style={styles.inputModify} key={index}>
+                    {association.adminId !== userId ? (
+                      <>
+                        <Text style={styles.text}>
+                          {association.name} (
+                          {userIsAdmin ? "admin" : "visiteur"})
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() =>
+                            openDeassociateModal(
+                              uid,
+                              association.id,
+                              "Se désassocier de cette association ?"
+                            )
+                          }
+                          style={styles.btnDeassociate}
+                        >
+                          <Text style={styles.btnDeassociateText}>
+                            Retirer de vos associations
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <Text style={styles.text}>
+                        {association.name} (Super admin)
+                      </Text>
+                    )}
+                  </View>
+                ))}
+              </View>
+            </>
+          )}
+        </View>
 
-      <TextInputModal
-        visible={isEditNameVisible}
-        onClose={() => setEditVisible(false)} // Fermeture de la modale
-        onConfirm={handleUpdateName}
-        messageType={"Entrer un nouveau nom"}
-        onChangeText={setEditedName}
-      />
+        <View style={styles.sectionAssociationAdmin}>
+          <Text style={styles.title2}>
+            Associations dont vous avez la gestion :{" "}
+          </Text>
 
-      <TextInputModal
-        visible={isEditSurnameVisible}
-        onClose={() => setEditVisible(false)} // Fermeture de la modale
-        onConfirm={handleUpdateSurname}
-        messageType={"Entrer un nouveau prénom"}
-        onChangeText={setEditedSurname}
-      />
+          <View style={styles.inputsModify}>
+            {creatorAssociation.map((asso, index) => (
+              <>
+                <View key={index} style={styles.inputModify}>
+                  <Text key={index} style={styles.text}>
+                    {asso.name} (
+                    {asso.adminId === userId ? "Super admin" : "admin"})
+                  </Text>
+                  <TouchableOpacity
+                  onPress={() =>
+                    openDeleteModal(
+                      uid,
+                      asso.id,
+                      "Supprimer cette association ?"
+                    )
+                  }
+                  style={styles.btnSuppAssociation}
+                >
+                  <Text style={styles.btnSuppAssociationText}>
+                    Supprimer cette association
+                  </Text>
+                </TouchableOpacity>
+                </View>
 
-      <TextInputModal
-        visible={isEditEmailVisible}
-        onClose={() => setEditVisible(false)} // Fermeture de la modale
-        onConfirm={handleUpdateEmail}
-        messageType={"Entrez le nouvel email"}
-        onChangeText={setEditedEmail}
-      />
+              </>
+            ))}
+          </View>
+        </View>
+        <View style={styles.suppAccount}>
+          <TouchableOpacity
+            onPress={() => openDeleteAccountModal()}
+            style={styles.btnSupp}
+          >
+            <Text style={styles.buttonSuppText}>SUPPRIMER LE COMPTE</Text>
+          </TouchableOpacity>
 
-      <TextInputModal
-        visible={isEditPasswordVisible}
-        onClose={() => setEditVisible(false)} // Fermeture de la modale
-        onConfirm={handleUpdatePassword}
-        messageType={"Entrez le nouveau mot de passe"}
-        onChangeText={setEditedPassword}
-      />
+          {/* Add all the other interface elements here */}
+        </View>
 
-      <ConfirmationModal
-        visible={deassociateModal}
-        onClose={() => setDeassociateModal(false)}
-        onConfirm={handleConfirmUnlinkAssociation}
-        messageType={"Voulez vous désassocier le compte ? "}
-      />
-      <ConfirmationModal
-        visible={deleteModal}
-        onClose={() => setDeleteModal(false)}
-        onConfirm={handleConfirmDeleteAssociation}
-        messageType={"Voulez vous supprimer l'association ?"}
-      />
-      <ConfirmationModal
-        visible={deleteAccountModal}
-        onClose={() => setDeleteAccountModal(false)}
-        onConfirm={handleDeleteUser}
-        messageType={"Voulez vous supprimer votre compte ?"}
-      />
-      <CustomAlert
-        visible={isAlertVisible}
-        onClose={() => setAlertVisible(false)}
-        message={alertMessage}
-      />
+        <TextInputModal
+          visible={isEditNameVisible}
+          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onConfirm={handleUpdateName}
+          messageType={"Entrer un nouveau nom"}
+          onChangeText={setEditedName}
+        />
+
+        <TextInputModal
+          visible={isEditSurnameVisible}
+          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onConfirm={handleUpdateSurname}
+          messageType={"Entrer un nouveau prénom"}
+          onChangeText={setEditedSurname}
+        />
+
+        <TextInputModal
+          visible={isEditEmailVisible}
+          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onConfirm={handleUpdateEmail}
+          messageType={"Entrez le nouvel email"}
+          onChangeText={setEditedEmail}
+        />
+
+        <TextInputModal
+          visible={isEditPasswordVisible}
+          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onConfirm={handleUpdatePassword}
+          messageType={"Entrez le nouveau mot de passe"}
+          onChangeText={setEditedPassword}
+        />
+
+        <ConfirmationModal
+          visible={deassociateModal}
+          onClose={() => setDeassociateModal(false)}
+          onConfirm={handleConfirmUnlinkAssociation}
+          messageType={"Voulez vous désassocier le compte ? "}
+        />
+        <ConfirmationModal
+          visible={deleteModal}
+          onClose={() => setDeleteModal(false)}
+          onConfirm={handleConfirmDeleteAssociation}
+          messageType={"Voulez vous supprimer l'association ?"}
+        />
+        <ConfirmationModal
+          visible={deleteAccountModal}
+          onClose={() => setDeleteAccountModal(false)}
+          onConfirm={handleDeleteUser}
+          messageType={"Voulez vous supprimer votre compte ?"}
+        />
+        <CustomAlert
+          visible={isAlertVisible}
+          onClose={() => setAlertVisible(false)}
+          message={alertMessage}
+        />
+      {/* </ScrollView> */}
     </ScrollView>
+    {/* </> */}
+    </View>
   );
 };
 
 const styles = {
+  container:{
+    height: '100%',
+    backgroundColor: "#2F4F4F",
+    // marginBottom: 150
+    flexDirection: 'column'
+  },
   mainView: {
-    backgroundColor: "red",
+    backgroundColor: "#2F4F4F",
+    // backgroundColor: "#075bb5",
     padding: 20,
+    height : '100%',
+    paddingBottom: 100
   },
   title1: {
     color: "#FFF",
@@ -427,7 +472,7 @@ const styles = {
   },
   title2: {
     color: "#FFF",
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
   },
@@ -510,7 +555,7 @@ const styles = {
     rowGap: 20,
   },
   btnSupp: {
-    backgroundColor: "red",
+    backgroundColor: "#c40030",
   },
   buttonSaveText: {
     padding: 20,
@@ -527,6 +572,44 @@ const styles = {
   btnSave: {
     backgroundColor: "green",
   },
+  buttonGroupIcons: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  buttonIcon: {
+    backgroundColor: "black",
+    borderRadius: 2,
+    paddingTop: 1,
+  },
+  buttonIconElt: {
+    margin: 7,
+  },
+  btnDeassociate: {
+    backgroundColor: "#c40030",
+  },
+  btnDeassociateText: {
+    padding: 5,
+    color: "white",
+    fontFamily: "WixMadeforDisplay-Bold",
+    textAlign: "center",
+    fontSize: 10
+  },
+  btnSuppAssociation:{
+    backgroundColor: "#c40030",
+    width: '50%'
+  },
+  btnSuppAssociationText: {
+    padding: 5,
+    color: "white",
+    fontFamily: "WixMadeforDisplay-Bold",
+    textAlign: "center",
+    fontSize: 10,
+    
+  },
+  suppAccount: {
+    paddingBottom: 100
+  }
 };
 
 export default Settings;

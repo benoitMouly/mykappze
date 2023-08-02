@@ -54,7 +54,7 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
           source={
             props.animal.image
               ? { uri: props.animal.image }
-              : require("../../assets/kappze_logo_circle_noir_roigne.png")
+              : require("../../assets/kappze_logo_without_square_bw.png")
           }
         />
         <View style={styles.infoContainer}>

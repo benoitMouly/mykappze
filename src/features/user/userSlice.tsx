@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
+import { registerForPushNotificationsAsync } from '../../../App';
+
 import firebase from "firebase/compat/app";
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -21,9 +26,64 @@ import {
   getDocs,
   setDoc,
   deleteDoc,
+  addDoc,
 } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import messaging from '@react-native-firebase/messaging';
+// import PushNotification from 'react-native-push-notification';
+
+// Enregistrez `expoPushToken` dans le document de l'utilisateur dans Firestore
+
+
+
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission();
+  const enabled =
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+  if (enabled) {
+    console.log('Authorization status:', authStatus);
+  }
+}
+
+async function getToken(userId) {
+  let fcmToken = await messaging().getToken();
+  if (fcmToken) {
+    console.log(fcmToken);
+
+    // Enregistrez le token FCM dans le document de l'utilisateur dans Firestore
+    const db = getFirestore();
+    await updateDoc(doc(db, 'users', userId), {
+      fcmToken: fcmToken,
+    });
+  }
+}
+
+
+
+export const createAndSendNotification = createAsyncThunk(
+  'notifications/createAndSend',
+  async ({ userIds, message }, thunkAPI) => {
+    try {
+      const db = getFirestore();
+
+      // Créez la notification dans Firestore
+      const notificationsCollection = collection(db, 'notifications');
+      await addDoc(notificationsCollection, {
+        userIds,
+        message,
+        view: false,
+        date: Date.now(),
+      });
+
+    } catch (error) {
+      console.log(error)
+      return thunkAPI.rejectWithValue(error.toString());
+    }
+  }
+);
 // export const loginUser = createAsyncThunk<
 //   { uid: string; email: string | null },
 //   { email: string; password: string },
@@ -94,6 +154,18 @@ export const loginUser = createAsyncThunk<
       const docSnapshot = await getDoc(userRef);
       // console.log('docSnapshot', docSnapshot);
 
+      try {
+        // Obtenir le token Expo Push
+        const expoPushToken = await registerForPushNotificationsAsync();
+      
+        // Stocker le token dans Firestore
+        // const db = getFirestore();
+        // const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, { expoPushToken });
+      } catch (error) {
+        console.error('Error getting Expo push token or updating Firestore:', error);
+      }
+      
       if (docSnapshot.exists()) {
         const { name, surname } = docSnapshot.data();
         // console.log('name, surname', name, surname);
@@ -345,37 +417,37 @@ const authSlice = createSlice({
       state.isLoggedIn = false;
     });
 
-    // builder.addCase(resetPassword.fulfilled, (state) => {
-    //     state.status = 'fulfilled';
-    //     state.error = null;
-    // });
-    // builder.addCase(resetPassword.pending, (state) => {
-    //     state.status = 'loading';
-    //     state.error = null;
-    // });
-    // builder.addCase(resetPassword.rejected, (state, action) => {
-    //     state.status = 'failed';
-    //     state.error = action.error.code;
-    // });
-    // builder.addCase(checkEmailExists.rejected, (state, action) => {
-    //     state.status = 'failed';
-    //     // state.error = action.error.message;
-    //     if(action.payload){
-    //         const errorCode = action.payload.code;
-    //         state.error = errorCode;
-    //     }
+    builder.addCase(resetPassword.fulfilled, (state) => {
+        state.status = 'fulfilled';
+        state.error = null;
+    });
+    builder.addCase(resetPassword.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+    });
+    builder.addCase(resetPassword.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.code;
+    });
+    builder.addCase(checkEmailExists.rejected, (state, action) => {
+        state.status = 'failed';
+        // state.error = action.error.message;
+        if(action.payload){
+            const errorCode = action.payload.code;
+            state.error = errorCode;
+        }
 
-    // });
-    // builder.addCase(resetStatus, (state) => {
-    //     state.status = null;
-    //     state.error = null;
-    // });
-    // builder.addCase(updateEmail.fulfilled, (state, action) => {
-    //     state.email = action.payload;
-    // });
-    // builder.addCase(updatePassword.fulfilled, (state, action) => {
-    //     state.password = action.payload;
-    // });
+    });
+    builder.addCase(resetStatus, (state) => {
+        state.status = null;
+        state.error = null;
+    });
+    builder.addCase(updateEmail.fulfilled, (state, action) => {
+        state.email = action.payload;
+    });
+    builder.addCase(updatePassword.fulfilled, (state, action) => {
+        state.password = action.payload;
+    });
     builder.addCase(registerUser.fulfilled, (state, action) => {
         state.uid = action.payload.uid;
         state.email = action.payload.email;
@@ -392,30 +464,30 @@ const authSlice = createSlice({
             state.error = action.error.message; // this is the fallback if payload is not available
           }
     });
-    // builder.addCase(updateUserName.fulfilled, (state, action) => {
-    //     // Mettre à jour l'état avec le nouveau nom
-    //     state.name = action.payload.newName;
-    // });
-    // builder.addCase(updateUserName.rejected, (state, action) => {
-    //     // Mettre à jour l'état avec le nouveau nom
-    //     state.status = 'failed';
-    //     state.error = action.error ? action.error.message : "Une erreur s'est produite lors de la mise à jour du nom.";
+    builder.addCase(updateUserName.fulfilled, (state, action) => {
+        // Mettre à jour l'état avec le nouveau nom
+        state.name = action.payload.newName;
+    });
+    builder.addCase(updateUserName.rejected, (state, action) => {
+        // Mettre à jour l'état avec le nouveau nom
+        state.status = 'failed';
+        state.error = action.error ? action.error.message : "Une erreur s'est produite lors de la mise à jour du nom.";
 
-    // });
-    // builder.addCase(updateUserSurname.fulfilled, (state, action) => {
-    //     // Mettre à jour l'état avec le nouveau prénom
-    //     state.surname = action.payload.newSurname;
-    // });
-    // builder.addCase(deleteUser.fulfilled, (state, action) => {
-    //     // Effectuez les actions nécessaires après la suppression de l'utilisateur, si nécessaire
-    // });
+    });
+    builder.addCase(updateUserSurname.fulfilled, (state, action) => {
+        // Mettre à jour l'état avec le nouveau prénom
+        state.surname = action.payload.newSurname;
+    });
+    builder.addCase(deleteUser.fulfilled, (state, action) => {
+        // Effectuez les actions nécessaires après la suppression de l'utilisateur, si nécessaire
+    });
 
-    // builder.addCase(deleteUser.rejected, (state, action) => {
-    //     state.status = 'failed';
-    //     state.error = action.error.message;
+    builder.addCase(deleteUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message;
 
-    //     // Gérez les erreurs lors de la suppression de l'utilisateur, si nécessaire
-    // });
+        // Gérez les erreurs lors de la suppression de l'utilisateur, si nécessaire
+    });
   },
 });
 

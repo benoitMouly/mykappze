@@ -23,6 +23,8 @@ const ColorSelect: FC<ColorSelectProps> = ({ selectedColors, onChange }) => {
                     <Checkbox
                         status={selectedColors && selectedColors.includes(color) ? 'checked' : 'unchecked'}
                         onPress={() => handleColorChange(color)}
+                        color={'#d15e41'}
+                        uncheckedColor={"#fff"}
                     />
                     <Text style={styles.label}>{color.charAt(0).toUpperCase() + color.slice(1)}</Text>
                 </View>
@@ -31,22 +33,45 @@ const ColorSelect: FC<ColorSelectProps> = ({ selectedColors, onChange }) => {
     );
 };
 
+// const styles = StyleSheet.create({
+//     container: {
+//         paddingTop: 16,
+//         flexDirection: 'row',
+//         flexWrap: 'wrap',
+//         paddingBottom: 16,
+//         alignItems: 'center',
+//         // justifyContent: 'flex-start'
+//         columnGap: 40
+//     },
+//     item: {
+//         paddingRight: 16,
+//         flexDirection: 'row',
+//         alignItems: 'center',
+//     },
+//     label: {
+//         color: '#fff',
+//     },
+// });
+
 const styles = StyleSheet.create({
     container: {
         paddingTop: 16,
+        paddingBottom: 16,
         flexDirection: 'row',
         flexWrap: 'wrap',
-        paddingBottom: 16
-        // alignItems: 'center'
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
     },
     item: {
-        paddingRight: 16,
         flexDirection: 'row',
         alignItems: 'center',
+        width: '33%',  // Changer la largeur en fonction de combien de colonnes vous voulez
+        padding: 8,
     },
     label: {
-        color: 'black',
+        color: '#fff',
     },
 });
+
 
 export default ColorSelect;

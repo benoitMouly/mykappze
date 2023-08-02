@@ -361,12 +361,17 @@ const ObjectForm = (props) => {
           <View style={styles.inputGroup && styles.checkboxes}>
             <Text style={styles.text}>Couleurs de la robe :</Text>
             {/* Composant de sélection des couleurs */}
+            <View style={{backgroundColor: '#2f2f2f', margin: 10}}>
             <ColorSelect selectedColors={colors} onChange={handleRobeChange} />
+            </View>
+           
           </View>
           <View style={styles.inputGroup}>
             <View style={styles.imagePicker}>
               <Text style={styles.text}>Image :</Text>
+              <View style={{margin: 10}}>
               <EditableImage imageUri={imageUri} setImageUri={setImageUri} />
+              </View>
             </View>
           </View>
         </View>
@@ -613,8 +618,6 @@ const styles = {
   handleSubmit: {
     margin: 20,
     alignItems: 'center',
-    // padding: 30
-    // paddingBottom: 30
   },
   buttonTextSubmit: {
     padding: 2,

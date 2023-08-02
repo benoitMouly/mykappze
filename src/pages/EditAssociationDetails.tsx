@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
@@ -30,11 +31,14 @@ import TextInputModal from "../components/general/TextUpdateModal";
 import {
   changeUserRole,
   updateAssociation,
+  updateAssociationImage,
 } from "../features/associations/associationSlice";
 import SelectModal from "../components/general/EditableSelect";
 import ConfirmationModal from "../components/general/ConfirmationModal";
 import CustomAlert from "../components/general/CustomAlert";
-
+import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
+import * as Clipboard from 'expo-clipboard';
+import { createAndSendNotification } from "../features/user/userSlice";
 // définir les interfaces
 interface Association {
   id: string;
@@ -127,6 +131,7 @@ const EditAssociationDetails: React.FC = () => {
 
   const association = associations.find((asso) => asso.id === associationId);
 
+  console.log(associationsStatus)
   useEffect(() => {
     // const association = associations.find((asso) => asso.id === associationId);
     if (association) {
@@ -141,7 +146,7 @@ const EditAssociationDetails: React.FC = () => {
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
   const [sectorsList, setSectors] = useState<Sector[]>([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [imageUri, setImageUri] = useState("");
+  const [imageUri, setImageUri] = useState(association?.image);
   const [isEditNameAssociationVisible, setEditVisible] = useState(false);
   const [isEditEmailAssociationVisible, setEditVisibleEmail] = useState(false);
   const [isEditCityAssociationVisible, setEditVisibleCity] = useState(false);
@@ -159,6 +164,9 @@ const EditAssociationDetails: React.FC = () => {
   const [isConfirmationVisible, setConfirmationVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [isAlertVisible, setAlertVisible] = useState(false);
+  const [selectRole, setSelectRole] = useState(false);
+  const [selectDeassociate, setSelectDeassociate] = useState(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
 
   const [currentAssociationName, setCurrentAssociationName] = useState(
     association.name
@@ -178,6 +186,37 @@ const EditAssociationDetails: React.FC = () => {
     { label: "Visiteur", value: false },
     // Ajoutez ici d'autres options
   ];
+
+  const [isModified, setIsModified] = useState(false);
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      // Empêche le geste de retour par défaut
+      if (!isModified) {
+        // Si aucune modification n'a été apportée, laissez l'utilisateur quitter la page.
+        return;
+      }
+
+      e.preventDefault();
+
+      // Demande confirmation avant de revenir en arrière
+      Alert.alert(
+        "Annuler les changements ?",
+        "Vous avez des données non sauvegardées. Etes vous certain de vouloir quitter ?",
+        [
+          { text: "Rester", style: "cancel", onPress: () => {} },
+          {
+            text: "Confirmer",
+            style: "destructive",
+            // Si l'utilisateur confirme, revenir
+            onPress: () => navigation.dispatch(e.data.action),
+          },
+        ]
+      );
+    });
+
+    return unsubscribe;
+  }, [navigation, isModified]);
 
   const handleConfirm = (value) => {
     setSelectedValue(value);
@@ -202,17 +241,29 @@ const EditAssociationDetails: React.FC = () => {
 
     // console.log(selectedUserId);
     setSelectedUserId(null); // ferme la modale
+    setSelectRole(false);
   };
 
-  const openModal = (userId) => {
+  const handleClean = () => {
+    setSelectedUserId(null);
+    setSelectRole(false);
+    setSelectDeassociate(false);
+  };
+
+  const openDeassociateModal = (userId) => {
     setSelectedUserId(userId);
+    setSelectRole(true);
   };
 
-  const handleDeassociateUser = async () => {
-    // console.log(id);
-    if (animal.id) {
-      setConfirmationVisible(true); // Affiche la modale de confirmation
-    }
+  const openSuppModal = (userId) => {
+    setSelectedUserId(userId);
+    setSelectDeassociate(true);
+  };
+
+  const copyToClipboard = async (value) => {
+    await Clipboard.setStringAsync(value);
+    setIsCopied(true)
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const handleConfirmSuppression = async () => {
@@ -279,6 +330,19 @@ const EditAssociationDetails: React.FC = () => {
     // loadFonts();
   }, [editedAssociationEmail]);
 
+  // useEffect(() => {
+  //   if (associationsStatus === 'failed') {
+  //     setAlertMessage(associationsStatus.error);
+  //     setAlertVisible(true);
+  //   } else if (associationsStatus === "succeeded") {
+  //     setAlertMessage("La mise à jour a réussi !");
+  //     setAlertVisible(true);
+  //     console.log('NOOOOn')
+  //     // Ensuite, vous pouvez réinitialiser le statut à 'idle' ou autre selon votre logique d'application
+  //   }
+  // }, [associationsStatus.error, associationsStatus]);
+
+
   useEffect(() => {
     setUpdatedUsers(users);
   }, [users]);
@@ -287,12 +351,15 @@ const EditAssociationDetails: React.FC = () => {
 
   // };
 
-  const handleUpdateName = (newName) => {
+  const handleUpdateName = async (newName) => {
     const updatedData = { name: newName };
+    const message = 'Notre nom association a changé ! Il est désormais' +  newName
+    const userIds = ['0d0E2ou8OLfQhkDdgHEF8VDp4JK2', '9gCOJvy598gS8PAX3pyql0Wm9hD2']
     setCurrentAssociationName(newName);
-    dispatch(
+    await dispatch(
       updateAssociation({ associationId, associationData: updatedData })
     );
+    await dispatch(createAndSendNotification({ userIds, message }));
     setEditVisible(false);
   };
 
@@ -323,174 +390,240 @@ const EditAssociationDetails: React.FC = () => {
     setEditVisiblePostalCode(false);
   };
 
+  const handleSavePress = async () => {
+    if (imageUri !== association.image) {
+      dispatch(updateAssociationImage({ associationId, image: imageUri }));
+    }
+    setIsModified(false);
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.header1st}>
-          <Image source={{ uri: association?.image }} style={styles.image} />
-          <Text style={styles.title}>{association?.name}</Text>
-        </View>
-        <View style={styles.sectionShare}>
-          <Text style={styles.sectionShare_title}>Partager le canal : </Text>
-          <TouchableOpacity
-            onPress={() => handleCopy}
-            style={styles.sectionShare_button}
-          >
-            <Text style={styles.sectionShare_buttonText}>
-              {association?.id}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+    <View style={styles.fold}>
+      <HeaderEditAnimal navigation={navigation} animalName={association.name} />
 
-      <View style={styles.containerSection}>
-        {/* Informations generales */}
-        <View style={styles.section}>
-          <View>
-            <Text>{association?.name}</Text>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.header1st}>
+            <EditableImage
+              imageUri={imageUri}
+              setImageUri={setImageUri}
+              isModified={setIsModified}
+            />
+            <Text style={styles.title}>{association?.name}</Text>
+          </View>
+          <View style={styles.sectionShare}>
+            <Text style={styles.sectionShare_title}>Partager le canal : </Text>
             <TouchableOpacity
-              onPress={() => setEditVisible(true)}
-              style={styles.sectionHeader}
+              onPress = {() => {copyToClipboard(association.id)}}
+              style={styles.sectionShare_button}
             >
-              <Text style={styles.sectionTitle}>Modifier</Text>
+              <Text style={styles.sectionShare_buttonText} selectable={true} >
+                {isCopied ? ('Copié !') : (association?.id)}
+              </Text>
             </TouchableOpacity>
           </View>
-          <View>
-            <Text>{association.email}</Text>
-            <TouchableOpacity
-              onPress={() => setEditVisibleEmail(true)}
-              style={styles.sectionHeader}
-            >
-              <Text style={styles.sectionTitle}>Modifier</Text>
-            </TouchableOpacity>
-          </View>
-          <View>
-            <Text>{association?.city}</Text>
-            <TouchableOpacity
-              onPress={() => setEditVisibleCity(true)}
-              style={styles.sectionHeader}
-            >
-              <Text style={styles.sectionTitle}>Modifier</Text>
-            </TouchableOpacity>
-          </View>
-          <View>
-            <Text>{association?.postalCode}</Text>
-            <TouchableOpacity
-              onPress={() => setEditVisiblePostalCode(true)}
-              style={styles.sectionHeader}
-            >
-              <Text style={styles.sectionTitle}>Modifier</Text>
-            </TouchableOpacity>
-          </View>
+        </View>
 
-          <TextInputModal
-            visible={isEditNameAssociationVisible}
-            onClose={() => setEditVisible(false)} // Fermeture de la modale
-            onConfirm={handleUpdateName}
-            messageType={"Entrez le nouveau nom de l'association"}
-            onChangeText={setEditedAssociationName}
-          />
-          <TextInputModal
-            visible={isEditEmailAssociationVisible}
-            onClose={() => setEditVisibleEmail(false)} // Fermeture de la modale
-            onConfirm={handleUpdateEmail}
-            messageType={"Entrez le nouvel email"}
-            onChangeText={setEditedAssociationEmail}
-          />
-          <TextInputModal
-            visible={isEditCityAssociationVisible}
-            onClose={() => setEditVisibleCity(false)} // Fermeture de la modale
-            onConfirm={handleUpdateCity}
-            messageType={"Entrez le nouveau nom de la ville"}
-            onChangeText={setEditedAssociationCity}
-          />
-          <TextInputModal
-            visible={isEditPostalCodeAssociationVisible}
-            onClose={() => setEditVisiblePostalCode(false)} // Fermeture de la modale
-            onConfirm={handleUpdatePostalCode}
-            messageType={"Entrez le nouveau postal code"}
-            onChangeText={setEditedAssociationPostalCode}
-          />
-          {/* <Text>{association?.email}</Text>
+        <View style={styles.containerSection}>
+          {/* Informations generales */}
+          <Text style={styles.editUnicalSectionTitle}>Général</Text>
+          <View style={styles.containerUnicalSection}>
+            <View style={styles.editEltGroup}>
+              <Text style={styles.text}>{association?.name}</Text>
+              <TouchableOpacity
+                onPress={() => setEditVisible(true)}
+                style={styles.sectionHeader}
+              >
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.editEltGroup}>
+              <Text style={styles.text}>{association.email}</Text>
+              <TouchableOpacity
+                onPress={() => setEditVisibleEmail(true)}
+                style={styles.sectionHeader}
+              >
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.editEltGroup}>
+              <Text style={styles.text}>{association?.city}</Text>
+              <TouchableOpacity
+                onPress={() => setEditVisibleCity(true)}
+                style={styles.sectionHeader}
+              >
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.editEltGroup}>
+              <Text style={styles.text}>{association?.postalCode}</Text>
+              <TouchableOpacity
+                onPress={() => setEditVisiblePostalCode(true)}
+                style={styles.sectionHeader}
+              >
+                <View style={styles.buttonIcon}>
+                  <Icon
+                    style={styles.buttonIconElt}
+                    name="pencil-outline"
+                    size={15}
+                    color="#fff"
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <TextInputModal
+              visible={isEditNameAssociationVisible}
+              onClose={() => setEditVisible(false)} // Fermeture de la modale
+              onConfirm={handleUpdateName}
+              messageType={"Entrez le nouveau nom de l'association"}
+              onChangeText={setEditedAssociationName}
+            />
+            <TextInputModal
+              visible={isEditEmailAssociationVisible}
+              onClose={() => setEditVisibleEmail(false)} // Fermeture de la modale
+              onConfirm={handleUpdateEmail}
+              messageType={"Entrez le nouvel email"}
+              onChangeText={setEditedAssociationEmail}
+            />
+            <TextInputModal
+              visible={isEditCityAssociationVisible}
+              onClose={() => setEditVisibleCity(false)} // Fermeture de la modale
+              onConfirm={handleUpdateCity}
+              messageType={"Entrez le nouveau nom de la ville"}
+              onChangeText={setEditedAssociationCity}
+            />
+            <TextInputModal
+              visible={isEditPostalCodeAssociationVisible}
+              onClose={() => setEditVisiblePostalCode(false)} // Fermeture de la modale
+              onConfirm={handleUpdatePostalCode}
+              messageType={"Entrez le nouveau postal code"}
+              onChangeText={setEditedAssociationPostalCode}
+            />
+            {/* <Text>{association?.email}</Text>
           <Text>{association?.city}</Text>
           <Text>{association?.postalCode}</Text> */}
-          <EditableImage imageUri={imageUri} setImageUri={setImageUri} />
-        </View>
+          </View>
 
-        <View style={styles.section}>
-          {users.map((user, index) => (
-            <View key={index}>
-              <Text>{user.name}</Text>
-              <Text>{user.email}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.section}>
-          <Text>Gestion des membres : </Text>
-          <View>
-            {updatedUsers.map((user) => (
-              <View key={user.id}>
-                <Text>
-                  {user.surname} {user.name}, {user.email}
-                </Text>
-                <Text>{user.isAdmin ? "Administrateur" : "Visiteur"}</Text>
-
-                {user.id !== association.adminId ? (
-                  <>
-                    <TouchableOpacity
-                      onPress={() => openModal(user.id)}
-                      style={styles.sectionShare_button}
-                    >
-                      <Text style={styles.sectionShare_buttonText}>
-                        Modifier le rôle
+          <Text style={styles.editUnicalSectionTitle}>Gestion des membres</Text>
+          <View style={styles.containerSection}>
+            {/* <View style={styles.containerUnicalSection}>: */}
+            <View style={styles.section}>
+              <View style={styles.members}>
+                {updatedUsers.map((user) => (
+                  <View style={styles.member} key={user.id}>
+                    <View>
+                      <Text style={styles.text}>
+                        {user.surname} {user.name}
                       </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={() => openModal(user.id)}
-                      style={styles.sectionShare_button}
-                    >
-                      <Text style={styles.sectionShare_buttonText}>
-                        Retirer ce membre de l'association
+                      <Text style={styles.text}>{user.email}</Text>
+                      <Text style={styles.text}>
+                        {user.isAdmin ? "Administrateur" : "Visiteur"}
                       </Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <Text>Super Admin, le rôle ne peut être modifié.</Text>
-                )}
+                    </View>
+
+                    {user.id !== association.adminId ? (
+                      <View style={styles.btnAdmin}>
+                        <TouchableOpacity
+                          onPress={() => openDeassociateModal(user.id)}
+                          style={styles.sectionAdmin_button}
+                        >
+                          <View style={styles.buttonIcon}>
+                            <Icon
+                              style={styles.buttonIconElt}
+                              name="pencil-outline"
+                              size={15}
+                              color="#fff"
+                            />
+                          </View>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          onPress={() => openSuppModal(user.id)}
+                          style={styles.sectionAdmin_button}
+                        >
+                          <View style={styles.buttonIcon}>
+                            <Icon
+                              style={styles.buttonIconElt}
+                              name="close-outline"
+                              size={15}
+                              color="#C40030"
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      // <Text style={styles.text}>
+                      //   Super Admin, le rôle ne peut être modifié.
+                      // </Text>
+                      <></>
+                    )}
+                  </View>
+                ))}
+
+                <SelectModal
+                  visible={selectRole}
+                  // onClose={() => setSelectRole(false)}
+                  onClose={handleClean}
+                  onConfirm={handleConfirm}
+                  options={options}
+                />
+                <ConfirmationModal
+                  visible={selectDeassociate}
+                  // onClose={() => setSelectDeassociate(false)}
+                  onClose={handleClean}
+                  onConfirm={handleConfirmSuppression}
+                  messageType={
+                    "Voulez-vous vraiment désassocier cet utilisateur de l'association ?"
+                  }
+                />
+                <CustomAlert
+                  visible={isAlertVisible}
+                  onClose={() => setAlertVisible(false)}
+                  message={alertMessage}
+                />
               </View>
-            ))}
-
-            <SelectModal
-              visible={selectedUserId !== null}
-              onClose={() => setSelectedUserId(null)}
-              onConfirm={handleConfirm}
-              options={options}
-            />
-            <ConfirmationModal
-              visible={selectedUserId !== null}
-              onClose={() => setSelectedUserId(null)}
-              onConfirm={handleConfirmSuppression}
-              messageType={
-                "Voulez-vous vraiment désassocier cet utilisateur de l'association ?"
-              }
-            />
-            <CustomAlert
-              visible={isAlertVisible}
-              onClose={() => setAlertVisible(false)}
-              message={alertMessage}
-            />
+            </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
-      <View style={styles.line} />
-    </ScrollView>
+      {isModified && (
+        <View style={styles.btnSectionSuppSave}>
+          <TouchableOpacity onPress={handleSavePress} style={styles.btnSave}>
+            <Text style={styles.buttonSaveText}>SAUVEGARDER L'IMAGE</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  fold: {
+    height: "100%",
+  },
   container: {
     padding: 0,
     height: "100%",
@@ -506,6 +639,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: "#2F4F4F",
     paddingTop: 20,
+    columnGap: 20,
   },
   sectionShare: {
     flexDirection: "row",
@@ -566,27 +700,28 @@ const styles = StyleSheet.create({
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
   },
+  subtitle: {
+    color: "#2F4F4F",
+    fontSize: 22,
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontWeight: "600",
+  },
 
   containerSection: {
-    padding: 10,
+    // padding: 10,
     // backgroundColor: '#C40030',
-    // margin: 5
+    // paddingBottom: 25
+    height: "100%",
+    // paddingBottom: 2
   },
 
   section: {
-    marginBottom: 20,
-    padding: 25,
-    paddingTop: 0,
-    // borderWidth: 2,
+    paddingHorizontal: 25,
+    paddingBottom: 60,
+    // paddingTop: 0,
+    backgroundColor: "#2f4f4f",
+    marginBottom: 0,
   },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 25,
-    paddingBottom: 5,
-  },
-
   sectionTitle: {
     fontSize: 16,
     fontWeight: "bold",
@@ -594,21 +729,31 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  editEltGroup: {
+    marginHorizontal: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 20,
   },
   buttonGroupIcons: {
     display: "flex",
     flexDirection: "row",
+    alignItems: "center",
   },
   buttonIcon: {
-    marginRight: 5,
-    width: 15,
-    height: 15,
+    backgroundColor: "black",
+    borderRadius: 2,
+    paddingTop: 1,
+  },
+  buttonIconElt: {
+    margin: 7,
   },
   addCat: {
     flexDirection: "column",
-    // justifyContent: 'center',
     alignItems: "center",
-    // width: '100%'
   },
   iconAddCat: {
     flexDirection: "row",
@@ -617,12 +762,10 @@ const styles = StyleSheet.create({
   sectionCity: {
     flexDirection: "column",
     rowGap: 5,
-    // alignItems: 'center',
     justifyContent: "center",
   },
   cityList: {
     maxWidth: 200,
-    // backgroundColor: 'blue'
   },
   sectionBtns_btnCity: {
     flexDirection: "row",
@@ -644,6 +787,68 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginVertical: 20, // space above and below the line
     width: "80%", // change this to fit your design
+  },
+  editUnicalSectionTitle: {
+    fontSize: 18,
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontWeight: "600",
+    textAlign: "left",
+    color: "#2F4F4F",
+    marginLeft: 15,
+  },
+  containerUnicalSection: {
+    backgroundColor: "#2F4F4F",
+    padding: 15,
+    rowGap: 20,
+  },
+  members: {
+    marginTop: 20,
+    rowGap: 10,
+  },
+  member: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    rowGap: 10,
+    paddingBottom: 20,
+    borderBottomWidth: 2,
+    // height: '100%'
+  },
+  btnAdmin: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  sectionAdmin_button: {
+    backgroundColor: "transparent",
+    padding: 5,
+  },
+  btnSectionSuppSave: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60, // Vous pouvez modifier cette valeur en fonction de vos besoins
+    backgroundColor: "#000", // Pour la visibilité
+    flexDirection: "row",
+    justifyContent: "space-around", // Pour espacer les boutons
+    alignItems: "center",
+    padding: 10,
+    marginTop: 10,
+  },
+  buttonSaveText: {
+    // padding: 20,
+    color: "white",
+    fontFamily: "WixMadeforDisplay-Bold",
+    textAlign: "center",
+  },
+  buttonSuppText: {
+    padding: 20,
+    color: "white",
+    fontFamily: "WixMadeforDisplay-Bold",
+    textAlign: "center",
+  },
+  btnSave: {
+    // backgroundColor: 'green'
+    width: "100%",
   },
 });
 

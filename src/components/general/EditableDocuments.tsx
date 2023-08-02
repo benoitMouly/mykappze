@@ -48,7 +48,7 @@ const EditableDocumentList = ({ documents, setDocuments }) => {
           <Text
             numberOfLines={2}
             ellipsizeMode="middle"
-            style={{ paddingRight: 10 }}
+            style={{ paddingRight: 10, color: 'white' }}
           >
             {document.name}
           </Text>

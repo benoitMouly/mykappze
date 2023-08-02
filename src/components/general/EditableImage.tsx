@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Button, Image, TouchableOpacity, View, Text } from 'react-native';
 import Modal from 'react-native-modal';
 import * as ImagePicker from 'expo-image-picker';
+// import Icon from "react-native-vector-icons/Ionicons";
+import { Icon, Avatar, Badge } from '@rneui/base';
 
-const EditableImage = ({imageUri, setImageUri}) => {
+const EditableImage = ({imageUri, setImageUri, isModified}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   // const [imageUri, setImageUri] = useState(null);
 
@@ -14,6 +16,7 @@ const EditableImage = ({imageUri, setImageUri}) => {
   const handleSave = uri => {
     setImageUri(uri);
     setModalVisible(false);
+    isModified(true);
   };
 
   const handleCancel = () => {
@@ -41,23 +44,51 @@ const EditableImage = ({imageUri, setImageUri}) => {
 
   return (
     <View style={{paddingTop: 5}}>
-      
-      {/* <Button title="Edit Image" onPress={toggleModal} /> */}
+      {/* <TouchableOpacity onPress={openImagePickerAsync} style={styles.buttonsPicker}>
+        <Text style={styles.buttonText}>
+          {imageUri ? 'Modifier' : 'Choisir'}
+        </Text>
+      </TouchableOpacity> */}
 
-      <TouchableOpacity onPress={openImagePickerAsync} style={styles.buttonsPicker}>
-              <Text style={styles.buttonText}>
-                {imageUri ? 'Modifier' : 'Choisir'}
-              </Text>
-        </TouchableOpacity>
-
-        {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />}
-        
-      {/* <Modal isVisible={isModalVisible}>
-        <View style={{backgroundColor: "white", padding: 20}}>
-          <Button title="Choisir une image" onPress={openImagePickerAsync} />
-          <Button title="Annuler" onPress={handleCancel} />
-        </View>
-      </Modal> */}
+      {imageUri ? 
+        <Avatar
+          rounded
+          size={100}
+          source={{uri: imageUri}}
+          containerStyle={{ backgroundColor: 'transparent' }}
+          // containerStyle={{width: 200, height: 200}}
+        >
+          <Avatar.Accessory 
+            size={20} 
+            reverse
+            onPress={openImagePickerAsync}
+            name='pencil'
+            type='ionicon' 
+            containerStyle={{ backgroundColor: 'transparent'}}
+            color = '#2F4F4F'
+            
+          />
+        </Avatar>
+        :
+        <Avatar
+          rounded
+          size={100}
+          icon={{name: 'add', color: '#fff', type: 'material'}}
+          containerStyle={{ backgroundColor: '#000' }}
+          // containerStyle={{width: 200, height: 200}}
+        >
+          <Avatar.Accessory 
+            size={20} 
+            reverse
+            onPress={openImagePickerAsync}
+            name='pencil'
+            type='ionicon' 
+            containerStyle={{ backgroundColor: 'transparent'}}
+            color = '#2F4F4F'
+            
+          />
+        </Avatar>
+      }
     </View>
   );
 };

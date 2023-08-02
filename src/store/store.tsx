@@ -7,6 +7,8 @@ import citiesReducer from '../features/cities/citySlice';
 import sectorsReducer from '../features/sectors/sectorSlice';
 import animalsReducer from '../features/animals/animalSlice';
 import associationsUsersReducer from '../features/associations/associationUsersSlice';
+import notificationSlice from '../features/notifications/notificationSlice.tsx';
+import commentsReducer from '../features/animals/commentsSlice.tsx'
 
 export const store = configureStore({
     reducer: {
@@ -15,7 +17,9 @@ export const store = configureStore({
         cities: citiesReducer,
         animals: animalsReducer,
         sectors: sectorsReducer,
-        associationUsers: associationsUsersReducer
+        associationUsers: associationsUsersReducer,
+        notifications: notificationSlice,
+        comments: commentsReducer
     },
     // devTools: process.env.NODE_ENV !== 'production',
 });

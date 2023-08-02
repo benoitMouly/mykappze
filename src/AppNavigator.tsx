@@ -26,6 +26,7 @@ import EditAssociationDetails from "./pages/EditAssociationDetails";
 import SettingsUser from "./pages/SettingsUser";
 import AssociationForm from "./pages/AssociationCreate";
 import ForgotPasswordForm from "./pages/ForgotPassword";
+import Veterinaires from "./pages/NearbyVet";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -72,7 +73,7 @@ function MainStackNavigator() {
         component={EditAnimalDetails}
         options={{
           header: () => <Header navigation={navigation} />,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -104,7 +105,7 @@ function MainStackNavigator() {
         component={EditAssociationDetails}
         options={{
           header: () => <Header navigation={navigation} />,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -112,12 +113,21 @@ function MainStackNavigator() {
         component={SettingsUser}
         options={{
           header: () => <Header navigation={navigation} />,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="CreateAssociation"
         component={AssociationForm}
+        options={{
+          header: () => <Header navigation={navigation} />,
+          headerShown: true,
+        }}
+      />
+
+      <Stack.Screen
+        name="NearByVet"
+        component={Veterinaires}
         options={{
           header: () => <Header navigation={navigation} />,
           headerShown: true,
@@ -175,7 +185,7 @@ function AppRouter() {
               component={RegisterPage}
               options={{ headerShown: false }}
             />
-                        <Stack.Screen
+            <Stack.Screen
               name="ForgotPassword"
               component={ForgotPasswordForm}
               options={{ headerShown: false }}
@@ -194,13 +204,17 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
     <DrawerContentScrollView {...props}>
       <DrawerItem
         label="Home"
-        onPress={() => props.navigation.navigate("Home")}
+        onPress={() => props.navigation.navigate("Main")}
       />
       <DrawerItem
         label="Paramètres"
         onPress={() => props.navigation.navigate("UserSettings")}
       />
 
+      <DrawerItem
+        label="Vétérinaires"
+        onPress={() => props.navigation.navigate("NearByVet")}
+      />
 
       <DrawerItem label="Déconnexion" onPress={() => dispatch(logoutAsync())} />
     </DrawerContentScrollView>
