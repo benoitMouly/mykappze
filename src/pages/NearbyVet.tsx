@@ -174,8 +174,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Text, View, FlatList, Platform } from "react-native";
-import Geolocation from "react-native-geolocation-service";
-import functions from "@react-native-firebase/functions";
+// import Geolocation from "react-native-geolocation-service";
+// import functions from "@react-native-firebase/functions";
 import * as Location from "expo-location";
 import { getDistanceFromLatLonInKm } from "../utils/getDistance";
 

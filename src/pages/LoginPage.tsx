@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
-// import { useDispatch } from "react-redux";
 import { useAppDispatch } from "../store/store";
 import { loginUser } from "../features/user/userSlice.tsx";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import * as Google from 'expo-auth-session/providers/google';
+import firebase from 'firebase/compat/app';
+
+import * as WebBrowser from 'expo-web-browser';
+
+import 'firebase/auth';
+
+import * as AuthSession from 'expo-auth-session';
+
 
 import {
   View,
@@ -17,6 +25,13 @@ import {
 } from "react-native";
 import * as Font from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+WebBrowser.maybeCompleteAuthSession();
+
+// web : 169421691212-b6edhc4v6tl2g0s5fcbgecp796ipqin0.apps.googleusercontent.com
+// IOS : 169421691212-gnfq5fkabqbr8ng611emgmm35nd3vt7b.apps.googleusercontent.com
+// Android : 169421691212-jiefe2qrfhlv62ha45cj67kflc6e9brf.apps.googleusercontent.com 
+
 
 // Define the navigation type
 type RootStackParamList = {
@@ -33,27 +48,59 @@ type LoginScreenNavigationProp = StackNavigationProp<
 const LoginPage: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   // const navigation = useNavigation();
+  const [accessToken, setAccessToken] = useState(null)
+  const [user , setUser] = useState(null)
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: '169421691212-b6edhc4v6tl2g0s5fcbgecp796ipqin0.apps.googleusercontent.com',
+    androidClientId: '169421691212-jiefe2qrfhlv62ha45cj67kflc6e9brf.apps.googleusercontent.com',
+    iosClientId: '169421691212-gnfq5fkabqbr8ng611emgmm35nd3vt7b.apps.googleusercontent.com',
+    
+  });
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const navigation = useNavigation();
-  // AsyncStorage.getAllKeys((err, keys) => {
-  //   AsyncStorage.multiGet(keys, (error, stores) => {
-  //     stores.map((result, i, store) => {
-  //       console.log({ [store[i][0]]: store[i][1] });
-  //       return true;
-  //     });
-  //   });
-  // });
-  // Dans LoginPage
+  const [isRequestReady, setIsRequestReady] = useState(false);
+
+
+  useEffect(() => {
+    if(response?.type === "success"){
+      setAccessToken(response.authentication.accessToken);
+      accessToken && fetchUserInfo();
+    } else{
+      console.log('REQUEST !!!! ', request)
+    }
+  }, [response, accessToken]);
+
+  const fetchUserInfo = async () => {
+    let response = await fetch("https://www.googleapis.com/userinfo/v2/me" , {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    const userInfo = await response.json();
+    setUser(userInfo)
+  }
+
+  const ShowUserInfo = () => {
+    if(user) {
+      return(
+        <View>
+          <Text>{user.email} && {user.name}</Text>
+        </View>
+      )
+    }
+  }
+
   const handleLogin = async () => {
     if (email === "" || password === "") {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
+
+
 
     const actionResult = await dispatch(loginUser({ email, password }));
 
@@ -94,6 +141,7 @@ const LoginPage: React.FC = () => {
     return (
       <View style={styles.container}>
         <View style={styles.titleContainer}>
+          {user && <ShowUserInfo />}
           <Text style={styles.title}>Kappze</Text>
           <Image
             style={styles.logo}
@@ -131,6 +179,7 @@ const LoginPage: React.FC = () => {
             Mot de passe oublié
           </Text>
         </View>
+        <Button title="Se connecter avec Google" onPress={() => promptAsync()} />
       </View>
     );
   }

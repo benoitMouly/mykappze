@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { registerForPushNotificationsAsync } from '../../../App';
+import axios from 'axios';
 
 import firebase from "firebase/compat/app";
 import * as Notifications from 'expo-notifications';
@@ -14,6 +15,7 @@ import {
   updatePassword as updatePasswordAuth,
   signOut,
   deleteUser as deleteAuthUser,
+  signInWithCustomToken,
 } from "firebase/auth";
 import {
   updateDoc,
@@ -30,36 +32,39 @@ import {
 } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import messaging from '@react-native-firebase/messaging';
+// import messaging from '@react-native-firebase/messaging';
 // import PushNotification from 'react-native-push-notification';
 
 // Enregistrez `expoPushToken` dans le document de l'utilisateur dans Firestore
 
 
 
-async function requestUserPermission() {
-  const authStatus = await messaging().requestPermission();
-  const enabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
-  if (enabled) {
-    console.log('Authorization status:', authStatus);
-  }
-}
 
-async function getToken(userId) {
-  let fcmToken = await messaging().getToken();
-  if (fcmToken) {
-    console.log(fcmToken);
 
-    // Enregistrez le token FCM dans le document de l'utilisateur dans Firestore
-    const db = getFirestore();
-    await updateDoc(doc(db, 'users', userId), {
-      fcmToken: fcmToken,
-    });
-  }
-}
+// async function requestUserPermission() {
+//   const authStatus = await messaging().requestPermission();
+//   const enabled =
+//     authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+//     authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+//   if (enabled) {
+//     console.log('Authorization status:', authStatus);
+//   }
+// }
+
+// async function getToken(userId) {
+//   let fcmToken = await messaging().getToken();
+//   if (fcmToken) {
+//     console.log(fcmToken);
+
+//     // Enregistrez le token FCM dans le document de l'utilisateur dans Firestore
+//     const db = getFirestore();
+//     await updateDoc(doc(db, 'users', userId), {
+//       fcmToken: fcmToken,
+//     });
+//   }
+// }
 
 
 
@@ -84,45 +89,6 @@ export const createAndSendNotification = createAsyncThunk(
     }
   }
 );
-// export const loginUser = createAsyncThunk<
-//   { uid: string; email: string | null },
-//   { email: string; password: string },
-//   { rejectValue: string }>(
-//     'auth/loginUser',
-//     async ({ email, password }, { dispatch, rejectWithValue }) => {
-//         try {
-//             const auth = getAuth();
-//             console.log('auth', auth);
-
-//             const userCredential = await signInWithEmailAndPassword(auth, email, password);
-//             console.log('userCredential', userCredential);
-
-//             const user = userCredential.user;
-//             console.log('user', user);
-
-//             const db = getFirestore();
-//             console.log('db', db);
-
-//             const userRef = doc(db, 'users', user.uid);
-//             console.log('userRef', userRef);
-
-//             const docSnapshot = await getDoc(userRef);
-//             console.log('docSnapshot', docSnapshot);
-
-//             if (docSnapshot.exists()) {
-//                 const { name, surname } = docSnapshot.data();
-//                 console.log('name, surname', name, surname);
-//                 dispatch(setName(name));
-//                 dispatch(setSurname(surname));
-//             }
-
-//             return { uid: user.uid, email: user.email };
-//         } catch (error) {
-//             console.log('error in loginUser', error);
-//             return rejectWithValue(error.message);
-//         }
-//     }
-// );
 
 export const loginUser = createAsyncThunk<
   { uid: string; email: string | null },
@@ -222,6 +188,53 @@ export const registerUser = createAsyncThunk<
     }
 }
 );
+
+
+/* GOOGLE */ 
+
+
+// export const signIn = async () => {
+//   try {
+//     await GoogleSignin.hasPlayServices();
+//     const userInfo = await GoogleSignin.signIn();
+//     const token = userInfo.idToken;
+
+//     // Envoyez ce token à votre fonction Cloud pour authentification côté serveur
+//     const firebaseToken = await authenticateWithCloudFunction(token);
+
+//     // Utilisez firebaseToken pour vous authentifier avec Firebase dans votre application
+//     const auth = getAuth();
+//     await signInWithCustomToken(auth, firebaseToken);
+
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
+
+// const authenticateWithCloudFunction = async (token) => {
+//   // Utilisez axios ou fetch pour envoyer une requête à votre fonction Cloud
+//   const response = await axios.post('https://us-central1-kappze.cloudfunctions.net/authenticateWithGoogle', { token: token });
+//   return response.data.firebaseToken;
+// };
+
+
+// const signOutGoogle = async () => {
+//   try {
+//     // Déconnectez-vous de Firebase
+//     const auth = getAuth();
+//     await signOut(auth);
+
+//     // Déconnectez-vous de Google Sign-In
+//     await GoogleSignin.revokeAccess();
+//     await GoogleSignin.signOut();
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
+
+
+
+/* *********************** */ 
 
 export const updateUserName = createAsyncThunk(
     'user/updateUserName',

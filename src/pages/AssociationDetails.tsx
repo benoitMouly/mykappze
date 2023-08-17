@@ -9,7 +9,7 @@ import {
   ScrollView,
   SafeAreaView,
   Button,
-  RefreshControl
+  RefreshControl,
 } from "react-native";
 // import Clipboard from '@react-native-clipboard/clipboard';
 
@@ -30,7 +30,7 @@ import AddCat from "./AddCat";
 import { fetchSectors } from "../features/sectors/sectorSlice";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import * as Clipboard from 'expo-clipboard';
+import * as Clipboard from "expo-clipboard";
 
 // définir les interfaces
 interface Association {
@@ -110,9 +110,7 @@ const AssociationDetails: React.FC = () => {
   const navigation = useNavigation<AddCatScreenNavigationProp>();
   const navigationCity = useNavigation<CityDetailScreen>();
   const navigationEdit = useNavigation<EditAssociationScreen>();
-  const [copiedText, setCopiedText] = useState('');
-
-
+  const [copiedText, setCopiedText] = useState("");
 
   const { associationId } = route.params as RouteParams;
 
@@ -160,16 +158,25 @@ const AssociationDetails: React.FC = () => {
     loadFonts();
   }, []);
 
+  useEffect(() => {
+    // Initialiser userRoles avec les rôles actuels des utilisateurs
+    users.forEach((user) => {
+      if (user.id === uid) {
+        setUserRole(user.isAdmin);
+      }
+    });
+  }, [users]);
 
   const [refreshing, setRefreshing] = useState(false);
   const wait = (timeout) => {
-    return new Promise(resolve => setTimeout(resolve, timeout));
-  }
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
     // Simuler une requête de réseau
-    wait(2000).then(
-      () => {setRefreshing(false), dispatch(fetchAnimalsByAssociation(associationId));});
+    wait(2000).then(() => {
+      setRefreshing(false), dispatch(fetchAnimalsByAssociation(associationId));
+    });
   }, []);
 
   const numSterilizedCats = animals.filter(
@@ -185,7 +192,6 @@ const AssociationDetails: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-
       dispatch(fetchCities(associationId));
       dispatch(fetchAnimalsByAssociation(associationId));
       dispatch(fetchAssociationUsers(associationId));
@@ -217,50 +223,51 @@ const AssociationDetails: React.FC = () => {
   //     return <LoadingPage />;
   // }
 
-
   const copyToClipboard = async (value) => {
     await Clipboard.setStringAsync(value);
-    setIsCopied(true)
+    setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
     <View>
-      <ScrollView style={styles.container}   refreshControl={
-      <RefreshControl
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      />
-    }>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View style={styles.header}>
           <View style={styles.header1st}>
             <Image source={{ uri: association?.image }} style={styles.image} />
             <Text style={styles.title}>{association?.name}</Text>
             <View style={styles.settingsBtn}>
-              <TouchableOpacity
-                onPress={() =>
-                  navigationEdit.navigate("EditAssociation", {
-                    associationId: association?.id,
-                  })
-                }
-                style={styles.sectionBtns_btnSettings}
-              >
-                <Icon name={"settings-outline"} size={24} color="#fff" />
-              </TouchableOpacity>
+              {userIsAdmin && (
+                <TouchableOpacity
+                  onPress={() =>
+                    navigationEdit.navigate("EditAssociation", {
+                      associationId: association?.id,
+                    })
+                  }
+                  style={styles.sectionBtns_btnSettings}
+                >
+                  <Icon name={"settings-outline"} size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
           <View style={styles.sectionShare}>
-          
             <Text style={styles.sectionShare_title}>Partager le canal : </Text>
             <TouchableOpacity
-              onPress = {() => {copyToClipboard(association.id)}}
+              onPress={() => {
+                copyToClipboard(association.id);
+              }}
               style={styles.sectionShare_button}
             >
-              <Text style={styles.sectionShare_buttonText} selectable={true} >
-                {isCopied ? ('Copié !') : (association?.id)}
+              <Text style={styles.sectionShare_buttonText} selectable={true}>
+                {isCopied ? "Copié !" : association?.id}
               </Text>
             </TouchableOpacity>
-            
           </View>
 
           <View style={styles.addCat}>
@@ -377,7 +384,7 @@ const AssociationDetails: React.FC = () => {
               source={require("../assets/icons/icon-add.png")}
               style={styles.buttonIcon}
             /> */}
-            <Text style={{color: 'white'}}>+</Text>
+            <Text style={{ color: "white" }}>+</Text>
           </View>
         </TouchableOpacity>
         <AddSectorModal
@@ -412,7 +419,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#2F4F4F",
     color: "#FFF",
-    
+
     // padding: 5
   },
   sectionShare_title: {
@@ -427,15 +434,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     color: "#000",
     padding: 5,
-    width: '60%'
-    
+    width: "60%",
   },
   sectionShare_buttonText: {
     color: "#000",
     fontFamily: "WixMadeforDisplay-Regular",
     marginBottom: 5,
-    width: '100%',
-    textAlign: 'center'
+    width: "100%",
+    textAlign: "center",
   },
   sectionBtns: {
     flexDirection: "row",
@@ -570,13 +576,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-around", // Pour espacer les boutons
     alignItems: "center",
     padding: 10,
-    marginTop: 10
+    marginTop: 10,
   },
   settingsBtn: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
-    right: 0
-  }
+    right: 0,
+  },
 });
 
 export default AssociationDetails;

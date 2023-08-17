@@ -1,0 +1,39 @@
+{
+    "project_info": {
+        "project_number": "169421691212",
+        "project_id": "kappze",
+        "storage_bucket": "kappze.appspot.com"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:169421691212:android:64632f9152ce4e6c55d7e9",
+                "android_client_info": {
+                    "package_name": "com.mykappze.android"
+                }
+            },
+            "oauth_client": [
+                {
+                    "client_id": "169421691212-m7965ihrinohejatnsmtj893q1127imt.apps.googleusercontent.com",
+                    "client_type": 3
+                }
+            ],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyD6S15ZW2dmulJXyf3giibLPxt9W-w_mVE"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": [
+                        {
+                            "client_id": "169421691212-m7965ihrinohejatnsmtj893q1127imt.apps.googleusercontent.com",
+                            "client_type": 3
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}

@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "MyKappze",
+    "scheme": "com.mykappze.android",
     "slug": "MyKappze",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "jsEngine": "jsc",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -16,37 +16,42 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Nous avons besoin d'accéder à votre galerie pour sauvegarder les documents téléchargés.",
+        "NSPhotoLibraryAddUsageDescription": "Nous avons besoin de la permission pour sauvegarder les documents dans votre galerie.",
+        "NSDocumentsLibraryUsageDescription": "Nous avons besoin d'accéder à vos documents pour sauvegarder les fichiers téléchargés."
+      }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "useNextNotificationsApi": true
+      "permissions": [
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.mykappze.android"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
       [
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./local/assets/notification-icon.png",
-          "color": "#ffffff",
-          "sounds": [
-            "./local/assets/notification-sound.wav",
-            "./local/assets/notification-sound-other.wav"
-          ]
-        }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2215e4a8-f48a-4db8-86a5-8463fef7ce41"
+      }
+    }
   }
 }

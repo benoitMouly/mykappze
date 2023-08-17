@@ -11,8 +11,17 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
-import { fetchCities, fetchAllSectors, updateCity, deleteCity } from "../features/cities/citySlice";
-import { fetchAnimalsByAssociation, fetchAnimalsByCity, updateAnimalCityName } from "../features/animals/animalSlice";
+import {
+  fetchCities,
+  fetchAllSectors,
+  updateCity,
+  deleteCity,
+} from "../features/cities/citySlice";
+import {
+  fetchAnimalsByAssociation,
+  fetchAnimalsByCity,
+  updateAnimalCityName,
+} from "../features/animals/animalSlice";
 import { fetchSectorById } from "../features/sectors/sectorSlice";
 import { fetchAssociationUsers } from "../features/associations/associationUsersSlice";
 import { useRoute } from "@react-navigation/native";
@@ -105,7 +114,6 @@ const CityDetails: React.FC = () => {
 
   const { cityId, associationId } = route.params as RouteParams;
 
-
   const { isAuthenticated, uid } = useSelector(
     (state: RootState) => state.auth
   );
@@ -140,16 +148,15 @@ const CityDetails: React.FC = () => {
   const [sectorsList, setSectors] = useState<Sector[]>([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [editCityMode, setEditCityMode] = useState(false);
-  const [editedCityName, setEditedCityName] = useState('');
+  const [editedCityName, setEditedCityName] = useState("");
   const [currentCityName, setCurrentCityName] = useState(cityName);
   const [isConfirmationVisible, setConfirmationVisible] = useState(false);
   const [isTextUpdateVisible, setTextUpdateVisible] = useState(false);
   const [isAlertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [isEditVisible, setEditVisible] = useState(false);
-  
 
-  const archiveType = 'city';
+  const archiveType = "city";
 
   const loadFonts = async () => {
     await Font.loadAsync({
@@ -163,9 +170,9 @@ const CityDetails: React.FC = () => {
     loadFonts();
   }, []);
 
-//   useEffect(() => {
-//     dispatch(fetchSectors(cityId));
-//   }, [isAuthenticated]);
+  //   useEffect(() => {
+  //     dispatch(fetchSectors(cityId));
+  //   }, [isAuthenticated]);
 
   const numSterilizedCats = animals.filter(
     (animal) => animal.isSterilise
@@ -178,45 +185,43 @@ const CityDetails: React.FC = () => {
   ).length;
   // const archiveType = linkedCityId;
 
-//   useEffect(() => {
-//     if (isAuthenticated) {
-//       dispatch(fetchCities());
-//       // dispatch(fetchAnimalsByAssociation(associationId));
-//       dispatch(fetchAssociationUsers(associationId));
-//       dispatch(fetchAnimalsByCity(cityId))
-//     }
-//   }, [dispatch, isAuthenticated]);
+  //   useEffect(() => {
+  //     if (isAuthenticated) {
+  //       dispatch(fetchCities());
+  //       // dispatch(fetchAnimalsByAssociation(associationId));
+  //       dispatch(fetchAssociationUsers(associationId));
+  //       dispatch(fetchAnimalsByCity(cityId))
+  //     }
+  //   }, [dispatch, isAuthenticated]);
 
-// useEffect(() => {
-//     if (isAuthenticated) {
-//       dispatch(fetchCities());
-//       // dispatch(fetchAnimalsByAssociation(associationId));
-//       dispatch(fetchAssociationUsers(associationId));
-//       dispatch(fetchAnimalsByCity(cityId))
-//     }
-//   }, [cityId, isAuthenticated]);
+  // useEffect(() => {
+  //     if (isAuthenticated) {
+  //       dispatch(fetchCities());
+  //       // dispatch(fetchAnimalsByAssociation(associationId));
+  //       dispatch(fetchAssociationUsers(associationId));
+  //       dispatch(fetchAnimalsByCity(cityId))
+  //     }
+  //   }, [cityId, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
-        dispatch(fetchSectors(cityId));
-        dispatch(fetchAnimalsByCity(cityId))
-        dispatch(fetchCities());
-
+      dispatch(fetchSectors(cityId));
+      dispatch(fetchAnimalsByCity(cityId));
+      dispatch(fetchCities());
     }
-}, [dispatch, cityId, isAuthenticated]);
+  }, [dispatch, cityId, isAuthenticated]);
 
+  //   useEffect(() => {
+  //     const fetchData = async () => {
+  //       if (isAuthenticated) {
+  //         // console.log(association)
+  //         const sectores = await fetchAllSectors(cities, dispatch);
+  //         setSectors(sectores);
+  //       }
+  //     };
 
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       if (isAuthenticated) {
-//         // console.log(association)
-//         const sectores = await fetchAllSectors(cities, dispatch);
-//         setSectors(sectores);
-//       }
-//     };
-
-//     // fetchData();
-//   }, [association, cities, isAuthenticated]);
+  //     // fetchData();
+  //   }, [association, cities, isAuthenticated]);
 
   useEffect(() => {
     users.forEach((user) => {
@@ -261,48 +266,51 @@ const CityDetails: React.FC = () => {
 
   const handleEditCity = async (newName) => {
     await dispatch(updateCity({ id: city.id, name: newName }));
-    await dispatch(updateAnimalCityName({ cityId: city.id, newCityName: newName }));
+    await dispatch(
+      updateAnimalCityName({ cityId: city.id, newCityName: newName })
+    );
     setCurrentCityName(newName); // Update the current city name
-    console.log('EDIT CITY NAME : ', newName)
+    console.log("EDIT CITY NAME : ", newName);
     setEditVisible(false);
-  }
+  };
 
   return (
+    <View>
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+      {userIsAdmin && (
+          <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', columnGap: 20}}>
+
+            <TouchableOpacity onPress={() => setEditVisible(true)} style={{backgroundColor: '#fff', padding: 5, borderRadius: 50}}>
+                  <Icon name="create-outline" size={24} color="#000" />
+                </TouchableOpacity>
+
+                <TouchableOpacity  onPress={() => handleDeleteCity(city.id)} style={{backgroundColor: '#fff', padding: 5, borderRadius: 50}}>
+            <Icon name="trash-outline" size={24} color="#c40030" />
+          </TouchableOpacity>
+
+          </View>
+        )}
         <View style={styles.header1st}>
-          <Text style={styles.title}>Ville de : {city.name ? city.name : editedCityName}</Text>
+          <Text style={styles.title}>
+            Ville de : {city.name ? city.name : editedCityName}
+          </Text>
         </View>
-        <TouchableOpacity
-            onPress={() => setEditVisible(true)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Modifier</Text>
-        </TouchableOpacity>
+        <ConfirmationModal
+          visible={isConfirmationVisible}
+          onClose={() => setConfirmationVisible(false)}
+          onConfirm={handleConfirmSuppression}
+          messageType={"Voulez-vous vraiment supprimer cette ville ?"}
+        />
 
+        <TextInputModal
+          visible={isEditVisible}
+          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onConfirm={handleEditCity}
+          messageType={"Entrez le nouveau nom de la ville"}
+          onChangeText={setEditedCityName}
+        />
 
-        <TouchableOpacity
-          onPress={() => handleDeleteCity(city.id)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Supprimer</Text>
-        </TouchableOpacity>
-
-<ConfirmationModal
-        visible={isConfirmationVisible}
-        onClose={() => setConfirmationVisible(false)}
-        onConfirm={handleConfirmSuppression}
-        messageType={'Voulez-vous vraiment supprimer cette ville ?'}
-      />
-
-<TextInputModal
-        visible={isEditVisible}
-        onClose={() => setEditVisible(false)} // Fermeture de la modale
-        onConfirm={handleEditCity}
-        messageType={'Entrez le nouveau nom de la ville'}
-        onChangeText={setEditedCityName}
-      />
-      
         <View style={styles.sectionShare}>
           <Text style={styles.sectionShare_title}>Partager le canal : </Text>
           <TouchableOpacity
@@ -313,46 +321,51 @@ const CityDetails: React.FC = () => {
               {association?.id}
             </Text>
           </TouchableOpacity>
-
-
-
         </View>
 
-        <View style={styles.sectionBtns}>
-          {/* <View> */}
-          <AddSectorModal
-            style={styles.sectionBtns_btn}
-            associationId={association?.id}
-          />
-          {/* </View> */}
+        {/* <View style={styles.sectionBtns}>
+          {userIsAdmin && (
+            <>
+              <AddSectorModal
+                style={styles.sectionBtns_btn}
+                associationId={association?.id}
+              />
+            </>
+          )}
+
+ 
         </View>
 
-
-<View style={styles.addCat}>
-        <View style={styles.iconAddCat}>
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("AddCat", { associationId: association?.id })
-            }
-            style={styles.sectionBtns_btn}
-          >
-            <Text style={styles.sectionBtns_btnText}>Ajouter un chat</Text>
-            <View style={styles.buttonGroupIcons}>
-            <Image
-            source={require("../assets/icon-paw.png")}
-            style={styles.buttonIcon}
-          />
-          <Image
-            source={require("../assets/icons/icon-add.png")}
-            style={styles.buttonIcon}
-          />
+        <View style={styles.addCat}>
+          <View style={styles.iconAddCat}>
+            {userIsAdmin && (
+              <>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate("AddCat", {
+                      associationId: association?.id,
+                    })
+                  }
+                  style={styles.sectionBtns_btn}
+                >
+                  <Text style={styles.sectionBtns_btnText}>
+                    Ajouter un chat
+                  </Text>
+                  <View style={styles.buttonGroupIcons}>
+                    <Image
+                      source={require("../assets/icon-paw.png")}
+                      style={styles.buttonIcon}
+                    />
+                    <Image
+                      source={require("../assets/icons/icon-add.png")}
+                      style={styles.buttonIcon}
+                    />
+                  </View>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
-          </TouchableOpacity>
-        </View>
-
-</View>
-
-
+        </View> */}
       </View>
 
       <View style={styles.containerSection}>
@@ -368,24 +381,25 @@ const CityDetails: React.FC = () => {
           />
         </TouchableOpacity>
         {isOpenBlock1 && (
- <View style={styles.sectionCity}>
- {sectors.map((sector) => (
-   <View style={styles.cityList} key={sector.id}>
-   <TouchableOpacity
-   onPress={() =>
-     navigationCity.navigate("SectorDetails", { associationId: associationId, cityId: city?.id , sectorId: sector?.id})
-   }
-   style={styles.sectionBtns_btnCity}>
-   <Text style={styles.sectionTitleCity}>{sector?.name}</Text>
-   <Icon
- name={"chevron-forward"}
- size={24}
- color="#FFF"
-/>
-   </TouchableOpacity>
-   </View>
- ))}
-</View>
+          <View style={styles.sectionCity}>
+            {sectors.map((sector) => (
+              <View style={styles.cityList} key={sector.id}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigationCity.navigate("SectorDetails", {
+                      associationId: associationId,
+                      cityId: city?.id,
+                      sectorId: sector?.id,
+                    })
+                  }
+                  style={styles.sectionBtns_btnCity}
+                >
+                  <Text style={styles.sectionTitleCity}>{sector?.name}</Text>
+                  <Icon name={"chevron-forward"} size={24} color="#FFF" />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
         )}
 
         <TouchableOpacity
@@ -412,12 +426,40 @@ const CityDetails: React.FC = () => {
       </View>
 
 
-      {/* <SafeAreaView style={{flex: 1}}> */}
       <View style={styles.line} />
 
-      <AnimalFilters animals={animals} archiveType={archiveType} sectorized={sectorsList} />
-      {/* </SafeAreaView> */}
+      <AnimalFilters
+        animals={animals}
+        archiveType={archiveType}
+        sectorized={sectorsList}
+      />
+
+
+
     </ScrollView>
+    {userIsAdmin && (
+      <View style={styles.footer}>
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("AddCat", { associationId: association?.id })
+        }
+        style={styles.sectionBtns_btn}
+      >
+        <View style={styles.buttonGroupIcons}>
+          <Image
+            source={require("../assets/icon-paw.png")}
+            style={styles.buttonIcon}
+          />
+          <Text style={{ color: "white" }}>+</Text>
+        </View>
+      </TouchableOpacity>
+      <AddSectorModal
+        style={styles.sectionBtns_btn}
+        associationId={association?.id}
+      />
+    </View>
+)}
+    </View>
   );
 };
 
@@ -437,6 +479,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: "#2F4F4F",
     paddingTop: 20,
+  },
+  btnAdmin: {
+    color: '#fff'
   },
   sectionShare: {
     flexDirection: "row",
@@ -471,17 +516,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   sectionBtns_btn: {
-    flexDirection: 'row',
+    flexDirection: "row",
     columnGap: 8,
-    backgroundColor: '#000',
-    color: '#FFF',
+    backgroundColor: "#000",
+    color: "#FFF",
     padding: 10,
-    borderRadius: 2
+    borderRadius: 2,
   },
   sectionBtns_btnText: {
     color: "#FFF",
     fontFamily: "WixMadeforDisplay-Bold",
-    fontSize: 10
+    fontSize: 10,
   },
   image: {
     width: 50,
@@ -518,13 +563,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 10,
+    // color: '#FFF'
   },
   text: {
     fontSize: 14,
   },
   buttonGroupIcons: {
     display: "flex",
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   buttonIcon: {
     marginRight: 5,
@@ -532,34 +578,34 @@ const styles = StyleSheet.create({
     height: 15,
   },
   addCat: {
-    flexDirection: 'column',
+    flexDirection: "column",
     // justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: "center",
     // width: '100%'
   },
   iconAddCat: {
-    flexDirection: 'row',
-    marginTop: 20
+    flexDirection: "row",
+    marginTop: 20,
   },
-  sectionCity:{
-    flexDirection: 'column',
+  sectionCity: {
+    flexDirection: "column",
     rowGap: 5,
     // alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: "center",
   },
-  cityList:{
+  cityList: {
     maxWidth: 200,
     // backgroundColor: 'blue'
   },
   sectionBtns_btnCity: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#000',
-    color: '#FFF',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "#000",
+    color: "#FFF",
     padding: 10,
-    borderRadius: 2
+    borderRadius: 2,
   },
-  sectionTitleCity:{
+  sectionTitleCity: {
     color: "#FFF",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
@@ -567,10 +613,23 @@ const styles = StyleSheet.create({
   },
   line: {
     height: 2,
-    backgroundColor: '#000', // change this to fit your design
-    alignSelf: 'center',
+    backgroundColor: "#000", // change this to fit your design
+    alignSelf: "center",
     marginVertical: 20, // space above and below the line
-    width: '80%', // change this to fit your design
+    width: "80%", // change this to fit your design
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60, // Vous pouvez modifier cette valeur en fonction de vos besoins
+    backgroundColor: "#000", // Pour la visibilité
+    flexDirection: "row",
+    justifyContent: "space-around", // Pour espacer les boutons
+    alignItems: "center",
+    padding: 10,
+    marginTop: 10,
   },
 });
 

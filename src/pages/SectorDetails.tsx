@@ -15,9 +15,14 @@ import { fetchCities, fetchAllSectors } from "../features/cities/citySlice";
 import {
   fetchAnimalsByAssociation,
   fetchAnimalsByCity,
+  fetchAnimalsBySector,
   updateAnimalSectorName,
 } from "../features/animals/animalSlice";
-import { deleteSector, fetchSectorById, updateSector } from "../features/sectors/sectorSlice";
+import {
+  deleteSector,
+  fetchSectorById,
+  updateSector,
+} from "../features/sectors/sectorSlice";
 import { fetchAssociationUsers } from "../features/associations/associationUsersSlice";
 import { useRoute } from "@react-navigation/native";
 import * as Font from "expo-font";
@@ -137,9 +142,8 @@ const SectorDetails: React.FC = () => {
   const archiveType = "sector";
   const sector = sectors.find((sector) => sector.id === sectorId);
 
-
-  const [editedSectorName, setEditedSectorName] = useState('');
-  const [currentSectorName, setCurrentSectorName] = useState('');
+  const [editedSectorName, setEditedSectorName] = useState("");
+  const [currentSectorName, setCurrentSectorName] = useState("");
   const [isConfirmationVisible, setConfirmationVisible] = useState(false);
   const [isTextUpdateVisible, setTextUpdateVisible] = useState(false);
   const [isAlertVisible, setAlertVisible] = useState(false);
@@ -194,7 +198,7 @@ const SectorDetails: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchSectors(cityId));
-      dispatch(fetchAnimalsByCity(cityId));
+      dispatch(fetchAnimalsBySector(sectorId))
       dispatch(fetchCities());
     }
   }, [dispatch, cityId, isAuthenticated]);
@@ -233,14 +237,12 @@ const SectorDetails: React.FC = () => {
     }
   };
 
-
-  const handleDeleteCity = async () => {
+  const handleDeleteSector = async () => {
     // console.log(id);
     if (sector.id) {
       setConfirmationVisible(true); // Affiche la modale de confirmation
     }
   };
-
 
   const handleConfirmSuppression = async () => {
     // console.log(id)
@@ -252,56 +254,53 @@ const SectorDetails: React.FC = () => {
 
   const handleEditSector = async (newName) => {
     await dispatch(updateSector({ id: sector.id, name: newName }));
-    await dispatch(updateAnimalSectorName({ sectorId: sector.id, newSectorName: newName }));
+    await dispatch(
+      updateAnimalSectorName({ sectorId: sector.id, newSectorName: newName })
+    );
     setCurrentSectorName(newName); // Update the current city name
-    console.log('EDIT CITY NAME : ', newName)
+    console.log("EDIT CITY NAME : ", newName);
     setEditVisible(false);
-  }
-
+  };
 
   return (
+    <View>
     <ScrollView style={styles.container}>
       <View style={styles.header}>
+      {userIsAdmin && (
+          <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', columnGap: 20}}>
+
+            <TouchableOpacity onPress={() => setEditVisible(true)} style={{backgroundColor: '#fff', padding: 5, borderRadius: 50}}>
+                  <Icon name="create-outline" size={24} color="#000" />
+                </TouchableOpacity>
+
+                <TouchableOpacity  onPress={() => handleDeleteSector(sector.id)} style={{backgroundColor: '#fff', padding: 5, borderRadius: 50}}>
+            <Icon name="trash-outline" size={24} color="#c40030" />
+          </TouchableOpacity>
+
+          </View>
+        )}
         <View style={styles.header1st}>
-          <Text style={styles.title}>Secteur de : {sector?.name ? sector?.name : ''}</Text>
+          <Text style={styles.title}>
+            Secteur de : {sector?.name ? sector?.name : ""}
+          </Text>
         </View>
 
 
-        <TouchableOpacity
-            onPress={() => setEditVisible(true)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Modifier</Text>
-        </TouchableOpacity>
 
+        <ConfirmationModal
+          visible={isConfirmationVisible}
+          onClose={() => setConfirmationVisible(false)}
+          onConfirm={handleConfirmSuppression}
+          messageType={"Voulez-vous vraiment supprimer ce secteur ?"}
+        />
 
-        <TouchableOpacity
-          onPress={() => handleDeleteCity(city.id)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Supprimer</Text>
-        </TouchableOpacity>
-
-<ConfirmationModal
-        visible={isConfirmationVisible}
-        onClose={() => setConfirmationVisible(false)}
-        onConfirm={handleConfirmSuppression}
-        messageType={'Voulez-vous vraiment supprimer ce secteur ?'}
-      />
-
-<TextInputModal
-        visible={isEditVisible}
-        onClose={() => setEditVisible(false)} // Fermeture de la modale
-        onConfirm={handleEditSector}
-        messageType={'Entrez le nouveau nom du secteur'}
-        onChangeText={setEditedSectorName}
-      />
-
-
-
-
-
-
+        <TextInputModal
+          visible={isEditVisible}
+          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onConfirm={handleEditSector}
+          messageType={"Entrez le nouveau nom du secteur"}
+          onChangeText={setEditedSectorName}
+        />
 
         <View style={styles.sectionShare}>
           <Text style={styles.sectionShare_title}>Partager le canal : </Text>
@@ -314,35 +313,9 @@ const SectorDetails: React.FC = () => {
             </Text>
           </TouchableOpacity>
         </View>
-
-        <View style={styles.addCat}>
-          <View style={styles.iconAddCat}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("AddCat", {
-                  associationId: association?.id,
-                })
-              }
-              style={styles.sectionBtns_btn}
-            >
-              <Text style={styles.sectionBtns_btnText}>Ajouter un chat</Text>
-              <View style={styles.buttonGroupIcons}>
-                <Image
-                  source={require("../assets/icon-paw.png")}
-                  style={styles.buttonIcon}
-                />
-                <Image
-                  source={require("../assets/icons/icon-add.png")}
-                  style={styles.buttonIcon}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
       </View>
 
       <View style={styles.containerSection}>
-
         <TouchableOpacity
           onPress={() => setIsOpenBlock1(!isOpenBlock1)}
           style={styles.sectionHeader}
@@ -365,8 +338,6 @@ const SectorDetails: React.FC = () => {
           </View>
         )}
       </View>
-
-      {/* <SafeAreaView style={{flex: 1}}> */}
       <View style={styles.line} />
 
       <AnimalFilters
@@ -374,8 +345,26 @@ const SectorDetails: React.FC = () => {
         archiveType={archiveType}
         sectorized={sectorsList}
       />
-      {/* </SafeAreaView> */}
     </ScrollView>
+    {userIsAdmin && (
+      <View style={styles.footer}>
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("AddCat", { associationId: association?.id })
+        }
+        style={styles.sectionBtns_btn}
+      >
+        <View style={styles.buttonGroupIcons}>
+          <Image
+            source={require("../assets/icon-paw.png")}
+            style={styles.buttonIcon}
+          />
+          <Text style={{ color: "white" }}>+</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+)}
+    </View>
   );
 };
 
@@ -383,6 +372,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 0,
     heigt: "100%",
+    marginBottom: 50
   },
   header: {
     flexDirection: "column",
@@ -416,6 +406,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     color: "#000",
     padding: 5,
+    marginLeft: 10
   },
   sectionShare_buttonText: {
     color: "#000",
@@ -533,6 +524,19 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginVertical: 20, // space above and below the line
     width: "80%", // change this to fit your design
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60, // Vous pouvez modifier cette valeur en fonction de vos besoins
+    backgroundColor: "#000", // Pour la visibilité
+    flexDirection: "row",
+    justifyContent: "space-around", // Pour espacer les boutons
+    alignItems: "center",
+    padding: 10,
+    marginTop: 10,
   },
 });
 

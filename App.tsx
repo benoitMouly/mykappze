@@ -12,6 +12,7 @@ import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 
+
 export async function registerForPushNotificationsAsync() {
   let token;
 

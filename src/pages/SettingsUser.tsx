@@ -121,6 +121,16 @@ const Settings = () => {
     }
   }, [dispatch, userId, isAuthenticated]);
 
+  useEffect(() => {
+    // Initialiser userRoles avec les rôles actuels des utilisateurs
+    users.forEach(user => {
+
+        if (user.id === uid) {
+            setUserRole(user.isAdmin);
+        }
+    });
+}, [users]);
+
   //   const openModal = (userId, associationId, message) => {
   //     setSelectedUserId(userId);
   //     setSelectedAssociationId(associationId);
