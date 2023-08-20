@@ -9,8 +9,8 @@ import {
 import Login from "../src/pages/LoginPage";
 import { logout, logoutAsync } from "../src/features/user/userSlice";
 import Home from "../src/pages/HomePage";
-import ListingAssociation from "../src/pages/ProfileUser";
-import AssociationDetails from "../src/pages/AssociationDetails";
+import ListingCanal from "../src/pages/ProfileUser";
+import CanalDetails from "../src/pages/CanalDetails";
 import AddCat from "../src/pages/AddCat";
 import AnimalDetails from "../src/pages/CatProfile";
 import { Header } from "../src/components/general/header";
@@ -20,13 +20,13 @@ import { useAppDispatch, useAppSelector } from "./store/store";
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 import RegisterPage from "./pages/RegisterPage";
 import EditAnimalDetails from "./pages/EditAnimalDetails";
-import CityDetails from "./pages/CityDetails";
-import SectorDetails from "./pages/SectorDetails";
-import EditAssociationDetails from "./pages/EditAssociationDetails";
+import CitySectorDetails from "./pages/CitySectorDetails";
+import EditCanalDetails from "./pages/EditCanalDetails";
 import SettingsUser from "./pages/SettingsUser";
-import AssociationForm from "./pages/AssociationCreate";
+import CanalForm from "./pages/CanalCreate";
 import ForgotPasswordForm from "./pages/ForgotPassword";
 import Veterinaires from "./pages/NearbyVet";
+import SubscribePage from "./pages/SubscribePage";
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -38,15 +38,23 @@ function MainStackNavigator() {
     <Stack.Navigator>
       <Stack.Screen
         name="Main"
-        component={Home}
+        component={ListingCanal}
         options={{
           header: () => <Header navigation={navigation} />,
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="ListingAssociation"
-        component={ListingAssociation}
+        name="Subscribe"
+        component={SubscribePage}
+        options={{
+          header: () => <Header navigation={navigation} />,
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="ListingCanal"
+        component={ListingCanal}
         options={{
           header: () => <Header navigation={navigation} />,
           headerShown: true,
@@ -77,32 +85,24 @@ function MainStackNavigator() {
         }}
       />
       <Stack.Screen
-        name="AssociationDetails"
-        component={AssociationDetails}
+        name="CanalDetails"
+        component={CanalDetails}
         options={{
           header: () => <Header navigation={navigation} />,
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="CityDetails"
-        component={CityDetails}
+        name="CitySectorDetails"
+        component={CitySectorDetails}
         options={{
           header: () => <Header navigation={navigation} />,
           headerShown: true,
         }}
       />
       <Stack.Screen
-        name="SectorDetails"
-        component={SectorDetails}
-        options={{
-          header: () => <Header navigation={navigation} />,
-          headerShown: true,
-        }}
-      />
-      <Stack.Screen
-        name="EditAssociation"
-        component={EditAssociationDetails}
+        name="EditCanal"
+        component={EditCanalDetails}
         options={{
           header: () => <Header navigation={navigation} />,
           headerShown: false,
@@ -117,8 +117,8 @@ function MainStackNavigator() {
         }}
       />
       <Stack.Screen
-        name="CreateAssociation"
-        component={AssociationForm}
+        name="CreateCanal"
+        component={CanalForm}
         options={{
           header: () => <Header navigation={navigation} />,
           headerShown: true,
@@ -203,7 +203,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
   return (
     <DrawerContentScrollView {...props}>
       <DrawerItem
-        label="Home"
+        label="Accueil"
         onPress={() => props.navigation.navigate("Main")}
       />
       <DrawerItem
@@ -214,6 +214,11 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
       <DrawerItem
         label="Vétérinaires"
         onPress={() => props.navigation.navigate("NearByVet")}
+      />
+
+<DrawerItem
+        label="S'abonner"
+        onPress={() => props.navigation.navigate("Subscribe")}
       />
 
       <DrawerItem label="Déconnexion" onPress={() => dispatch(logoutAsync())} />

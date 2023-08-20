@@ -11,13 +11,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { addAssociation } from "../features/associations/associationSlice";
+import { addCanal } from "../features/canals/canalSlice";
 
-const AssociationForm = () => {
+const CanalForm = () => {
   const { uid } = useSelector((state) => state.auth);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [city, setCity] = useState("");
+  const [citySector, setCitySector] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
@@ -29,24 +29,24 @@ const AssociationForm = () => {
       adminId: uid,
       name: name,
       email: email,
-      city: city,
+      citySector: citySector,
       postalCode: postalCode,
       phoneNumber: phoneNumber,
       role: [{ uid: uid, isAdmin: true }],
     };
-    dispatch(addAssociation({ userId: uid, associationData: data }))
+    dispatch(addCanal({ userId: uid, canalData: data }))
       .then(() => {
         Alert.alert(
-          "Association créée avec succès !",
-          "L'association est désormais disponible dans votre listing.",
+          "Canal créée avec succès !",
+          "L'canal est désormais disponible dans votre listing.",
           [{ text: "OK", onPress: () => navigate.navigate("Main") }],
           { cancelable: false }
         );
       })
       .catch((error) => {
-        console.error("Error adding association: ", error);
+        console.error("Error adding canal: ", error);
         Alert.alert(
-          "L'association n'a pas pu être créée.",
+          "L'canal n'a pas pu être créée.",
           `En cas de besoin, transmettez le message d'erreur suivant au support : ${error}`,
           [{ text: "OK" }],
           { cancelable: false }
@@ -58,7 +58,7 @@ const AssociationForm = () => {
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.header}>
-          <Text style={styles.title}>Ajouter une nouvelle association</Text>
+          <Text style={styles.title}>Ajouter une nouvelle canal</Text>
         </View>
         <Text style={styles.subtitle}>
           Veillez à remplir le maximum de champ possible. Vous pourrez malgré
@@ -74,7 +74,7 @@ const AssociationForm = () => {
             onChangeText={setEmail}
           />
           <Text style={styles.text}>Ville:</Text>
-          <TextInput style={styles.input} value={city} onChangeText={setCity} />
+          <TextInput style={styles.input} value={citySector} onChangeText={setCitySector} />
           <Text style={styles.text}>Code postal:</Text>
           <TextInput
             style={styles.input}
@@ -177,4 +177,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AssociationForm;
+export default CanalForm;

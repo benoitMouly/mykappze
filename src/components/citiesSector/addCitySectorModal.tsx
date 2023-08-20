@@ -8,19 +8,14 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  Pressable, Image
+  Pressable,
+  Image
 } from "react-native";
 import { useAppDispatch } from "../../store/store";
-import {
-  addCity,
-  fetchAllSectors,
-  fetchCities,
-} from "../../features/cities/citySlice";
-import { addSector } from "../../features/sectors/sectorSlice";
-import { Picker } from "@react-native-picker/picker";
-// import { addCity } from '../../features/cities/citySlice';
+import { addCitySector } from "../../features/citiesSector/citySectorSlice";
+// import { addCitySector } from '../../features/citiesSector/citySectorSlice';
 
-interface Association {
+interface Canal {
   id: string;
   data: any[]; // Changez `any` en type approprié
   // Autres propriétés...
@@ -39,12 +34,8 @@ interface User {
   // Ajoutez d'autres champs ici si nécessaire
 }
 
-interface City {
+interface CitySector {
   // Propriétés pour la ville...
-}
-
-interface Sector {
-  // Propriétés pour le secteur...
 }
 
 interface DataState<T> {
@@ -55,84 +46,53 @@ interface DataState<T> {
 }
 
 interface RootState {
-  associations: DataState<Association>;
-  cities: DataState<City>;
+  canals: DataState<Canal>;
+  citiesSector: DataState<CitySector>;
   animals: DataState<Animal>;
-  sectors: DataState<Sector>;
   auth: {
     isAuthenticated: boolean;
     uid: string;
   };
 }
 
-interface AddSectorModalProps {
-  associationId: string;
-  needsReturn?: boolean;
-  navigation?: any;
-}
-
-const AddSectorModal: React.FC<AddSectorModalProps> = (props) => {
+const AddCitySectorModal = (props) => {
   const { uid } = useSelector((state: RootState) => state.auth);
-  const { data: cities } = useSelector((state: RootState) => state.cities);
   const dispatch = useAppDispatch();
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [sectorName, setSectorName] = useState("");
-  const [cityId, setCityId] = useState(cities[0]?.id || ""); // initial value
+  const [citySectorName, setCitySectorName] = useState("");
 
   const handleConfirm = () => {
     const data = {
       userId: uid,
-      city: cities.find((city) => city.id === cityId)?.name,
-      cityId: cityId,
-      name: sectorName,
-      associationId: props.associationId,
+      name: citySectorName,
+      canalId: props.canalId,
     };
 
-    dispatch(addSector(data))
+    dispatch(addCitySector(data))
       .then(() => {
         setModalVisible(false);
-        // if (props.needsReturn) {
-        //   props.navigation.goBack();
-        // }
-
-        dispatch(fetchCities(props.associationId));
-        // dispatch(fetchAllSectors());
+        if (props.needsReturn) {
+          props.navigation.goBack();
+        }
       })
       .catch((error) => {
-        console.error("Error adding city: ", error);
+        console.error("Error adding citySector: ", error);
       });
   };
 
-  // console.log(cities);
-
-  const cityOptions = [
-    { id: "", label: "Toutes" },
-    ...cities.map((city) => ({ id: city.id, label: city.name })),
-  ];
-
   return (
     <View style={styles.centeredView}>
-      {/* <Button
-        title="Ajouter un secteur"
-        onPress={() => setModalVisible(true)}
-    /> */}
-
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
         style={styles.sectionBtns_btn}
       >
-        {/* <Text style={styles.sectionBtns_btnText}>Ajouter un secteur</Text> */}
         <View style={styles.buttonGroupIcons}>
           <Image
-            source={require("../../assets/icons/icon-compass.png")}
+            source={require("../../assets/icons/icon-city.png")}
             style={styles.buttonIcon}
           />
-          {/* <Image
-            source={require("../../assets/icons/icon-add.png")}
-            style={styles.buttonIcon}
-          /> */}
-          <Text style={{color: 'white'}}>+</Text>
+          <Text style={{color : 'white'}}>+</Text>
           </View>
       </TouchableOpacity>
 
@@ -144,38 +104,19 @@ const AddSectorModal: React.FC<AddSectorModalProps> = (props) => {
           setModalVisible(false);
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            justifyContent: "center",
-          }}
-        >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.8)', justifyContent: "center" }}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
-              Ajouter un nouveau secteur à votre association
+              Ajouter une nouvelle ville à votre canal
             </Text>
-            <Text>Sélectionner la ville</Text>
-            <View  style={{  alignItems: 'center', borderColor: 'black', borderWidth: 1, borderRadius: 3, width: '60%', backgroundColor: 'transparent'  }}>
-              <Picker
-
-                selectedValue={cityId}
-                onValueChange={(itemValue) => setCityId(itemValue)}
-                style={{ height: 50, width: 200, borderWidth: 1, borderColor: 'black' }}
-              >
-                {cityOptions.map((city) => (
-                  <Picker.Item key={city.id} label={city.label} value={city.id} />
-                ))}
-              </Picker>
-            </View>
             <TextInput
               style={styles.input}
-              onChangeText={setSectorName}
-              value={sectorName}
-              placeholder="Nom du secteur"
+              onChangeText={setCitySectorName}
+              value={citySectorName}
+              placeholder="Nom de la ville"
             />
             <View style={styles.buttonContainer}>
-              <Pressable style={styles.buttonCancel} onPress={() => setModalVisible(false)}>
+            <Pressable style={styles.buttonCancel} onPress={() => setModalVisible(false)}>
                 <Text style={styles.textCancel}>Annuler</Text>
               </Pressable>
               <Pressable style={styles.buttonAdd} onPress={handleConfirm}>
@@ -202,9 +143,10 @@ const styles = StyleSheet.create({
     color: '#FFF',
     padding: 10,
     borderRadius: 2
+    
   },
-  sectionBtns_btnText: {
-    color: "#FFF",
+  sectionBtns_btnText:{
+    color: '#FFF',
     fontFamily: "WixMadeforDisplay-Bold",
     fontSize: 10
   },
@@ -288,4 +230,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddSectorModal;
+export default AddCitySectorModal;

@@ -11,28 +11,26 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
-import { fetchCities, fetchAllSectors } from "../features/cities/citySlice";
-import { fetchAnimalsByAssociation } from "../features/animals/animalSlice";
-import { fetchSectorById } from "../features/sectors/sectorSlice";
+import { fetchCities} from "../features/citiesSector/citySectorSlice";
+import { fetchAnimalsByCanal } from "../features/animals/animalSlice";
 import {
-  fetchAssociationUsers,
-  removeUserFromAssociation,
-} from "../features/associations/associationUsersSlice";
+  fetchCanalUsers,
+  removeUserFromCanal,
+} from "../features/canals/canalUsersSlice";
 import { useRoute } from "@react-navigation/native";
 import * as Font from "expo-font";
 import Icon from "react-native-vector-icons/Ionicons";
 import AnimalList from "../components/animals/animalList";
 import AnimalFilters from "../components/animals/animalFilter";
-import { fetchSectors } from "../features/sectors/sectorSlice";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import EditableImage from "../components/general/EditableImage";
 import TextInputModal from "../components/general/TextUpdateModal";
 import {
   changeUserRole,
-  updateAssociation,
-  updateAssociationImage,
-} from "../features/associations/associationSlice";
+  updateCanal,
+  updateCanalImage,
+} from "../features/canals/canalSlice";
 import SelectModal from "../components/general/EditableSelect";
 import ConfirmationModal from "../components/general/ConfirmationModal";
 import CustomAlert from "../components/general/CustomAlert";
@@ -40,7 +38,7 @@ import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
 import * as Clipboard from 'expo-clipboard';
 import { createAndSendNotification } from "../features/user/userSlice";
 // définir les interfaces
-interface Association {
+interface Canal {
   id: string;
   data: any[]; // Changez `any` en type approprié
   // Autres propriétés...
@@ -59,12 +57,8 @@ interface User {
   // Ajoutez d'autres champs ici si nécessaire
 }
 
-interface City {
+interface CitySector {
   // Propriétés pour la ville...
-}
-
-interface Sector {
-  // Propriétés pour le secteur...
 }
 
 interface DataState<T> {
@@ -76,11 +70,10 @@ interface DataState<T> {
 
 // Utilisez cette interface dans l'interface RootState
 interface RootState {
-  associations: DataState<Association>;
-  cities: DataState<City>;
+  canals: DataState<Canal>;
+  citiesSector: DataState<CitySector>;
   animals: DataState<Animal>;
-  associationUsers: DataState<User>;
-  sectors: DataState<Sector>;
+  canalUsers: DataState<User>;
   auth: {
     isAuthenticated: boolean;
     uid: string;
@@ -89,13 +82,13 @@ interface RootState {
 
 interface RouteParams {
   id: string;
-  associationId: string;
-  cityId: string;
+  canalId: string;
+  citySectorId: string;
 }
 
 type RootStackParamList = {
   AddCat: undefined;
-  CityDetails: undefined;
+  CitySectorDetails: undefined;
 };
 
 type AddCatScreenNavigationProp = StackNavigationProp<
@@ -103,59 +96,58 @@ type AddCatScreenNavigationProp = StackNavigationProp<
   "AddCat"
 >;
 
-type CityDetailScreen = StackNavigationProp<RootStackParamList, "CityDetails">;
+type CitySectorDetailScreen = StackNavigationProp<RootStackParamList, "CitySectorDetails">;
 
-const EditAssociationDetails: React.FC = () => {
+const EditCanalDetails: React.FC = () => {
   const route = useRoute();
   const dispatch = useAppDispatch();
   const navigation = useNavigation<AddCatScreenNavigationProp>();
-  const navigationCity = useNavigation<CityDetailScreen>();
+  const navigationCitySector = useNavigation<CitySectorDetailScreen>();
 
-  const { associationId } = route.params as RouteParams;
+  const { canalId } = route.params as RouteParams;
 
   const { isAuthenticated, uid } = useSelector(
     (state: RootState) => state.auth
   );
-  const { data: associations, status: associationsStatus } = useSelector(
-    (state: RootState) => state.associations
+  const { data: canals, status: canalsStatus } = useSelector(
+    (state: RootState) => state.canals
   );
-  const { data: cities, status: citiesStatus } = useSelector(
-    (state: RootState) => state.cities
+  const { data: citiesSector, status: citiesSectorStatus } = useSelector(
+    (state: RootState) => state.citiesSector
   );
   const { data: animals, status: animalsStatus } = useSelector(
     (state: RootState) => state.animals
   );
   const { data: users, status: usersStatus } = useSelector(
-    (state: RootState) => state.associationUsers
+    (state: RootState) => state.canalUsers
   );
 
-  const association = associations.find((asso) => asso.id === associationId);
+  const canal = canals.find((asso) => asso.id === canalId);
 
-  console.log(associationsStatus)
+  console.log(canalsStatus)
   useEffect(() => {
-    // const association = associations.find((asso) => asso.id === associationId);
-    if (association) {
-      setCurrentAssociationName(association.name);
-      setCurrentAssociationEmail(association.email);
-      setCurrentAssociationCity(association.city);
-      setCurrentAssociationPostalCode(association.postalCode);
+    // const canal = canals.find((asso) => asso.id === canalId);
+    if (canal) {
+      setCurrentCanalName(canal.name);
+      setCurrentCanalEmail(canal.email);
+      setCurrentCanalCitySector(canal.citySector);
+      setCurrentCanalPostalCode(canal.postalCode);
     }
-  }, [associations]);
+  }, [canals]);
 
   const [editableFields, setEditableFields] = useState<string[]>([]);
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
-  const [sectorsList, setSectors] = useState<Sector[]>([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [imageUri, setImageUri] = useState(association?.image);
-  const [isEditNameAssociationVisible, setEditVisible] = useState(false);
-  const [isEditEmailAssociationVisible, setEditVisibleEmail] = useState(false);
-  const [isEditCityAssociationVisible, setEditVisibleCity] = useState(false);
-  const [isEditPostalCodeAssociationVisible, setEditVisiblePostalCode] =
+  const [imageUri, setImageUri] = useState(canal?.image);
+  const [isEditNameCanalVisible, setEditVisible] = useState(false);
+  const [isEditEmailCanalVisible, setEditVisibleEmail] = useState(false);
+  const [isEditCitySectorCanalVisible, setEditVisibleCitySector] = useState(false);
+  const [isEditPostalCodeCanalVisible, setEditVisiblePostalCode] =
     useState(false);
-  const [editedAssociationName, setEditedAssociationName] = useState("");
-  const [editedAssociationEmail, setEditedAssociationEmail] = useState("");
-  const [editedAssociationCity, setEditedAssociationCity] = useState("");
-  const [editedAssociationPostalCode, setEditedAssociationPostalCode] =
+  const [editedCanalName, setEditedCanalName] = useState("");
+  const [editedCanalEmail, setEditedCanalEmail] = useState("");
+  const [editedCanalCitySector, setEditedCanalCitySector] = useState("");
+  const [editedCanalPostalCode, setEditedCanalPostalCode] =
     useState("");
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -168,18 +160,18 @@ const EditAssociationDetails: React.FC = () => {
   const [selectDeassociate, setSelectDeassociate] = useState(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
 
-  const [currentAssociationName, setCurrentAssociationName] = useState(
-    association.name
+  const [currentCanalName, setCurrentCanalName] = useState(
+    canal.name
   );
-  const [currentAssociationEmail, setCurrentAssociationEmail] = useState(
-    association.email
+  const [currentCanalEmail, setCurrentCanalEmail] = useState(
+    canal.email
   );
-  const [currentAssociationCity, setCurrentAssociationCity] = useState(
-    association.city
+  const [currentCanalCitySector, setCurrentCanalCitySector] = useState(
+    canal.citySector
   );
-  const [currentAssociationPostalCode, setCurrentAssociationPostalCode] =
-    useState(association.city);
-  const archiveType = "association";
+  const [currentCanalPostalCode, setCurrentCanalPostalCode] =
+    useState(canal.citySector);
+  const archiveType = "canal";
 
   const options = [
     { label: "Admin", value: true },
@@ -225,7 +217,7 @@ const EditAssociationDetails: React.FC = () => {
     dispatch(
       changeUserRole({
         userId: selectedUserId, // Convertir l'ID de l'utilisateur en chaîne de caractères
-        associationId: association.id,
+        canalId: canal.id,
         newIsAdmin: value,
       })
     );
@@ -269,9 +261,9 @@ const EditAssociationDetails: React.FC = () => {
   const handleConfirmSuppression = async () => {
     // console.log(id)
     await dispatch(
-      removeUserFromAssociation({
+      removeUserFromCanal({
         userId: selectedUserId,
-        associationId: association.id,
+        canalId: canal.id,
       })
     );
     setConfirmationVisible(false); // Ferme la modale de confirmation
@@ -304,9 +296,9 @@ const EditAssociationDetails: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchAssociationUsers(associationId));
+      dispatch(fetchCanalUsers(canalId));
     }
-  }, [associationId, isAuthenticated]);
+  }, [canalId, isAuthenticated]);
 
   useEffect(() => {
     users.forEach((user) => {
@@ -328,78 +320,78 @@ const EditAssociationDetails: React.FC = () => {
 
   useEffect(() => {
     // loadFonts();
-  }, [editedAssociationEmail]);
+  }, [editedCanalEmail]);
 
   // useEffect(() => {
-  //   if (associationsStatus === 'failed') {
-  //     setAlertMessage(associationsStatus.error);
+  //   if (canalsStatus === 'failed') {
+  //     setAlertMessage(canalsStatus.error);
   //     setAlertVisible(true);
-  //   } else if (associationsStatus === "succeeded") {
+  //   } else if (canalsStatus === "succeeded") {
   //     setAlertMessage("La mise à jour a réussi !");
   //     setAlertVisible(true);
   //     console.log('NOOOOn')
   //     // Ensuite, vous pouvez réinitialiser le statut à 'idle' ou autre selon votre logique d'application
   //   }
-  // }, [associationsStatus.error, associationsStatus]);
+  // }, [canalsStatus.error, canalsStatus]);
 
 
   useEffect(() => {
     setUpdatedUsers(users);
   }, [users]);
 
-  // const handleEditAssociationName = async (newName) => {
+  // const handleEditCanalName = async (newName) => {
 
   // };
 
   const handleUpdateName = async (newName) => {
     const updatedData = { name: newName };
-    const message = 'Notre nom association a changé ! Il est désormais' +  newName
+    const message = 'Notre nom canal a changé ! Il est désormais' +  newName
     const userIds = ['0d0E2ou8OLfQhkDdgHEF8VDp4JK2', '9gCOJvy598gS8PAX3pyql0Wm9hD2']
-    setCurrentAssociationName(newName);
+    setCurrentCanalName(newName);
     await dispatch(
-      updateAssociation({ associationId, associationData: updatedData })
+      updateCanal({ canalId, canalData: updatedData })
     );
     await dispatch(createAndSendNotification({ userIds, message }));
     setEditVisible(false);
   };
 
   const handleUpdateEmail = (newEmail) => {
-    const updatedData = { email: newEmail, name: association.name }; // Remplacez par le nouvel email
-    setCurrentAssociationEmail(newEmail);
+    const updatedData = { email: newEmail, name: canal.name }; // Remplacez par le nouvel email
+    setCurrentCanalEmail(newEmail);
     dispatch(
-      updateAssociation({ associationId, associationData: updatedData })
+      updateCanal({ canalId, canalData: updatedData })
     );
     setEditVisibleEmail(false);
   };
 
-  const handleUpdateCity = (newCity) => {
-    const updatedData = { city: newCity, name: association.name }; // Remplacez par la nouvelle ville
-    setCurrentAssociationCity(newCity);
+  const handleUpdateCitySector = (newCitySector) => {
+    const updatedData = { citySector: newCitySector, name: canal.name }; // Remplacez par la nouvelle ville
+    setCurrentCanalCitySector(newCitySector);
     dispatch(
-      updateAssociation({ associationId, associationData: updatedData })
+      updateCanal({ canalId, canalData: updatedData })
     );
-    setEditVisibleCity(false);
+    setEditVisibleCitySector(false);
   };
 
   const handleUpdatePostalCode = (newPostalCode) => {
-    const updatedData = { postalCode: newPostalCode, name: association.name }; // Remplacez par le nouveau code postal
-    setCurrentAssociationPostalCode(newPostalCode);
+    const updatedData = { postalCode: newPostalCode, name: canal.name }; // Remplacez par le nouveau code postal
+    setCurrentCanalPostalCode(newPostalCode);
     dispatch(
-      updateAssociation({ associationId, associationData: updatedData })
+      updateCanal({ canalId, canalData: updatedData })
     );
     setEditVisiblePostalCode(false);
   };
 
   const handleSavePress = async () => {
-    if (imageUri !== association.image) {
-      dispatch(updateAssociationImage({ associationId, image: imageUri }));
+    if (imageUri !== canal.image) {
+      dispatch(updateCanalImage({ canalId, image: imageUri }));
     }
     setIsModified(false);
   };
 
   return (
     <View style={styles.fold}>
-      <HeaderEditAnimal navigation={navigation} animalName={association.name} />
+      <HeaderEditAnimal navigation={navigation} animalName={canal.name} />
 
       <ScrollView style={styles.container}>
         <View style={styles.header}>
@@ -409,16 +401,16 @@ const EditAssociationDetails: React.FC = () => {
               setImageUri={setImageUri}
               isModified={setIsModified}
             />
-            <Text style={styles.title}>{association?.name}</Text>
+            <Text style={styles.title}>{canal?.name}</Text>
           </View>
           <View style={styles.sectionShare}>
             <Text style={styles.sectionShare_title}>Partager le canal : </Text>
             <TouchableOpacity
-              onPress = {() => {copyToClipboard(association.id)}}
+              onPress = {() => {copyToClipboard(canal.id)}}
               style={styles.sectionShare_button}
             >
               <Text style={styles.sectionShare_buttonText} selectable={true} >
-                {isCopied ? ('Copié !') : (association?.id)}
+                {isCopied ? ('Copié !') : (canal?.id)}
               </Text>
             </TouchableOpacity>
           </View>
@@ -429,7 +421,7 @@ const EditAssociationDetails: React.FC = () => {
           <Text style={styles.editUnicalSectionTitle}>Général</Text>
           <View style={styles.containerUnicalSection}>
             <View style={styles.editEltGroup}>
-              <Text style={styles.text}>{association?.name}</Text>
+              <Text style={styles.text}>{canal?.name}</Text>
               <TouchableOpacity
                 onPress={() => setEditVisible(true)}
                 style={styles.sectionHeader}
@@ -445,7 +437,7 @@ const EditAssociationDetails: React.FC = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.editEltGroup}>
-              <Text style={styles.text}>{association.email}</Text>
+              <Text style={styles.text}>{canal.email}</Text>
               <TouchableOpacity
                 onPress={() => setEditVisibleEmail(true)}
                 style={styles.sectionHeader}
@@ -461,9 +453,9 @@ const EditAssociationDetails: React.FC = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.editEltGroup}>
-              <Text style={styles.text}>{association?.city}</Text>
+              <Text style={styles.text}>{canal?.citySector}</Text>
               <TouchableOpacity
-                onPress={() => setEditVisibleCity(true)}
+                onPress={() => setEditVisibleCitySector(true)}
                 style={styles.sectionHeader}
               >
                 <View style={styles.buttonIcon}>
@@ -477,7 +469,7 @@ const EditAssociationDetails: React.FC = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.editEltGroup}>
-              <Text style={styles.text}>{association?.postalCode}</Text>
+              <Text style={styles.text}>{canal?.postalCode}</Text>
               <TouchableOpacity
                 onPress={() => setEditVisiblePostalCode(true)}
                 style={styles.sectionHeader}
@@ -494,36 +486,36 @@ const EditAssociationDetails: React.FC = () => {
             </View>
 
             <TextInputModal
-              visible={isEditNameAssociationVisible}
+              visible={isEditNameCanalVisible}
               onClose={() => setEditVisible(false)} // Fermeture de la modale
               onConfirm={handleUpdateName}
-              messageType={"Entrez le nouveau nom de l'association"}
-              onChangeText={setEditedAssociationName}
+              messageType={"Entrez le nouveau nom de l'canal"}
+              onChangeText={setEditedCanalName}
             />
             <TextInputModal
-              visible={isEditEmailAssociationVisible}
+              visible={isEditEmailCanalVisible}
               onClose={() => setEditVisibleEmail(false)} // Fermeture de la modale
               onConfirm={handleUpdateEmail}
               messageType={"Entrez le nouvel email"}
-              onChangeText={setEditedAssociationEmail}
+              onChangeText={setEditedCanalEmail}
             />
             <TextInputModal
-              visible={isEditCityAssociationVisible}
-              onClose={() => setEditVisibleCity(false)} // Fermeture de la modale
-              onConfirm={handleUpdateCity}
+              visible={isEditCitySectorCanalVisible}
+              onClose={() => setEditVisibleCitySector(false)} // Fermeture de la modale
+              onConfirm={handleUpdateCitySector}
               messageType={"Entrez le nouveau nom de la ville"}
-              onChangeText={setEditedAssociationCity}
+              onChangeText={setEditedCanalCitySector}
             />
             <TextInputModal
-              visible={isEditPostalCodeAssociationVisible}
+              visible={isEditPostalCodeCanalVisible}
               onClose={() => setEditVisiblePostalCode(false)} // Fermeture de la modale
               onConfirm={handleUpdatePostalCode}
               messageType={"Entrez le nouveau postal code"}
-              onChangeText={setEditedAssociationPostalCode}
+              onChangeText={setEditedCanalPostalCode}
             />
-            {/* <Text>{association?.email}</Text>
-          <Text>{association?.city}</Text>
-          <Text>{association?.postalCode}</Text> */}
+            {/* <Text>{canal?.email}</Text>
+          <Text>{canal?.citySector}</Text>
+          <Text>{canal?.postalCode}</Text> */}
           </View>
 
           <Text style={styles.editUnicalSectionTitle}>Gestion des membres</Text>
@@ -543,7 +535,7 @@ const EditAssociationDetails: React.FC = () => {
                       </Text>
                     </View>
 
-                    {user.id !== association.adminId ? (
+                    {user.id !== canal.adminId ? (
                       <View style={styles.btnAdmin}>
                         <TouchableOpacity
                           onPress={() => openDeassociateModal(user.id)}
@@ -595,7 +587,7 @@ const EditAssociationDetails: React.FC = () => {
                   onClose={handleClean}
                   onConfirm={handleConfirmSuppression}
                   messageType={
-                    "Voulez-vous vraiment désassocier cet utilisateur de l'association ?"
+                    "Voulez-vous vraiment désassocier cet utilisateur de l'canal ?"
                   }
                 />
                 <CustomAlert
@@ -759,15 +751,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 20,
   },
-  sectionCity: {
+  sectionCitySector: {
     flexDirection: "column",
     rowGap: 5,
     justifyContent: "center",
   },
-  cityList: {
+  citySectorList: {
     maxWidth: 200,
   },
-  sectionBtns_btnCity: {
+  sectionBtns_btnCitySector: {
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: "#000",
@@ -775,7 +767,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 2,
   },
-  sectionTitleCity: {
+  sectionTitleCitySector: {
     color: "#FFF",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
@@ -852,4 +844,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EditAssociationDetails;
+export default EditCanalDetails;

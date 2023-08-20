@@ -15,25 +15,22 @@ import {
 
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
-import { fetchCities, fetchAllSectors } from "../features/cities/citySlice";
-import { fetchAnimalsByAssociation } from "../features/animals/animalSlice";
-import { fetchSectorById } from "../features/sectors/sectorSlice";
-import { fetchAssociationUsers } from "../features/associations/associationUsersSlice";
+import { fetchCities } from "../features/citiesSector/citySectorSlice";
+import { fetchAnimalsByCanal } from "../features/animals/animalSlice";
+import { fetchCanalUsers } from "../features/canals/canalUsersSlice";
 import { useRoute } from "@react-navigation/native";
 import * as Font from "expo-font";
 import Icon from "react-native-vector-icons/Ionicons";
 import AnimalList from "../components/animals/animalList";
 import AnimalFilters from "../components/animals/animalFilter";
-import AddCityModal from "../components/cities/addCityModal";
-import AddSectorModal from "../components/sectors/addSectorModal";
+import AddCitySectorModal from "../components/citiesSector/addCitySectorModal";
 import AddCat from "./AddCat";
-import { fetchSectors } from "../features/sectors/sectorSlice";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as Clipboard from "expo-clipboard";
 
 // définir les interfaces
-interface Association {
+interface Canal {
   id: string;
   data: any[]; // Changez `any` en type approprié
   // Autres propriétés...
@@ -52,13 +49,10 @@ interface User {
   // Ajoutez d'autres champs ici si nécessaire
 }
 
-interface City {
+interface CitySector {
   // Propriétés pour la ville...
 }
 
-interface Sector {
-  // Propriétés pour le secteur...
-}
 
 interface DataState<T> {
   data: T[];
@@ -69,11 +63,10 @@ interface DataState<T> {
 
 // Utilisez cette interface dans l'interface RootState
 interface RootState {
-  associations: DataState<Association>;
-  cities: DataState<City>;
+  canals: DataState<Canal>;
+  citiesSector: DataState<CitySector>;
   animals: DataState<Animal>;
-  associationUsers: DataState<User>;
-  sectors: DataState<Sector>;
+  canalUsers: DataState<User>;
   auth: {
     isAuthenticated: boolean;
     uid: string;
@@ -82,14 +75,14 @@ interface RootState {
 
 interface RouteParams {
   id: string;
-  associationId: string;
-  cityId: string;
+  canalId: string;
+  citySectorId: string;
 }
 
 type RootStackParamList = {
   AddCat: undefined;
-  CityDetails: undefined;
-  EditAssociation: undefined;
+  CitySectorDetails: undefined;
+  EditCanal: undefined;
 };
 
 type AddCatScreenNavigationProp = StackNavigationProp<
@@ -97,43 +90,40 @@ type AddCatScreenNavigationProp = StackNavigationProp<
   "AddCat"
 >;
 
-type CityDetailScreen = StackNavigationProp<RootStackParamList, "CityDetails">;
+type CitySectorDetailScreen = StackNavigationProp<RootStackParamList, "CitySectorDetails">;
 
-type EditAssociationScreen = StackNavigationProp<
+type EditCanalScreen = StackNavigationProp<
   RootStackParamList,
-  "EditAssociation"
+  "EditCanal"
 >;
 
-const AssociationDetails: React.FC = () => {
+const CanalDetails: React.FC = () => {
   const route = useRoute();
   const dispatch = useAppDispatch();
   const navigation = useNavigation<AddCatScreenNavigationProp>();
-  const navigationCity = useNavigation<CityDetailScreen>();
-  const navigationEdit = useNavigation<EditAssociationScreen>();
+  const navigationCitySector = useNavigation<CitySectorDetailScreen>();
+  const navigationEdit = useNavigation<EditCanalScreen>();
   const [copiedText, setCopiedText] = useState("");
 
-  const { associationId } = route.params as RouteParams;
+  const { canalId } = route.params as RouteParams;
 
   const { isAuthenticated, uid } = useSelector(
     (state: RootState) => state.auth
   );
-  const { data: associations, status: associationsStatus } = useSelector(
-    (state: RootState) => state.associations
+  const { data: canals, status: canalsStatus } = useSelector(
+    (state: RootState) => state.canals
   );
-  const { data: cities, status: citiesStatus } = useSelector(
-    (state: RootState) => state.cities
+  const { data: citiesSector, status: citiesSectorStatus } = useSelector(
+    (state: RootState) => state.citiesSector
   );
   const { data: animals, status: animalsStatus } = useSelector(
     (state: RootState) => state.animals
   );
   const { data: users, status: usersStatus } = useSelector(
-    (state: RootState) => state.associationUsers
+    (state: RootState) => state.canalUsers
   );
-  // const { data: sectors, status: sectorsStatus } = useSelector(
-  //   (state: RootState) => state.sectors
-  // );
 
-  const association = associations.find((asso) => asso.id === associationId);
+  const canal = canals.find((asso) => asso.id === canalId);
 
   const [editableFields, setEditableFields] = useState<string[]>([]);
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
@@ -142,9 +132,8 @@ const AssociationDetails: React.FC = () => {
   const [isOpenBlock3, setIsOpenBlock3] = useState<boolean>(false);
   const [isOpenBlock4, setIsOpenBlock4] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [sectorsList, setSectors] = useState<Sector[]>([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const archiveType = "association";
+  const archiveType = "canal";
 
   const loadFonts = async () => {
     await Font.loadAsync({
@@ -175,7 +164,7 @@ const AssociationDetails: React.FC = () => {
     setRefreshing(true);
     // Simuler une requête de réseau
     wait(2000).then(() => {
-      setRefreshing(false), dispatch(fetchAnimalsByAssociation(associationId));
+      setRefreshing(false), dispatch(fetchAnimalsByCanal(canalId));
     });
   }, []);
 
@@ -188,28 +177,17 @@ const AssociationDetails: React.FC = () => {
   const numIsBelongedCats = animals.filter(
     (animal) => !animal.isBelonged
   ).length;
-  // const archiveType = linkedCityId;
+  // const archiveType = linkedCitySectorId;
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchCities(associationId));
-      dispatch(fetchAnimalsByAssociation(associationId));
-      dispatch(fetchAssociationUsers(associationId));
+      dispatch(fetchCities(canalId));
+      dispatch(fetchAnimalsByCanal(canalId));
+      dispatch(fetchCanalUsers(canalId));
     }
-  }, [associationId, isAuthenticated]);
+  }, [canalId, isAuthenticated]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (isAuthenticated) {
-        // console.log(association)
-        const sectores = await fetchAllSectors(cities, dispatch);
-        setSectors(sectores);
-      }
-    };
 
-    fetchData();
-    console.log(associationId);
-  }, [associationId, cities, isAuthenticated]);
 
   useEffect(() => {
     users.forEach((user) => {
@@ -219,7 +197,7 @@ const AssociationDetails: React.FC = () => {
     });
   }, [users]);
 
-  // if (sectorsStatus === 'loading' || animalsStatus === 'loading' || associationsStatus === 'loading' || usersStatus === 'loading' || citiesStatus === 'loading') {
+  // if (sectorsStatus === 'loading' || animalsStatus === 'loading' || canalsStatus === 'loading' || usersStatus === 'loading' || citiesSectorStatus === 'loading') {
   //     return <LoadingPage />;
   // }
 
@@ -239,14 +217,21 @@ const AssociationDetails: React.FC = () => {
       >
         <View style={styles.header}>
           <View style={styles.header1st}>
-            <Image source={{ uri: association?.image }} style={styles.image} />
-            <Text style={styles.title}>{association?.name}</Text>
+          {canal.image ? (
+        <Image style={styles.image} source={{ uri: canal.image }} />
+      ) : (
+        <Image
+          style={styles.image}
+          source={require("../assets/kappze_logo_without_square_bw.png")}
+        />
+      )}
+            <Text style={styles.title}>{canal?.name}</Text>
             <View style={styles.settingsBtn}>
               {userIsAdmin && (
                 <TouchableOpacity
                   onPress={() =>
-                    navigationEdit.navigate("EditAssociation", {
-                      associationId: association?.id,
+                    navigationEdit.navigate("EditCanal", {
+                      canalId: canal?.id,
                     })
                   }
                   style={styles.sectionBtns_btnSettings}
@@ -260,12 +245,12 @@ const AssociationDetails: React.FC = () => {
             <Text style={styles.sectionShare_title}>Partager le canal : </Text>
             <TouchableOpacity
               onPress={() => {
-                copyToClipboard(association.id);
+                copyToClipboard(canal.id);
               }}
               style={styles.sectionShare_button}
             >
               <Text style={styles.sectionShare_buttonText} selectable={true}>
-                {isCopied ? "Copié !" : association?.id}
+                {isCopied ? "Copié !" : canal?.id}
               </Text>
             </TouchableOpacity>
           </View>
@@ -289,10 +274,10 @@ const AssociationDetails: React.FC = () => {
           </TouchableOpacity>
           {isOpenBlock1 && (
             <View style={styles.section}>
-              <Text>{association?.name}</Text>
-              <Text>{association?.email}</Text>
-              <Text>{association?.city}</Text>
-              <Text>{association?.postalCode}</Text>
+              <Text>{canal?.name}</Text>
+              <Text>{canal?.email}</Text>
+              <Text>{canal?.citySector}</Text>
+              <Text>{canal?.postalCode}</Text>
             </View>
           )}
 
@@ -323,7 +308,7 @@ const AssociationDetails: React.FC = () => {
             style={styles.sectionHeader}
           >
             <Text style={styles.sectionTitle}>
-              Villes Couvertes : ({cities.length})
+              Secteurs couverts : ({citiesSector.length})
             </Text>
             <Icon
               name={isOpenBlock3 ? "chevron-down" : "chevron-forward"}
@@ -332,19 +317,19 @@ const AssociationDetails: React.FC = () => {
             />
           </TouchableOpacity>
           {isOpenBlock3 && (
-            <View style={styles.sectionCity}>
-              {cities.map((city) => (
-                <View style={styles.cityList} key={city.id}>
+            <View style={styles.sectionCitySector}>
+              {citiesSector.map((citySector) => (
+                <View style={styles.citySectorList} key={citySector.id}>
                   <TouchableOpacity
                     onPress={() =>
-                      navigationCity.navigate("CityDetails", {
-                        associationId: associationId,
-                        cityId: city?.id,
+                      navigationCitySector.navigate("CitySectorDetails", {
+                        canalId: canalId,
+                        citySectorId: citySector?.id,
                       })
                     }
-                    style={styles.sectionBtns_btnCity}
+                    style={styles.sectionBtns_btnCitySector}
                   >
-                    <Text style={styles.sectionTitleCity}>{city?.name}</Text>
+                    <Text style={styles.sectionTitleCitySector}>{citySector?.name}</Text>
                     <Icon name={"chevron-forward"} size={24} color="#FFF" />
                   </TouchableOpacity>
                 </View>
@@ -358,20 +343,19 @@ const AssociationDetails: React.FC = () => {
 
         <AnimalFilters
           animals={animals}
-          sectorized={sectorsList}
           archiveType={archiveType}
         />
         {/* </SafeAreaView> */}
         <Text>Pull down to see RefreshControl indicator</Text>
       </ScrollView>
       <View style={styles.footer}>
-        <AddCityModal
+        <AddCitySectorModal
           style={styles.sectionBtns_btn}
-          associationId={association?.id}
+          canalId={canal?.id}
         />
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("AddCat", { associationId: association?.id })
+            navigation.navigate("AddCat", { canalId: canal?.id })
           }
           style={styles.sectionBtns_btn}
         >
@@ -387,10 +371,6 @@ const AssociationDetails: React.FC = () => {
             <Text style={{ color: "white" }}>+</Text>
           </View>
         </TouchableOpacity>
-        <AddSectorModal
-          style={styles.sectionBtns_btn}
-          associationId={association?.id}
-        />
       </View>
     </View>
   );
@@ -534,17 +514,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 20,
   },
-  sectionCity: {
+  sectionCitySector: {
     flexDirection: "column",
     rowGap: 5,
     // alignItems: 'center',
     justifyContent: "center",
   },
-  cityList: {
+  citySectorList: {
     maxWidth: 200,
     // backgroundColor: 'blue'
   },
-  sectionBtns_btnCity: {
+  sectionBtns_btnCitySector: {
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: "#000",
@@ -552,7 +532,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 2,
   },
-  sectionTitleCity: {
+  sectionTitleCitySector: {
     color: "#FFF",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
@@ -585,7 +565,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AssociationDetails;
+export default CanalDetails;
 
 // import React, { useState } from 'react';
 // import { Button, TextInput, View } from 'react-native';

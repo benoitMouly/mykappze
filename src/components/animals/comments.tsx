@@ -53,7 +53,15 @@ const CommentForm = ({ animalId }) => {
         numberOfLines={4}
         style={{ borderRadius: 4, flex: 1 }}
       />
-      <Button title="Commenter" onPress={handleFormSubmit} />
+      {/* <Button title="Commenter"  /> */}
+      <TouchableOpacity onPress={handleFormSubmit}>
+        <Icon
+          style={styles.buttonIconElt}
+          name="paper-plane"
+          size={35}
+          color="#2f4f4f"
+        />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -62,13 +70,13 @@ const CommentList = ({ animalId }) => {
   const { surname, uid } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const comments = useSelector((state) => state.comments);
-  const { data: users } = useSelector((state) => state.associationUsers);
+  const { data: users } = useSelector((state) => state.canalUsers);
   const [userIsAdmin, setUserRole] = useState({});
   const [isEditedCommentContentVisible, setEditVisible] = useState(false);
-  const [editedAssociationName, setEditedCommentContent] = useState("");
+  const [editedCanalName, setEditedCommentContent] = useState("");
   const [selectedCommentId, setSelectedCommentId] = useState(null);
-  // const [currentAssociationName, setCurrentAssociationName] = useState(
-  //     association.name
+  // const [currentCanalName, setCurrentCanalName] = useState(
+  //     canal.name
   //   );
 
   const handleUpdateComment = (updatedText) => {
@@ -109,41 +117,65 @@ const CommentList = ({ animalId }) => {
 
   return (
     <>
-      <ScrollView style={{ margin: 0, padding: 0 }}>
+      <ScrollView
+        style={{ margin: 10, padding: 0, flexDirection: "column", rowGap: 10, marginBottom: 100 }}
+      >
         {comments.map((comment) => (
           <View
             key={comment.id}
-            style={{ backgroundColor: "#2F2F2F", borderRadius: 3, padding: 15 }}
+            style={{
+              backgroundColor: "#2f4f4f",
+              borderRadius: 2,
+              padding: 20,
+              marginTop: 10,
+              flexDirection: "column",
+              rowGap: 20,
+            }}
           >
-            <View style={styles.editEltGroup}>
+            <View style={styles.commentElt}>
               <Text style={styles.text}>{comment?.texte}</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setEditVisible(true);
-                  setSelectedCommentId(comment.id); // set the selected comment ID when the edit button is pressed
-                  setEditedCommentContent(comment.texte); // set the current comment texte to the state
+            </View>
+            <View>
+              <Text style={styles.textInfo}>Par {comment.auteur}, </Text>
+              <Text style={styles.textInfo}>
+                le {new Date(comment.horodatage).toLocaleString()}
+              </Text>
+            </View>
+
+            {(comment.authorId === uid || userIsAdmin) && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  columnGap: 40,
+                  justifyContent: "flex-end",
                 }}
-                style={styles.sectionHeader}
               >
-                <View style={styles.buttonIcon}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setEditVisible(true);
+                    setSelectedCommentId(comment.id); // set the selected comment ID when the edit button is pressed
+                    setEditedCommentContent(comment.texte); // set the current comment texte to the state
+                  }}
+                  style={styles.sectionHeader}
+                >
+                  <View style={styles.buttonIcon}>
+                    <Icon
+                      style={styles.buttonIconElt}
+                      name="pencil-outline"
+                      size={18}
+                      color="#fff"
+                    />
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDelete(comment.id)}>
                   <Icon
                     style={styles.buttonIconElt}
-                    name="pencil-outline"
-                    size={15}
+                    name="close"
+                    size={18}
                     color="#fff"
                   />
-                </View>
-              </TouchableOpacity>
-            </View>
-            <Text style={{ color: "#fff" }}>Par {comment.auteur}, </Text>
-            <Text style={{ color: "#fff" }}>
-              le {new Date(comment.horodatage).toLocaleString()}
-            </Text>
-            {(comment.authorId === uid || userIsAdmin) && (
-              <Button
-                title="Supprimer"
-                onPress={() => handleDelete(comment.id)}
-              />
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         ))}
@@ -161,7 +193,7 @@ const CommentList = ({ animalId }) => {
         }}
         messageType={"Modifier le commentaire"}
         onChangeText={setEditedCommentContent}
-        value={editedAssociationName} // set the initial value of the text input to the current comment texte
+        value={editedCanalName} // set the initial value of the text input to the current comment texte
       />
     </>
   );
@@ -179,7 +211,9 @@ const CommentSection = ({ animalId, commentsLength }) => {
       <TouchableOpacity
         onPress={handleModalToggle}
         style={styles.sectionBtns_btn}
-      ><Text style={{color: 'white'}}>COMMENTAIRES ({commentsLength})</Text></TouchableOpacity>
+      >
+        <Text style={{ color: "white" }}>COMMENTAIRES ({commentsLength})</Text>
+      </TouchableOpacity>
 
       <Modal
         animationType="slide"
@@ -188,8 +222,22 @@ const CommentSection = ({ animalId, commentsLength }) => {
         onRequestClose={handleModalToggle}
       >
         <View style={styles.modalContainer}>
-          <Button title="Fermer" onPress={handleModalToggle} />
+          {/* <Button title="Fermer" onPress={handleModalToggle} /> */}
+          <TouchableOpacity
+            style={styles.closeModalComment}
+            onPress={handleModalToggle}
+          >
+            <Icon
+              style={styles.buttonIconElt}
+              name="close"
+              size={28}
+              color="#2f2f2f"
+            />
+            
+          </TouchableOpacity>
+
           <CommentList animalId={animalId} />
+
           <View style={styles.footer}>
             <CommentForm animalId={animalId} />
           </View>
@@ -207,6 +255,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
+    paddingTop: 20,
   },
   btnComments: {
     backgroundColor: "#2f2f2f",
@@ -221,6 +270,28 @@ const styles = StyleSheet.create({
     borderTopColor: "#e8e8e8",
     borderTopWidth: 1,
     padding: 10,
+  },
+  closeModalComment: {
+    // backgroundColor: '#2f2f2f',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    padding: 8,
+  },
+  closeModalCommentText: {
+    textAlign: "center",
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontSize: 15,
+  },
+  text: {
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontSize: 14,
+  },
+  textInfo: {
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontSize: 11,
   },
 });
 

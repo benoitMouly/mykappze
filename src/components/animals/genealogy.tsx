@@ -9,9 +9,11 @@ import {
   Text,
   Defs,
   Pattern,
+  Mask,
   Image as SvgImage,
   Line,
   G,
+  ClipPath,
 } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { processFontFamily } from "expo-font";
@@ -67,8 +69,33 @@ const FemaleIcon = ({ fill = "none", stroke = "#fff", size = 20 }) => (
   </Svg>
 );
 
+const QuestionIcon = ({ fill = "none", stroke = "#fff", size = 20 }) => (
+  <Svg
+    xmlns="http://www.w3.org/2000/svg"
+    height={size}
+    width={size}
+    viewBox="0 0 512 512"
+  >
+    <Path
+      d="M160 164s1.44-33 33.54-59.46C212.6 88.83 235.49 84.28 256 84c18.73-.23 35.47 2.94 45.48 7.82C318.59 100.2 352 120.6 352 164c0 45.67-29.18 66.37-62.35 89.18S248 298.36 248 324"
+      fill={fill}
+      stroke={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="40"
+    />
+    <Circle fill={stroke} cx="248" cy="399.99" r="32" />
+  </Svg>
+);
+
 const IconComponent = ({ sex }) => {
-  return sex === "Mâle" ? <MaleIcon /> : <FemaleIcon />;
+  return sex === "Mâle" ? (
+    <MaleIcon />
+  ) : sex === "Femelle" ? (
+    <FemaleIcon />
+  ) : (
+    <QuestionIcon />
+  );
 };
 
 const FamilyTree = ({ currentAnimalId }) => {
@@ -76,15 +103,15 @@ const FamilyTree = ({ currentAnimalId }) => {
   const { data: animals } = useSelector((state) => state.animals);
 
   const buildHierarchy = (animalId) => {
-    const animal = animals.find(a => a.id === animalId);
-    const children = animals.filter(a => a.motherAppId === animalId);
+    const animal = animals.find((a) => a.id === animalId);
+    const children = animals.filter((a) => a.motherAppId === animalId);
     return {
       ...animal,
-      children: children.map(c => buildHierarchy(c.id)),
+      children: children.map((c) => buildHierarchy(c.id)),
     };
   };
 
-  const rootAnimal = animals.find(animal => !animal.motherAppId);
+  const rootAnimal = animals.find((animal) => !animal.motherAppId);
   if (!rootAnimal) {
     return;
   }
@@ -118,28 +145,6 @@ const FamilyTree = ({ currentAnimalId }) => {
         }}
       >
         <Svg width={containerWidth} height={screenHeight}>
-          <Defs>
-            {nodes.map((node, index) => (
-              <Pattern
-                id={`image${index}`}
-                patternUnits="userSpaceOnUse"
-                x="-25"
-                y="-25"
-                width="50"
-                height="50"
-                viewBox="0 0 1 1"
-              >
-                <SvgImage
-                  x="0"
-                  y="0"
-                  width="1"
-                  height="1"
-                  preserveAspectRatio="xMidYMid slice"
-                  href={{ uri: node.data.image }}
-                />
-              </Pattern>
-            ))}
-          </Defs>
           {links.map((link, index) => (
             <Path
               key={index}
@@ -152,37 +157,48 @@ const FamilyTree = ({ currentAnimalId }) => {
               fill="transparent"
             />
           ))}
+
           {nodes.map((node, index) => (
-            <Circle
-              key={index}
-              cx={node.x}
-              cy={node.y}
-              r={25}
-              fill={`url(#image${index})`}
-              onPress={() =>
-                navigation.navigate("AnimalDetails", {
-                  animalId: node.data.id,
-                })
-              }
-            />
+            <G key={index}>
+              <SvgImage
+                x={node.x - 25}
+                y={node.y - 25}
+                width="50"
+                height="50"
+                preserveAspectRatio="xMidYMid slice"
+                href={{ uri: node.data.image }}
+                onPress={() =>
+                  navigation.navigate("AnimalDetails", {
+                    animalId: node.data.id,
+                  })
+                }
+              />
+            </G>
           ))}
-{nodes.map((node, index) => (
-  <G key={index} onPress={() => navigation.navigate("AnimalDetails", { animalId: node.data.id })}>
-    <G x={node.x - 10} y={node.y + 60}>
-      <IconComponent sex={node.data.sex} />
-    </G>
-    <Text
-      x={node.x - 20} // Changé ici
-      y={node.y + 50} // Changé ici
-      fill={node.data.id === currentAnimalId ? "#C40030" : "#FFF"}
-      textAnchor="start" // Changé ici
-      fontSize={15}
-      fontFamily={processFontFamily("WixMadeforDisplay-Regular")}
-    >
-      {node.data.name}
-    </Text>
-  </G>
-))}
+
+          {nodes.map((node, index) => (
+            <G
+              key={index}
+              onPress={() =>
+                navigation.navigate("AnimalDetails", { animalId: node.data.id })
+              }
+            >
+              <G x={node.x - 10} y={node.y + 60}>
+                <IconComponent sex={node.data.sex} />
+              </G>
+              <Text
+                x={node.x - 20}
+                y={node.y + 50}
+                fill={node.data.id === currentAnimalId ? "#C40030" : "#FFF"}
+                textAnchor="start"
+                fontSize={15}
+                fontFamily={processFontFamily("WixMadeforDisplay-Regular")}
+                fontWeight={600}
+              >
+                {node.data.name}
+              </Text>
+            </G>
+          ))}
         </Svg>
       </ScrollView>
     </View>

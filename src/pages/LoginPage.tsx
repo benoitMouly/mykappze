@@ -111,6 +111,7 @@ const LoginPage: React.FC = () => {
         if (token === "true") {
           console.log(token);
           console.log("ON Y VA");
+          console.log(user)
         }
       } catch (error) {
         console.log(error);

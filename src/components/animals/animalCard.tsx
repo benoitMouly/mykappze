@@ -20,8 +20,7 @@ interface AnimalProps {
     image?: string;
     sex: string;
     isMother: boolean;
-    cityName: string;
-    sectorName: string;
+    citySectorName: string;
   };
 }
 // Define the navigation type
@@ -31,13 +30,13 @@ type RootStackParamList = {
   AnimalDetails: { animalId: string }; // Add this line
 };
 
-type AssociationDetailsScreen = StackNavigationProp<
+type CanalDetailsScreen = StackNavigationProp<
   RootStackParamList,
   "AnimalDetails"
 >;
 
 const AnimalCard: React.FC<AnimalProps> = (props) => {
-  const navigation = useNavigation<AssociationDetailsScreen>();
+  const navigation = useNavigation<CanalDetailsScreen>();
 
   const handlePress = () => {
     navigation.navigate("AnimalDetails", {
@@ -47,6 +46,7 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
 
   return (
     <View style={styles.cardContainer}>
+      <TouchableOpacity onPress={handlePress}>
       <View style={styles.card}>
 
         <Image
@@ -70,7 +70,7 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
               <Icon name={"male-outline"} size={20} color="#000" />
             ) : props.animal.sex === "Femelle" ? (
               <Icon name={"female-outline"} size={20} color="#000" />
-            ) : (<Text>?</Text>)}
+            ) : (<Icon name={"help-outline"} size={20} color="#000" />)}
           </View>
           <View
             style={{ flexDirection: "column", rowGap: 10, marginVertical: 5 }}
@@ -80,15 +80,7 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
                 source={require("../../assets/icons/icon-city.png")}
                 style={styles.buttonIcon}
               />
-              <Text>{props.animal.cityName}</Text>
-            </View>
-
-            <View style={styles.buttonGroupIcons}>
-              <Image
-                source={require("../../assets/icons/icon-compass.png")}
-                style={styles.buttonIcon}
-              />
-              <Text>{props.animal.sectorName}</Text>
+              <Text>{props.animal.citySectorName}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.button} onPress={handlePress}>
@@ -96,6 +88,7 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
           </TouchableOpacity>
         </View>
       </View>
+      </TouchableOpacity>
     </View>
   );
 };

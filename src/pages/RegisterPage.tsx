@@ -5,6 +5,7 @@ import { loginUser, registerUser } from "../features/user/userSlice.tsx";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import Modal from "react-native-modal";
+import { fetchSirenData } from "../features/siren/sirenSlice.js";
 
 import {
   View,
@@ -19,6 +20,8 @@ import {
 } from "react-native";
 import * as Font from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSelector } from "react-redux";
+import { getErrorMsg } from "../utils/errorMessages.js";
 
 // Define the navigation type
 type RootStackParamList = {
@@ -55,19 +58,32 @@ const RegisterPage: React.FC = () => {
 
   const [errorMessage, setError] = useState("");
   const { error: errorCode } = useAppSelector((state) => state.auth);
+  const sirenData = useAppSelector((state) => state.siren);
+  const [userType, setUserType] = useState("visitor"); // 'visitor', 'mairie', 'association'
+  const [associationName, setAssociationName] = useState("");
 
-  //   useEffect(() => {
-  //     if (errorCode) {
-  //         setError(getErrorMsg(errorCode));
-  //     } else {
-  //         setError(null);
-  //     }
+  const [siren, setSiren] = useState("");
+  const [errSiren, setErrSiren] = useState("");
 
-  //     return () => {
-  //         setError('null'); // réinitialisez l'erreur lorsque le composant se démonte
-  //     };
+  useEffect(() => {
+    if (errorCode) {
+      setError(getErrorMsg(errorCode));
+    } else {
+      setError(null);
+    }
 
-  // }, [errorCode]);
+    return () => {
+      setError("null"); // réinitialisez l'erreur lorsque le composant se démonte
+    };
+  }, [errorCode]);
+
+  const handleUserTypeChange = (type: string) => {
+    setUserType(type);
+  };
+
+  const handleSirenChange = (text: string) => {
+    setSiren(text);
+  };
 
   // const navigation = useNavigation();
   // AsyncStorage.getAllKeys((err, keys) => {
@@ -80,26 +96,59 @@ const RegisterPage: React.FC = () => {
   // });
   // Dans Login
   const handleLogin = async () => {
-    if (email === "" || password === "" || name === "" || surname === "" || phone === "") {
-        setModalTitle("Erreur");
+
+    if (userType === "mairie" || userType === "association") {
+      await dispatch(fetchSirenData(siren));
+      console.log(sirenData)
+      if (userType === "mairie" && !sirenData.isMairie) {
+        setErrSiren("Le SIREN fourni n'appartient pas à une mairie.");
+        return;
+      } else if (userType === "association" && !sirenData.isAssociation) {
+        setErrSiren("Le SIREN fourni n'appartient pas à une association.");
+        return;
+      }
+    }
+    if (
+      email === "" ||
+      password === "" ||
+      name === "" ||
+      surname === "" ||
+      phone === ""
+    ) {
+      setModalTitle("Erreur");
       setModalMessage("Veuillez remplir tous les champs.");
       setModalVisible(true);
       return;
     }
 
-    const actionResult = await dispatch(registerUser({ email, password, name, surname }));
+
+
+    const actionResult = await dispatch(
+      registerUser({
+        email,
+        password,
+        name,
+        surname,
+        userType,
+        siren: userType !== "visitor" ? siren : null,
+        isMairie: userType === "mairie",
+        mairieName: userType === "mairie" ? sirenData.mairieName : null,
+        isAssociation: userType === "association",
+        associationName: userType === "association" ? sirenData.associaionName : null,
+      })
+    );
 
     if (registerUser.fulfilled.match(actionResult)) {
-    //   await AsyncStorage.setItem("@userIsLoggedIn", "true");
+      //   await AsyncStorage.setItem("@userIsLoggedIn", "true");
       try {
         // const token = await AsyncStorage.getItem("@userIsLoggedIn");
         // if (token === "true") {
-        setModalTitle('Inscription réussie ! ')
-          setModalMessage("Vous allez être redirigé vers la page de connexion.");
-          setModalVisible(true);
-          setTimeout(() => {
-            navigation.navigate('Login');
-          }, 2000);
+        setModalTitle("Inscription réussie ! ");
+        setModalMessage("Vous allez être redirigé vers la page de connexion.");
+        setModalVisible(true);
+        setTimeout(() => {
+          navigation.navigate("Login");
+        }, 2000);
         // }
       } catch (error) {
         console.log(error);
@@ -136,6 +185,28 @@ const RegisterPage: React.FC = () => {
           />
         </View>
         <View style={styles.inputContainer}>
+          <Text style={styles.label}>Type d'utilisateur:</Text>
+          <View style={styles.radioContainer}>
+            <TouchableOpacity onPress={() => handleUserTypeChange("visitor")}>
+              <Text style={styles.radioText}>Visiteur</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleUserTypeChange("mairie")}>
+              <Text style={styles.radioText}>Mairie</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleUserTypeChange("association")}>
+              <Text style={styles.radioText}>Association</Text>
+            </TouchableOpacity>
+            
+          </View>
+
+          {userType !== "visitor" && (
+            <TextInput
+              style={styles.input}
+              placeholder="SIREN"
+              placeholderTextColor="#FFF"
+              onChangeText={handleSirenChange}
+            />
+          )}
           <TextInput
             style={styles.input}
             placeholder="Nom"
@@ -176,27 +247,36 @@ const RegisterPage: React.FC = () => {
               style={styles.buttonIcon}
             />
           </TouchableOpacity>
-          <Text style={styles.link} onPress={() => {navigation.navigate("Login")}}>
+          <Text
+            style={styles.link}
+            onPress={() => {
+              navigation.navigate("Login");
+            }}
+          >
             Déja inscrit ? Se connecter
           </Text>
+          {errSiren && (<><Text style={{color:'red'}}>{errSiren}</Text></>)}
         </View>
 
-        <Modal isVisible={isModalVisible}   animationIn="slideInLeft"
-  animationOut="slideOutRight"
-  animationInTiming={600}
-  animationOutTiming={600}>
-      <View style={styles.modalElt}>
-      <Text style={styles.title}>{modalTitle}</Text>
-        <Text style={{color: 'white'}}>{modalMessage}</Text>
-        <Pressable style={styles.button} onPress={() => setModalVisible(false)}>
-        <Text style={{color: 'white'}}>Fermer</Text>
-        </Pressable>
+        <Modal
+          isVisible={isModalVisible}
+          animationIn="slideInLeft"
+          animationOut="slideOutRight"
+          animationInTiming={600}
+          animationOutTiming={600}
+        >
+          <View style={styles.modalElt}>
+            <Text style={styles.title}>{modalTitle}</Text>
+            <Text style={{ color: "white" }}>{modalMessage}</Text>
+            <Pressable
+              style={styles.button}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={{ color: "white" }}>Fermer</Text>
+            </Pressable>
+          </View>
+        </Modal>
       </View>
-    </Modal>
-
-      </View>
-
-      
     );
   }
 };
@@ -236,7 +316,7 @@ const styles = StyleSheet.create({
   link: {
     color: "white",
     marginTop: 20,
-    textDecorationLine: 'underline'
+    textDecorationLine: "underline",
   },
   button: {
     flexDirection: "row",
@@ -256,13 +336,37 @@ const styles = StyleSheet.create({
     fontFamily: "WixMadeforDisplay-Regular",
   },
   modalElt: {
-    display: 'flex',
+    display: "flex",
     flex: 1,
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    rowGap: 30
-  }
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    rowGap: 30,
+  },
+  radioContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+    // backgroundColor: 'red'
+  },
+  radioText: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#FFF",
+    borderRadius: 5,
+    color: "#FFF",
+    fontSize: 16,
+    textAlign: "center",
+    // flex: 1,
+    margin: 5,
+    // backgroundColor:'blue'
+  },
+  label: {
+    color: "#FFF",
+    fontSize: 18,
+    marginBottom: 10,
+  },
 });
 
 export default RegisterPage;

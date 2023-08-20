@@ -1,47 +1,3 @@
-// // AnimalList.tsx
-// import React, { useState, useCallback } from 'react';
-// import { FlatList, Text, View, StyleSheet } from 'react-native';
-// import AnimalCard from './animalCard';
-
-// interface Animal {
-//   id: string;
-//   name: string;
-//   image?: string;
-//   sex: string;
-//   isMother: boolean;
-//   cityName: string;
-//   sectorName: string;
-// }
-
-// interface AnimalListProps {
-//   animals: Animal[];
-// }
-
-// const AnimalList: React.FC<AnimalListProps> = ({ animals }) => {
-//   const [displayedAnimals, setDisplayedAnimals] = useState<Animal[]>([]);
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const itemsPerPage = 2;
-// //   console.log(displayedAnimals)
-
-//   const loadMoreAnimals = useCallback(() => {
-//     const newAnimals = animals.slice(0, (currentPage + 1) * itemsPerPage);
-//     setDisplayedAnimals(newAnimals);
-//     setCurrentPage(currentPage + 1);
-//   }, [animals, currentPage]);
-
-//   return (
-//     <FlatList
-//       data={animals}
-//       renderItem={({ item }) => <AnimalCard key={item.id} animal={item} />}
-//       keyExtractor={item => item.id}
-//       onEndReached={loadMoreAnimals}
-//       onEndReachedThreshold={0.1}
-//     />
-//   );
-// };
-
-// export default AnimalList;
-
 import React, { useState, useEffect } from "react";
 import {
   FlatList,
@@ -60,8 +16,7 @@ interface Animal {
   image?: string;
   sex: string;
   isMother: boolean;
-  cityName: string;
-  sectorName: string;
+  citySectorName: string;
 }
 
 interface AnimalListProps {

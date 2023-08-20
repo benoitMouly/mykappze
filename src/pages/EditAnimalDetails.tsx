@@ -21,8 +21,7 @@ import {
 } from "../features/animals/animalSlice";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Picker } from "@react-native-picker/picker";
-import CityAndSectorSelect from "../components/cities/cityAndSectorSelect";
-import { fetchSectors } from "../features/sectors/sectorSlice";
+import CitySectorAndSectorSelect from "../components/citiesSector/citySectorAndSectorSelect";
 import ColorSelect from "../components/animals/colorSelect";
 import EditableImage from "../components/general/EditableImage";
 import EditableDocumentList from "../components/general/EditableDocuments";
@@ -35,12 +34,9 @@ const EditAnimalDetails = ({ route, navigation }) => {
   const { animalId } = route.params;
   const [animal_id, setAnimalId] = useState("");
   const dispatch = useDispatch();
-  const { data: cities } = useSelector((state: RootState) => state.cities);
-  const { data: sectors } = useSelector((state: RootState) => state.sectors);
-  const [city, setCity] = useState(cities ? cities[0] : "");
-  const [cityId, setCityId] = useState(null);
-  const [sector, setSector] = useState(sectors ? sectors[0] : "");
-  const [sectorId, setSectorId] = useState(null);
+  const { data: citiesSector } = useSelector((state: RootState) => state.citiesSector);
+  const [citySector, setCitySector] = useState(citiesSector ? citiesSector[0] : "");
+  const [citySectorId, setCitySectorId] = useState(null);
   const [selectedColors, setSelectedColors] = useState([]);
   const [initialColors, setInitialColors] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -120,13 +116,6 @@ const EditAnimalDetails = ({ route, navigation }) => {
     }));
   }, [selectedColors]);
 
-  useEffect(() => {
-    // Vérifie si le secteur sélectionné est toujours valide
-    if (!sectors.find((sector) => sector.id === sectorId)) {
-      // Si ce n'est pas le cas, réinitialisez le secteur sélectionné
-      setSectorId(null);
-    }
-  }, [sectors, sectorId]);
 
   // Function to handle input changes
   const handleInputChange = (field, value) => {
@@ -137,32 +126,19 @@ const EditAnimalDetails = ({ route, navigation }) => {
     }));
   };
 
-  const handleObjectFormCityChange = async (id, name) => {
+  const handleObjectFormCitySectorChange = async (id, name) => {
     setIsModified(true);
     console.log(isModified);
-    setCity(name);
-    setCityId(id);
-    setSectorId(null);
-    dispatch(fetchSectors(id));
-
+    setCitySector(name);
+    setCitySectorId(id);
     setUpdatedAnimal((prev) => ({
       ...prev,
-      cityName: name,
-      cityId: id,
+      citySectorName: name,
+      citySectorId: id,
     }));
   };
 
-  const handleObjectFormSectorChange = (id, name) => {
-    setIsModified(true);
-    setSector(name);
-    setSectorId(id);
 
-    setUpdatedAnimal((prev) => ({
-      ...prev,
-      sectorName: name,
-      sectorId: id,
-    }));
-  };
 
   const handleConfirmIdentificationDate = (date) => {
     setIsModified(true);
@@ -299,16 +275,13 @@ const EditAnimalDetails = ({ route, navigation }) => {
             Informations générales{" "}
           </Text>
           <View style={styles.containerUnicalSection}>
-            {/* Select city */}
+            {/* Select citySector */}
             <View style={styles.editEltSelects}>
-            <Text style={styles.editEltLabel}>Ville et secteur : </Text>
-              <CityAndSectorSelect
-                cities={cities}
-                sectors={sectors}
-                selectedCityId={cityId}
-                selectedSectorId={sectorId}
-                onCityChange={handleObjectFormCityChange}
-                onSectorChange={handleObjectFormSectorChange}
+            <Text style={styles.editEltLabel}>Secteur : </Text>
+              <CitySectorAndSectorSelect
+                citiesSector={citiesSector}
+                selectedCitySectorId={citySectorId}
+                onCitySectorChange={handleObjectFormCitySectorChange}
               />
             </View>
 

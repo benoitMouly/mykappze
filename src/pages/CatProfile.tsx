@@ -6,7 +6,7 @@ import {
   fetchAnimalById,
   fetchMotherById,
   deleteAnimal,
-  fetchAnimalsByAssociation,
+  fetchAnimalsByCanal,
 } from "../features/animals/animalSlice";
 import { calculateAge } from "../utils/getAge.js";
 // import Icon from "react-native-vector-icons/FontAwesome";
@@ -27,7 +27,7 @@ import { fetchComments } from "../features/animals/commentsSlice.tsx";
 const AnimalDetails = ({ route }) => {
   const { animalId } = route.params;
   const comments = useSelector((state) => state.comments);
-  const { data: users } = useSelector((state) => state.associationUsers);
+  const { data: users } = useSelector((state) => state.canalUsers);
 
   const { name, uid, isAuthenticated } = useSelector((state) => state.auth);
   const [currentAnimalId, setCurrentAnimalId] = useState(null);
@@ -77,7 +77,7 @@ const AnimalDetails = ({ route }) => {
   useEffect(() => {
     if (animalId !== currentAnimalId) {
       dispatch(fetchAnimalById(animalId));
-      dispatch(fetchAnimalsByAssociation(animal.associationId));
+      dispatch(fetchAnimalsByCanal(animal.canalId));
       setCurrentAnimalId(animalId);
       dispatch(fetchComments(animalId));
     }
@@ -205,7 +205,10 @@ const AnimalDetails = ({ route }) => {
                   <Icon name={"female-outline"} size={20} color="#fff" />
                 </View>
               ) : (
-                <Text>?</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text style={styles.subtitle}>Sexe inconnu </Text>
+                {/* <Icon name={"female-outline"} size={20} color="#fff" /> */}
+              </View>
               )}
 
               <Text style={styles.subtitle}>
@@ -219,15 +222,7 @@ const AnimalDetails = ({ route }) => {
                   source={require("../assets/icons/icon-city.png")}
                   style={styles.buttonIcon}
                 />
-                <Text style={styles.subtitle}>{animal.cityName}</Text>
-              </View>
-
-              <View style={styles.buttonGroupIcons}>
-                <Image
-                  source={require("../assets/icons/icon-compass.png")}
-                  style={styles.buttonIcon}
-                />
-                <Text style={styles.subtitle}>{animal.sectorName}</Text>
+                <Text style={styles.subtitle}>{animal.citySectorName}</Text>
               </View>
             </View>
           </View>
@@ -248,9 +243,9 @@ const AnimalDetails = ({ route }) => {
               {blocksOpen.infoGeneral && (
                 <>
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Association : </Text>
+                    <Text style={styles.infosLabel}>Canal : </Text>
                     <Text style={styles.infosLabel_text}>
-                      {animal.associationName ? animal.associationName : null}
+                      {animal.canalName ? animal.canalName : null}
                     </Text>
                   </View>
                   <View style={styles.unicalInfo}>

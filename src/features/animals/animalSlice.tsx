@@ -4,30 +4,30 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'fire
 import { v4 as uuidv4 } from 'uuid'; // à installer avec npm ou yarn
 
 /*
-* Retrieve animals by Association
+* Retrieve animals by Canal
 ***    
 */
 
 // Définir le type de chaque animal
 interface AnimalData {
     id: string;
-    associationId: string;
+    canalId: string;
     // Inclure ici d'autres propriétés de l'animal si nécessaire
   }
   
-  export const fetchAnimalsByAssociation = createAsyncThunk<
+  export const fetchAnimalsByCanal = createAsyncThunk<
     AnimalData[], // Le type de la valeur de retour de la promesse
     string, // Le type du payload
     {} // Le type des informations de rejet si la promesse est rejetée
-  >('animals/fetchAnimalsByAssociation', async (associationId) => {
+  >('animals/fetchAnimalsByCanal', async (canalId) => {
     const db = getFirestore();
-    const q = query(collection(db, 'animals'), where('associationId', '==', associationId));
+    const q = query(collection(db, 'animals'), where('canalId', '==', canalId));
     const querySnapshot = await getDocs(q);
     const animalsData: AnimalData[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
-      if ('associationId' in data) {
-        animalsData.push({ id: doc.id, associationId: data.associationId, ...data });
+      if ('canalId' in data) {
+        animalsData.push({ id: doc.id, canalId: data.canalId, ...data });
       }
     });
     return animalsData;
@@ -83,29 +83,13 @@ export const fetchAnimalsByMother = createAsyncThunk('animals/fetchAnimalsByMoth
 
 
 /*
-* Retrieve animals by City
+* Retrieve animals by CitySector
 ***    
 */
 
-export const fetchAnimalsByCity = createAsyncThunk('animals/fetchAnimalsByCity', async (cityId) => {
+export const fetchAnimalsByCitySector = createAsyncThunk('animals/fetchAnimalsByCitySector', async (citySectorId) => {
     const db = getFirestore();
-    const q = query(collection(db, 'animals'), where('cityId', '==', cityId));
-    const querySnapshot = await getDocs(q);
-    const animalsData = [];
-    querySnapshot.forEach((doc) => {
-        animalsData.push({ id: doc.id, ...doc.data() });
-    });
-    return animalsData;
-});
-
-/*
-* Retrieve animals by Sector
-***    
-*/
-
-export const fetchAnimalsBySector = createAsyncThunk('animals/fetchAnimalsBySector', async (sectorId) => {
-    const db = getFirestore();
-    const q = query(collection(db, 'animals'), where('sectorId', '==', sectorId));
+    const q = query(collection(db, 'animals'), where('citySectorId', '==', citySectorId));
     const querySnapshot = await getDocs(q);
     const animalsData = [];
     querySnapshot.forEach((doc) => {
@@ -138,118 +122,57 @@ export const addAnimal = createAsyncThunk(
     }
 );
 
-
-
 /*
-* Update animal sector name
+* Update animal citySector name
 ***    
 */
 
-export const updateAnimalSectorName = createAsyncThunk(
-    'animals/updateAnimalSectorName',
-    async ({ sectorId, newSectorName }, { rejectWithValue }) => {
+export const updateAnimalCitySectorName = createAsyncThunk(
+    'animals/updateAnimalCitySectorName',
+    async ({ citySectorId, newCitySectorName }, { rejectWithValue }) => {
         try {
             const db = getFirestore();
-            const q = query(collection(db, 'animals'), where('sectorId', '==', sectorId));
+            const q = query(collection(db, 'animals'), where('citySectorId', '==', citySectorId));
             const querySnapshot = await getDocs(q);
 
             const batch = writeBatch(db);
             querySnapshot.forEach((animalDoc) => {
                 const animalRef = doc(db, 'animals', animalDoc.id);
-                batch.update(animalRef, { sectorName: newSectorName });
+                batch.update(animalRef, { citySectorName: newCitySectorName });
             });
             await batch.commit();
 
             // Return the payload
-            return { sectorId, newSectorName };
+            return { citySectorId, newCitySectorName };
         } catch (error) {
             return rejectWithValue(error.message);
         }
     }
 );
 
+
 /*
-* Update animal sector name
+* Remove animal citySector
 ***    
 */
 
-export const updateAnimalCityName = createAsyncThunk(
-    'animals/updateAnimalCityName',
-    async ({ cityId, newCityName }, { rejectWithValue }) => {
+export const removeCitySectorFromAnimals = createAsyncThunk(
+    'animals/removeCitySectorFromAnimals',
+    async (citySectorId, { rejectWithValue }) => {
         try {
             const db = getFirestore();
-            const q = query(collection(db, 'animals'), where('cityId', '==', cityId));
+            const q = query(collection(db, 'animals'), where('citySectorId', '==', citySectorId));
             const querySnapshot = await getDocs(q);
 
             const batch = writeBatch(db);
             querySnapshot.forEach((animalDoc) => {
                 const animalRef = doc(db, 'animals', animalDoc.id);
-                batch.update(animalRef, { cityName: newCityName });
+                batch.update(animalRef, { citySectorId: '', citySectorName: '' });
             });
             await batch.commit();
 
-            // Return the payload
-            return { cityId, newCityName };
-        } catch (error) {
-            return rejectWithValue(error.message);
-        }
-    }
-);
-
-/*
-* Remove animal sector
-***    
-*/
-
-export const removeSectorFromAnimals = createAsyncThunk(
-    'animals/removeSectorFromAnimals',
-    async ({ sectorId, cityId }, { rejectWithValue }) => {
-        try {
-            const db = getFirestore();
-            const q = query(
-                collection(db, 'animals'),
-                where('sectorId', '==', sectorId),
-                where('cityId', '==', cityId)
-            );
-            const querySnapshot = await getDocs(q);
-
-            const batch = writeBatch(db);
-            querySnapshot.forEach((animalDoc) => {
-                const animalRef = doc(db, 'animals', animalDoc.id);
-                batch.update(animalRef, { sectorId: '', sectorName: '' });
-            });
-            await batch.commit();
-
-            // Return the sectorId
-            return sectorId;
-        } catch (error) {
-            return rejectWithValue(error.message);
-        }
-    }
-);
-
-/*
-* Remove animal city
-***    
-*/
-
-export const removeCityFromAnimals = createAsyncThunk(
-    'animals/removeCityFromAnimals',
-    async (cityId, { rejectWithValue }) => {
-        try {
-            const db = getFirestore();
-            const q = query(collection(db, 'animals'), where('cityId', '==', cityId));
-            const querySnapshot = await getDocs(q);
-
-            const batch = writeBatch(db);
-            querySnapshot.forEach((animalDoc) => {
-                const animalRef = doc(db, 'animals', animalDoc.id);
-                batch.update(animalRef, { cityId: '', cityName: '' });
-            });
-            await batch.commit();
-
-            // Return the sectorId
-            return cityId;
+            // Return the citySectorid
+            return citySectorId;
         } catch (error) {
             return rejectWithValue(error.message);
         }
@@ -525,38 +448,25 @@ const animalsSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchAnimalsByCity.pending, (state) => {
+            .addCase(fetchAnimalsByCitySector.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchAnimalsByCity.fulfilled, (state, action) => {
+            .addCase(fetchAnimalsByCitySector.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.data = action.payload;
             })
-            .addCase(fetchAnimalsByCity.rejected, (state, action) => {
+            .addCase(fetchAnimalsByCitySector.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-
-            .addCase(fetchAnimalsBySector.pending, (state) => {
+            .addCase(fetchAnimalsByCanal.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(fetchAnimalsBySector.fulfilled, (state, action) => {
+            .addCase(fetchAnimalsByCanal.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.data = action.payload;
             })
-            .addCase(fetchAnimalsBySector.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
-            })
-
-            .addCase(fetchAnimalsByAssociation.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(fetchAnimalsByAssociation.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.data = action.payload;
-            })
-            .addCase(fetchAnimalsByAssociation.rejected, (state, action) => {
+            .addCase(fetchAnimalsByCanal.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })
@@ -612,53 +522,27 @@ const animalsSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload;
             })
-
-            .addCase(updateAnimalSectorName.pending, (state) => {
+            .addCase(updateAnimalCitySectorName.pending, (state) => {
                 state.status = 'loading';
             })
-            .addCase(updateAnimalSectorName.fulfilled, (state, action) => {
+            .addCase(updateAnimalCitySectorName.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.data = state.data.map((animal) => {
-                    if (animal.sectorId === action.payload.sectorId) {
-                        return { ...animal, sectorName: action.payload.newSectorName };
+                    if (animal.citySectorId === action.payload.citySectorId) {
+                        return { ...animal, citySectorName: action.payload.newCitySectorName };
                     }
                     return animal;
                 });
             })
-            .addCase(updateAnimalSectorName.rejected, (state, action) => {
+            .addCase(updateAnimalCitySectorName.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
             })
-            .addCase(removeSectorFromAnimals.fulfilled, (state, action) => {
+            .addCase(removeCitySectorFromAnimals.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.data = state.data.map((animal) => {
-                    if (animal.sectorId === action.payload) {
-                        return { ...animal, sectorId: '' };
-                    }
-                    return animal;
-                });
-            })
-            .addCase(updateAnimalCityName.pending, (state) => {
-                state.status = 'loading';
-            })
-            .addCase(updateAnimalCityName.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.data = state.data.map((animal) => {
-                    if (animal.cityId === action.payload.cityId) {
-                        return { ...animal, cityName: action.payload.newCityName };
-                    }
-                    return animal;
-                });
-            })
-            .addCase(updateAnimalCityName.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload;
-            })
-            .addCase(removeCityFromAnimals.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.data = state.data.map((animal) => {
-                    if (animal.cityId === action.payload) {
-                        return { ...animal, cityId: '' };
+                    if (animal.citySectorId === action.payload) {
+                        return { ...animal, citySectorId: '' };
                     }
                     return animal;
                 });

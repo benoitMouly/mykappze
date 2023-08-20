@@ -1,23 +1,25 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux'
 import authReducer from '../features/user/userSlice';
-import associationsReducer from '../features/associations/associationSlice.tsx';
+import licenceReducer from '../features/licences/licenceSlice.tsx';
+import canalsReducer from '../features/canals/canalSlice.tsx';
 import { useSelector, TypedUseSelectorHook } from 'react-redux';
-import citiesReducer from '../features/cities/citySlice';
-import sectorsReducer from '../features/sectors/sectorSlice';
+import citiesSectorReducer from '../features/citiesSector/citySectorSlice';
 import animalsReducer from '../features/animals/animalSlice';
-import associationsUsersReducer from '../features/associations/associationUsersSlice';
+import canalsUsersReducer from '../features/canals/canalUsersSlice.tsx';
 import notificationSlice from '../features/notifications/notificationSlice.tsx';
-import commentsReducer from '../features/animals/commentsSlice.tsx'
+import commentsReducer from '../features/animals/commentsSlice.tsx';
+import sirenReducer from '../features/siren/sirenSlice.js';
 
 export const store = configureStore({
     reducer: {
         auth: authReducer,
-        associations: associationsReducer,
-        cities: citiesReducer,
+        licences: licenceReducer,
+        canals: canalsReducer,
+        siren: sirenReducer,
+        citiesSector: citiesSectorReducer,
         animals: animalsReducer,
-        sectors: sectorsReducer,
-        associationUsers: associationsUsersReducer,
+        canalUsers: canalsUsersReducer,
         notifications: notificationSlice,
         comments: commentsReducer
     },

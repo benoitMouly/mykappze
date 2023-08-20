@@ -11,35 +11,31 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useAppDispatch } from "../store/store";
-import { fetchCities, fetchAllSectors } from "../features/cities/citySlice";
 import {
-  fetchAnimalsByAssociation,
-  fetchAnimalsByCity,
-  fetchAnimalsBySector,
-  updateAnimalSectorName,
+  fetchCities,
+  updateCitySector,
+  deleteCitySector,
+} from "../features/citiesSector/citySectorSlice";
+import {
+  fetchAnimalsByCanal,
+  fetchAnimalsByCitySector,
+  updateAnimalCitySectorName,
 } from "../features/animals/animalSlice";
-import {
-  deleteSector,
-  fetchSectorById,
-  updateSector,
-} from "../features/sectors/sectorSlice";
-import { fetchAssociationUsers } from "../features/associations/associationUsersSlice";
+import { fetchCanalUsers } from "../features/citiesSector/canalUsersSlice";
 import { useRoute } from "@react-navigation/native";
 import * as Font from "expo-font";
 import Icon from "react-native-vector-icons/Ionicons";
 import AnimalList from "../components/animals/animalList";
 import AnimalFilters from "../components/animals/animalFilter";
-import AddCityModal from "../components/cities/addCityModal";
-import AddSectorModal from "../components/sectors/addSectorModal";
+import AddCitySectorModal from "../components/citiesSector/addCitySectorModal";
 import AddCat from "./AddCat";
-import { fetchSectors } from "../features/sectors/sectorSlice";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import TextInputModal from "../components/general/TextUpdateModal";
 import ConfirmationModal from "../components/general/ConfirmationModal";
+import TextInputModal from "../components/general/TextUpdateModal";
 
 // définir les interfaces
-interface Association {
+interface Canal {
   id: string;
   data: any[]; // Changez `any` en type approprié
   // Autres propriétés...
@@ -58,12 +54,8 @@ interface User {
   // Ajoutez d'autres champs ici si nécessaire
 }
 
-interface City {
+interface CitySector {
   // Propriétés pour la ville...
-}
-
-interface Sector {
-  // Propriétés pour le secteur...
 }
 
 interface DataState<T> {
@@ -75,11 +67,10 @@ interface DataState<T> {
 
 // Utilisez cette interface dans l'interface RootState
 interface RootState {
-  associations: DataState<Association>;
-  cities: DataState<City>;
+  canals: DataState<Canal>;
+  citiesSector: DataState<CitySector>;
   animals: DataState<Animal>;
-  associationUsers: DataState<User>;
-  sectors: DataState<Sector>;
+  canalUsers: DataState<User>;
   auth: {
     isAuthenticated: boolean;
     uid: string;
@@ -87,9 +78,8 @@ interface RootState {
 }
 
 interface RouteParams {
-  id: string;
-  associationId: string;
-  cityId: string;
+  canalId: string;
+  citySectorId: string;
 }
 
 type RootStackParamList = {
@@ -101,35 +91,33 @@ type AddCatScreenNavigationProp = StackNavigationProp<
   "AddCat"
 >;
 
-const SectorDetails: React.FC = () => {
+const CitySectorDetails: React.FC = () => {
   const route = useRoute();
   const dispatch = useAppDispatch();
   const navigation = useNavigation<AddCatScreenNavigationProp>();
 
-  const { id, cityId, associationId, sectorId } = route.params as RouteParams;
+  const { citySectorId, canalId } = route.params as RouteParams;
 
   const { isAuthenticated, uid } = useSelector(
     (state: RootState) => state.auth
   );
-  const { data: associations, status: associationsStatus } = useSelector(
-    (state: RootState) => state.associations
+  const { data: canals, status: canalsStatus } = useSelector(
+    (state: RootState) => state.canals
   );
-  const { data: cities, status: citiesStatus } = useSelector(
-    (state: RootState) => state.cities
+  const { data: citiesSector, status: citiesSectorStatus } = useSelector(
+    (state: RootState) => state.citiesSector
   );
   const { data: animals, status: animalsStatus } = useSelector(
     (state: RootState) => state.animals
   );
   const { data: users, status: usersStatus } = useSelector(
-    (state: RootState) => state.associationUsers
+    (state: RootState) => state.canalUsers
   );
-  const { data: sectors, status: sectorsStatus } = useSelector(
-    (state: RootState) => state.sectors
-  );
+  const citySector = citiesSector.find((citySector) => citySector.id === citySectorId);
+  const canal = canals.find((asso) => asso.id === canalId);
+  // const citySectorName = citySector.id;
 
-  const city = cities.find((city) => city.id === cityId);
-  const association = associations.find((asso) => asso.id === associationId);
-
+  const [citySectorName, setCitySectorName] = useState(citySector?.name);
   const [editableFields, setEditableFields] = useState<string[]>([]);
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
   const [isOpenBlock1, setIsOpenBlock1] = useState<boolean>(true);
@@ -137,18 +125,17 @@ const SectorDetails: React.FC = () => {
   const [isOpenBlock3, setIsOpenBlock3] = useState<boolean>(false);
   const [isOpenBlock4, setIsOpenBlock4] = useState<boolean>(false);
   const [isCopied, setIsCopied] = useState<boolean>(false);
-  const [sectorsList, setSectors] = useState<Sector[]>([]);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const archiveType = "sector";
-  const sector = sectors.find((sector) => sector.id === sectorId);
-
-  const [editedSectorName, setEditedSectorName] = useState("");
-  const [currentSectorName, setCurrentSectorName] = useState("");
+  const [editCitySectorMode, setEditCitySectorMode] = useState(false);
+  const [editedCitySectorName, setEditedCitySectorName] = useState("");
+  const [currentCitySectorName, setCurrentCitySectorName] = useState(citySectorName);
   const [isConfirmationVisible, setConfirmationVisible] = useState(false);
   const [isTextUpdateVisible, setTextUpdateVisible] = useState(false);
   const [isAlertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [isEditVisible, setEditVisible] = useState(false);
+
+  const archiveType = "citySector";
 
   const loadFonts = async () => {
     await Font.loadAsync({
@@ -162,10 +149,6 @@ const SectorDetails: React.FC = () => {
     loadFonts();
   }, []);
 
-  //   useEffect(() => {
-  //     dispatch(fetchSectors(cityId));
-  //   }, [isAuthenticated]);
-
   const numSterilizedCats = animals.filter(
     (animal) => animal.isSterilise
   ).length;
@@ -175,45 +158,32 @@ const SectorDetails: React.FC = () => {
   const numIsBelongedCats = animals.filter(
     (animal) => !animal.isBelonged
   ).length;
-  // const archiveType = linkedCityId;
+  // const archiveType = linkedCitySectorId;
 
   //   useEffect(() => {
   //     if (isAuthenticated) {
   //       dispatch(fetchCities());
-  //       // dispatch(fetchAnimalsByAssociation(associationId));
-  //       dispatch(fetchAssociationUsers(associationId));
-  //       dispatch(fetchAnimalsByCity(cityId))
+  //       // dispatch(fetchAnimalsByCanal(canalId));
+  //       dispatch(fetchCanalUsers(canalId));
+  //       dispatch(fetchAnimalsByCitySector(citySectorId))
   //     }
   //   }, [dispatch, isAuthenticated]);
 
   // useEffect(() => {
   //     if (isAuthenticated) {
   //       dispatch(fetchCities());
-  //       // dispatch(fetchAnimalsByAssociation(associationId));
-  //       dispatch(fetchAssociationUsers(associationId));
-  //       dispatch(fetchAnimalsByCity(cityId))
+  //       // dispatch(fetchAnimalsByCanal(canalId));
+  //       dispatch(fetchCanalUsers(canalId));
+  //       dispatch(fetchAnimalsByCitySector(citySectorId))
   //     }
-  //   }, [cityId, isAuthenticated]);
+  //   }, [citySectorId, isAuthenticated]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchSectors(cityId));
-      dispatch(fetchAnimalsBySector(sectorId))
+      dispatch(fetchAnimalsByCitySector(citySectorId));
       dispatch(fetchCities());
     }
-  }, [dispatch, cityId, isAuthenticated]);
-
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       if (isAuthenticated) {
-  //         // console.log(association)
-  //         const sectores = await fetchAllSectors(cities, dispatch);
-  //         setSectors(sectores);
-  //       }
-  //     };
-
-  //     // fetchData();
-  //   }, [association, cities, isAuthenticated]);
+  }, [dispatch, citySectorId, isAuthenticated]);
 
   useEffect(() => {
     users.forEach((user) => {
@@ -223,7 +193,7 @@ const SectorDetails: React.FC = () => {
     });
   }, [users]);
 
-  // if (sectorsStatus === 'loading' || animalsStatus === 'loading' || associationsStatus === 'loading' || usersStatus === 'loading' || citiesStatus === 'loading') {
+  // if (sectorsStatus === 'loading' || animalsStatus === 'loading' || canalsStatus === 'loading' || usersStatus === 'loading' || citiesSectorStatus === 'loading') {
   //     return <LoadingPage />;
   // }
 
@@ -237,133 +207,152 @@ const SectorDetails: React.FC = () => {
     }
   };
 
-  const handleDeleteSector = async () => {
+  // const handleDeleteCitySector = async(citySectorId) => {
+
+  // }
+
+  const handleDeleteCitySector = async () => {
     // console.log(id);
-    if (sector.id) {
+    if (citySector.id) {
       setConfirmationVisible(true); // Affiche la modale de confirmation
     }
   };
 
   const handleConfirmSuppression = async () => {
     // console.log(id)
-    await dispatch(deleteSector(sector.id));
+    await dispatch(deleteCitySector(citySector.id));
     setConfirmationVisible(false); // Ferme la modale de confirmation
-    setAlertMessage("Le secteur a été supprimé avec succès"); // Définir le message d'alerte
+    setAlertMessage("La ville a été supprimé avec succès"); // Définir le message d'alerte
     setAlertVisible(true); // Affiche la modale d'alerte
   };
 
-  const handleEditSector = async (newName) => {
-    await dispatch(updateSector({ id: sector.id, name: newName }));
+  const handleEditCitySector = async (newName) => {
+    await dispatch(updateCitySector({ id: citySector.id, name: newName }));
     await dispatch(
-      updateAnimalSectorName({ sectorId: sector.id, newSectorName: newName })
+      updateAnimalCitySectorName({ citySectorId: citySector.id, newCitySectorName: newName })
     );
-    setCurrentSectorName(newName); // Update the current city name
+    setCurrentCitySectorName(newName); // Update the current citySector name
     console.log("EDIT CITY NAME : ", newName);
     setEditVisible(false);
   };
 
   return (
     <View>
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-      {userIsAdmin && (
-          <View style={{display: 'flex', flexDirection: 'row', justifyContent: 'flex-end', columnGap: 20}}>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          {userIsAdmin && (
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-end",
+                columnGap: 20,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setEditVisible(true)}
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 5,
+                  borderRadius: 50,
+                }}
+              >
+                <Icon name="create-outline" size={24} color="#000" />
+              </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setEditVisible(true)} style={{backgroundColor: '#fff', padding: 5, borderRadius: 50}}>
-                  <Icon name="create-outline" size={24} color="#000" />
-                </TouchableOpacity>
-
-                <TouchableOpacity  onPress={() => handleDeleteSector(sector.id)} style={{backgroundColor: '#fff', padding: 5, borderRadius: 50}}>
-            <Icon name="trash-outline" size={24} color="#c40030" />
-          </TouchableOpacity>
-
-          </View>
-        )}
-        <View style={styles.header1st}>
-          <Text style={styles.title}>
-            Secteur de : {sector?.name ? sector?.name : ""}
-          </Text>
-        </View>
-
-
-
-        <ConfirmationModal
-          visible={isConfirmationVisible}
-          onClose={() => setConfirmationVisible(false)}
-          onConfirm={handleConfirmSuppression}
-          messageType={"Voulez-vous vraiment supprimer ce secteur ?"}
-        />
-
-        <TextInputModal
-          visible={isEditVisible}
-          onClose={() => setEditVisible(false)} // Fermeture de la modale
-          onConfirm={handleEditSector}
-          messageType={"Entrez le nouveau nom du secteur"}
-          onChangeText={setEditedSectorName}
-        />
-
-        <View style={styles.sectionShare}>
-          <Text style={styles.sectionShare_title}>Partager le canal : </Text>
-          <TouchableOpacity
-            onPress={() => handleCopy}
-            style={styles.sectionShare_button}
-          >
-            <Text style={styles.sectionShare_buttonText}>
-              {association?.id}
+              <TouchableOpacity
+                onPress={() => handleDeleteCitySector(citySector.id)}
+                style={{
+                  backgroundColor: "#fff",
+                  padding: 5,
+                  borderRadius: 50,
+                }}
+              >
+                <Icon name="trash-outline" size={24} color="#c40030" />
+              </TouchableOpacity>
+            </View>
+          )}
+          <View style={styles.header1st}>
+            <Text style={styles.title}>
+              Secteur : {citySector.name ? citySector.name : editedCitySectorName}
             </Text>
+          </View>
+          <ConfirmationModal
+            visible={isConfirmationVisible}
+            onClose={() => setConfirmationVisible(false)}
+            onConfirm={handleConfirmSuppression}
+            messageType={"Voulez-vous vraiment supprimer cette ville ?"}
+          />
+
+          <TextInputModal
+            visible={isEditVisible}
+            onClose={() => setEditVisible(false)} // Fermeture de la modale
+            onConfirm={handleEditCitySector}
+            messageType={"Entrez le nouveau nom de la ville"}
+            onChangeText={setEditedCitySectorName}
+          />
+
+          <View style={styles.sectionShare}>
+            <Text style={styles.sectionShare_title}>Partager le canal : </Text>
+            <TouchableOpacity
+              onPress={() => handleCopy}
+              style={styles.sectionShare_button}
+            >
+              <Text style={styles.sectionShare_buttonText}>
+                {canal?.id}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.containerSection}>
+          {isOpenBlock1 && <View style={styles.sectionCitySector}></View>}
+
+          <TouchableOpacity
+            onPress={() => setIsOpenBlock2(!isOpenBlock2)}
+            style={styles.sectionHeader}
+          >
+            <Text style={styles.sectionTitle}>Animaux : ({users.length})</Text>
+            <Icon
+              name={isOpenBlock2 ? "chevron-down" : "chevron-forward"}
+              size={24}
+              color="#000"
+            />
+          </TouchableOpacity>
+          {isOpenBlock2 && (
+            <View style={styles.section}>
+              {users.map((user) => (
+                <View key={user.id}>
+                  <Text>{user.name}</Text>
+                  <Text>{user.email}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        <View style={styles.line} />
+
+        <AnimalFilters animals={animals} archiveType={archiveType} />
+      </ScrollView>
+      {userIsAdmin && (
+        <View style={styles.footer}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("AddCat", { canalId: canal?.id })
+            }
+            style={styles.sectionBtns_btn}
+          >
+            <View style={styles.buttonGroupIcons}>
+              <Image
+                source={require("../assets/icon-paw.png")}
+                style={styles.buttonIcon}
+              />
+              <Text style={{ color: "white" }}>+</Text>
+            </View>
           </TouchableOpacity>
         </View>
-      </View>
-
-      <View style={styles.containerSection}>
-        <TouchableOpacity
-          onPress={() => setIsOpenBlock1(!isOpenBlock1)}
-          style={styles.sectionHeader}
-        >
-          <Text style={styles.sectionTitle}>Animaux : ({users.length})</Text>
-          <Icon
-            name={isOpenBlock1 ? "chevron-down" : "chevron-forward"}
-            size={24}
-            color="#000"
-          />
-        </TouchableOpacity>
-        {isOpenBlock1 && (
-          <View style={styles.section}>
-            {users.map((user) => (
-              <View key={user.id}>
-                <Text>{user.name}</Text>
-                <Text>{user.email}</Text>
-              </View>
-            ))}
-          </View>
-        )}
-      </View>
-      <View style={styles.line} />
-
-      <AnimalFilters
-        animals={animals}
-        archiveType={archiveType}
-        sectorized={sectorsList}
-      />
-    </ScrollView>
-    {userIsAdmin && (
-      <View style={styles.footer}>
-      <TouchableOpacity
-        onPress={() =>
-          navigation.navigate("AddCat", { associationId: association?.id })
-        }
-        style={styles.sectionBtns_btn}
-      >
-        <View style={styles.buttonGroupIcons}>
-          <Image
-            source={require("../assets/icon-paw.png")}
-            style={styles.buttonIcon}
-          />
-          <Text style={{ color: "white" }}>+</Text>
-        </View>
-      </TouchableOpacity>
-    </View>
-)}
+      )}
     </View>
   );
 };
@@ -372,7 +361,6 @@ const styles = StyleSheet.create({
   container: {
     padding: 0,
     heigt: "100%",
-    marginBottom: 50
   },
   header: {
     flexDirection: "column",
@@ -386,13 +374,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#2F4F4F",
     paddingTop: 20,
   },
+  btnAdmin: {
+    color: "#fff",
+  },
   sectionShare: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#2F4F4F",
     color: "#FFF",
-    // padding: 5
   },
   sectionShare_title: {
     fontSize: 16,
@@ -406,14 +396,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     color: "#000",
     padding: 5,
-    marginLeft: 10
   },
   sectionShare_buttonText: {
     color: "#000",
   },
   sectionBtns: {
     flexDirection: "row",
-    // flexWrap: "nowrap",
     alignItems: "center",
     justifyContent: "space-between",
     rowGap: 40,
@@ -449,8 +437,6 @@ const styles = StyleSheet.create({
 
   containerSection: {
     padding: 10,
-    // backgroundColor: '#C40030',
-    // margin: 5
   },
 
   section: {
@@ -471,6 +457,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 10,
+    // color: '#FFF'
   },
   text: {
     fontSize: 14,
@@ -494,17 +481,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 20,
   },
-  sectionCity: {
+  sectionCitySector: {
     flexDirection: "column",
     rowGap: 5,
     // alignItems: 'center',
     justifyContent: "center",
   },
-  cityList: {
+  citySectorList: {
     maxWidth: 200,
     // backgroundColor: 'blue'
   },
-  sectionBtns_btnCity: {
+  sectionBtns_btnCitySector: {
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: "#000",
@@ -512,7 +499,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 2,
   },
-  sectionTitleCity: {
+  sectionTitleCitySector: {
     color: "#FFF",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
@@ -540,4 +527,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SectorDetails;
+export default CitySectorDetails;

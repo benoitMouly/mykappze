@@ -1,12 +1,7 @@
-export const getFilteredAnimals = (animals, selectedCity, selectedSector, selectedColor, filterByDisease, filterBySterilization, filterByIdentification, filterByOwner, filterBySex, filterByMom, filterByName) => {
+export const getFilteredAnimals = (animals, selectedCitySector, selectedColor, filterByDisease, filterBySterilization, filterByIdentification, filterByOwner, filterBySex, filterByMom, filterByName) => {
     return animals.filter((animal) => {
         // Filtre par ville
-        if (selectedCity && selectedCity !== 'Toutes' && animal.cityName !== selectedCity) {
-            return false;
-        }
-
-        // Filtre par secteur
-        if (selectedSector && selectedSector !== 'Tous' && animal.sectorName !== selectedSector) {
+        if (selectedCitySector && selectedCitySector !== 'Toutes' && animal.citySectorName !== selectedCitySector) {
             return false;
         }
 

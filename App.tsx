@@ -10,6 +10,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { initStripe } from '@stripe/stripe-react-native';
 
 
 
@@ -69,6 +70,12 @@ export default function App() {
   useEffect(() => {
     loadFonts();
   }, []);
+
+  useEffect(() => {
+    initStripe({
+        publishableKey: 'pk_test_51Ng7WZKu63J8L2mL7dvfBNlwLZuhwHBiNdjM50Il4BLNklaaw7fq1gKFOERzW4SRbHPJJQpW9cis4RDY9TQH5OUW00BEIm8fzk',
+    });
+}, []);
 
   // useEffect(() => {
   //   registerForPushNotificationsAsync().then(token => console.log(token));

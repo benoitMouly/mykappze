@@ -64,7 +64,7 @@ export const validateEmail = (email, err) => {
 
 
 
-export const validateIdAssociation = (str) => {
+export const validateIdCanal = (str) => {
     const errors = {};
     const stringRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ-]+$/; // Les caractères alphabétiques uniquement (y compris les accents et les tirets)
     if (!stringRegex.test(str)) {

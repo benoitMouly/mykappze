@@ -10,9 +10,9 @@ import {
   ScrollView,
 } from "react-native";
 import {
-  fetchAssociations,
-  removeAssociation,
-} from "../features/associations/associationSlice";
+  fetchCanals,
+  removeCanal,
+} from "../features/canals/canalSlice";
 import TextInputModal from "../components/general/TextUpdateModal";
 import {
   deleteUser,
@@ -22,21 +22,23 @@ import {
   updateUserName,
   updateUserSurname,
 } from "../features/user/userSlice";
-import { removeUserFromAssociation } from "../features/associations/associationUsersSlice";
+import { removeUserFromCanal } from "../features/canals/canalUsersSlice";
 import CustomAlert from "../components/general/CustomAlert";
 import ConfirmationModal from "../components/general/ConfirmationModal";
 import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
 import Icon from "react-native-vector-icons/Ionicons";
+import { fetchLicenseById } from "../features/licences/licenceSlice";
+import { formatDateToFrench } from "../utils/formatDate";
+
 const Settings = () => {
   //   const {
   //     params: { userId },
   //   } = useRoute();
-  const { name, surname, email, isAuthenticated, uid } = useSelector(
-    (state) => state.auth
-  );
+  const { name, surname, email, isAuthenticated, uid, licenseNumber, isMairie, isAssociation} =
+    useSelector((state) => state.auth);
   const userId = uid;
-  const { data: associations } = useSelector((state) => state.associations);
-  const { data: users } = useSelector((state) => state.associationUsers);
+  const { data: canals } = useSelector((state) => state.canals);
+  const { data: users } = useSelector((state) => state.canalUsers);
   //   const user =
 
   const dispatch = useDispatch();
@@ -45,21 +47,20 @@ const Settings = () => {
   const [editableFields, setEditableFields] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [
-    showConfirmationUnlinkedAssociation,
-    setShowConfirmationUnlinkAssociation,
+    showConfirmationUnlinkedCanal,
+    setShowConfirmationUnlinkCanal,
   ] = useState(false);
   const [
-    showConfirmationDeleteAssociation,
-    setShowConfirmationDeleteAssociation,
+    showConfirmationDeleteCanal,
+    setShowConfirmationDeleteCanal,
   ] = useState(false);
 
-  const [selectedAssociationId, setSelectedAssociationId] = useState(null);
-  const [creatorAssociation, setCreatorAssociation] = useState([]);
+  const [selectedCanalId, setSelectedCanalId] = useState(null);
+  const [creatorCanal, setCreatorCanal] = useState([]);
   const [userIsAdmin, setUserRole] = useState({});
 
-  const sectorsStatus = useSelector((state) => state.sectors.status);
   const animalsStatus = useSelector((state) => state.animals.status);
-  const associationsStatus = useSelector((state) => state.associations.status);
+  const canalsStatus = useSelector((state) => state.canals.status);
   const [isEditNameVisible, setEditVisible] = useState(false);
   const [isEditSurnameVisible, setEditVisibleSurname] = useState(false);
   const [isEditEmailVisible, setEditVisibleEmail] = useState(false);
@@ -76,12 +77,14 @@ const Settings = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteAccountModal, setDeleteAccountModal] = useState(false);
   const [messageType, setMessageType] = useState(null);
+  const currentLicenseDetails = useSelector((state) => state.licences.license);
 
   useEffect(() => {
     if (isAuthenticated) {
-      // Dispatch your fetchAssociations action if needed
+      // Dispatch your fetchCanals action if needed
+      dispatch(fetchLicenseById(licenseNumber));
     }
-  }, [dispatch, userId, isAuthenticated]);
+  }, [dispatch, userId, isAuthenticated, licenseNumber]);
 
   //   useEffect(() => {
   //     if (uid && uid === userId) {
@@ -99,47 +102,46 @@ const Settings = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchAssociations(userId));
+      dispatch(fetchCanals(userId));
       if (uid && uid === userId) {
-        let creatorAssociations = [];
+        let creatorCanals = [];
 
-        for (let association of associations) {
-          if (Array.isArray(association.role)) {
-            for (let role of association.role) {
-              if (role.isAdmin === true && role.uid === userId) {
-                creatorAssociations.push(association);
+        for (let canal of canals) {
+          if (Array.isArray(canal.role)) {
+            for (let role of canal.role) {
+              if (role.isAdmin === true && role.uid === userId && canal.adminId === userId) {
+                creatorCanals.push(canal);
                 break;
               }
             }
           }
         }
 
-        setCreatorAssociation(creatorAssociations);
+        setCreatorCanal(creatorCanals);
       } else {
-        setCreatorAssociation([]);
+        setCreatorCanal([]);
       }
     }
   }, [dispatch, userId, isAuthenticated]);
 
   useEffect(() => {
     // Initialiser userRoles avec les rôles actuels des utilisateurs
-    users.forEach(user => {
-
-        if (user.id === uid) {
-            setUserRole(user.isAdmin);
-        }
+    users.forEach((user) => {
+      if (user.id === uid) {
+        setUserRole(user.isAdmin);
+      }
     });
-}, [users]);
+  }, [users]);
 
-  //   const openModal = (userId, associationId, message) => {
+  //   const openModal = (userId, canalId, message) => {
   //     setSelectedUserId(userId);
-  //     setSelectedAssociationId(associationId);
+  //     setSelectedCanalId(canalId);
   //     setMessageType(message);
   //   };
 
-  const openDeleteModal = (userId, associationId) => {
+  const openDeleteModal = (userId, canalId) => {
     setSelectedUserId(userId);
-    setSelectedAssociationId(associationId);
+    setSelectedCanalId(canalId);
     setDeleteModal(true);
   };
 
@@ -147,7 +149,7 @@ const Settings = () => {
     setDeassociateModal(true);
   };
 
-  const openDeleteAccountModal = (userId, associationId) => {
+  const openDeleteAccountModal = (userId, canalId) => {
     setDeleteAccountModal(true);
   };
 
@@ -178,9 +180,9 @@ const Settings = () => {
   //   const handleConfirmSuppression = async () => {
   //     // console.log(id)
   //     await dispatch(
-  //       removeUserFromAssociation({
+  //       removeUserFromCanal({
   //         userId: selectedUserId,
-  //         associationId: association.id,
+  //         canalId: canal.id,
   //       })
   //     );
   //     setConfirmationVisible(false); // Ferme la modale de confirmation
@@ -189,12 +191,12 @@ const Settings = () => {
   //     setSelectedUserId(null); // ferme la modale
   //   };
 
-  const handleConfirmUnlinkAssociation = async () => {
+  const handleConfirmUnlinkCanal = async () => {
     // console.log(id)
     await dispatch(
-      removeUserFromAssociation({
+      removeUserFromCanal({
         userId: selectedUserId,
-        associationId: selectedAssociationId,
+        canalId: selectedCanalId,
       })
     );
     setConfirmationVisible(false); // Ferme la modale de confirmation
@@ -203,16 +205,16 @@ const Settings = () => {
     setSelectedUserId(null); // ferme la modale
   };
 
-  const handleConfirmDeleteAssociation = async () => {
+  const handleConfirmDeleteCanal = async () => {
     // console.log(id)
     await dispatch(
-      removeAssociation({
+      removeCanal({
         userId: selectedUserId,
-        associationId: selectedAssociationId,
+        canalId: selectedCanalId,
       })
     );
     setConfirmationVisible(false); // Ferme la modale de confirmation
-    setAlertMessage("L'association a été supprimée avec succès'"); // Définir le message d'alerte
+    setAlertMessage("L'canal a été supprimée avec succès'"); // Définir le message d'alerte
     setAlertVisible(true); // Affiche la modale d'alerte
     setSelectedUserId(null); // ferme la modale
   };
@@ -222,169 +224,230 @@ const Settings = () => {
     dispatch(logout());
   };
 
+  const expiryDateFrench = formatDateToFrench(
+    currentLicenseDetails?.expiryDate
+  );
+
   // Add all your handler functions here
 
   return (
     <View style={styles.container}>
-    {/* <> */}
+      {/* <> */}
       <HeaderEditAnimal navigation={navigate} animalName={surname} />
       <ScrollView style={styles.mainView}>
-        <View style={styles.sectionGeneral}>
+
+        <View style={{padding: 20}}>
+          <Text>{surname}</Text>
+          <Text>Membre depuis le 5 mai 2021</Text>
+          <Text>Formule : gratuite</Text></View>
+        <View style={{ backgroundColor: "#fff" }}>
           <Text style={styles.title2}>
             Informations générales de l'utilisateur
           </Text>
-
-          <View style={styles.inputsModify}>
-            <View style={styles.inputModify}>
-              <Text style={styles.text}>{name}</Text>
-              <TouchableOpacity
-                onPress={() => setEditVisible(true)}
-                style={styles.sectionHeader}
-              >
-                <View style={styles.buttonIcon}>
-                  <Icon
-                    style={styles.buttonIconElt}
-                    name="pencil-outline"
-                    size={15}
-                    color="#fff"
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.inputModify}>
-              <Text style={styles.text}>{surname}</Text>
-              <TouchableOpacity
-                onPress={() => setEditVisibleSurname(true)}
-                style={styles.sectionHeader}
-              >
-                <View style={styles.buttonIcon}>
-                  <Icon
-                    style={styles.buttonIconElt}
-                    name="pencil-outline"
-                    size={15}
-                    color="#fff"
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.inputModify}>
-              <Text style={styles.text}>{email}</Text>
-              <TouchableOpacity
-                onPress={() => setEditVisibleEmail(true)}
-                style={styles.sectionHeader}
-              >
-                <View style={styles.buttonIcon}>
-                  <Icon
-                    style={styles.buttonIconElt}
-                    name="pencil-outline"
-                    size={15}
-                    color="#fff"
-                  />
-                </View>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.inputModify}>
-              <Text style={styles.text}>Modifier le mot de passe</Text>
-              <TouchableOpacity
-                onPress={() => setEditVisiblePassword(true)}
-                style={styles.sectionHeader}
-              >
-                <View style={styles.buttonIcon}>
-                  <Icon
-                    style={styles.buttonIconElt}
-                    name="pencil-outline"
-                    size={15}
-                    color="#fff"
-                  />
-                </View>
-              </TouchableOpacity>
+        </View>
+        <View style={styles.sectionGeneral}>
+          <View style={styles.sectionBloc}>
+            <View style={styles.inputsModify}>
+              <View style={styles.inputModify}>
+                <Text style={styles.text}>{name}</Text>
+                <TouchableOpacity
+                  onPress={() => setEditVisible(true)}
+                  style={styles.sectionHeader}
+                >
+                  <View style={styles.buttonIcon}>
+                    <Icon
+                      style={styles.buttonIconElt}
+                      name="pencil-outline"
+                      size={15}
+                      color="#fff"
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.inputModify}>
+                <Text style={styles.text}>{surname}</Text>
+                <TouchableOpacity
+                  onPress={() => setEditVisibleSurname(true)}
+                  style={styles.sectionHeader}
+                >
+                  <View style={styles.buttonIcon}>
+                    <Icon
+                      style={styles.buttonIconElt}
+                      name="pencil-outline"
+                      size={15}
+                      color="#fff"
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.inputModify}>
+                <Text style={styles.text}>{email}</Text>
+                <TouchableOpacity
+                  onPress={() => setEditVisibleEmail(true)}
+                  style={styles.sectionHeader}
+                >
+                  <View style={styles.buttonIcon}>
+                    <Icon
+                      style={styles.buttonIconElt}
+                      name="pencil-outline"
+                      size={15}
+                      color="#fff"
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.inputModify}>
+                <Text style={styles.text}>Modifier le mot de passe</Text>
+                <TouchableOpacity
+                  onPress={() => setEditVisiblePassword(true)}
+                  style={styles.sectionHeader}
+                >
+                  <View style={styles.buttonIcon}>
+                    <Icon
+                      style={styles.buttonIconElt}
+                      name="pencil-outline"
+                      size={15}
+                      color="#fff"
+                    />
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
 
-        <View style={styles.sectionAssociationMember}>
-          {associations.length > 0 && (
+        {isMairie && (<>
+
+          <View style={styles.sectionGeneral}>
+        <View style={{ backgroundColor: "#fff" }}>
+          <Text style={styles.title2}>
+            Abonnement
+          </Text></View>
+          <View style={styles.sectionBloc}>
+          {licenseNumber ? (
             <>
-              <Text style={styles.title2}>
-                Associations dont vous êtes membres
+              <Text style={styles.licences}>
+                Numéro de license : {licenseNumber}. La license expirera le 
+                {expiryDateFrench}
               </Text>
-              <View style={styles.inputsModify}>
-                {associations.map((association, index) => (
-                  <View style={styles.inputModify} key={index}>
-                    {association.adminId !== userId ? (
-                      <>
-                        <Text style={styles.text}>
-                          {association.name} (
-                          {userIsAdmin ? "admin" : "visiteur"})
-                        </Text>
-                        <TouchableOpacity
-                          onPress={() =>
-                            openDeassociateModal(
-                              uid,
-                              association.id,
-                              "Se désassocier de cette association ?"
-                            )
-                          }
-                          style={styles.btnDeassociate}
-                        >
-                          <Text style={styles.btnDeassociateText}>
-                            Retirer de vos associations
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigate.navigate("Subscribe")}
+              >
+                <Text style={styles.buttonTextSub}>Renouveler la licence</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text style={styles.licences}>
+                Vous ne disposez pas d'un abonnement actif.
+              </Text>
+
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigate.navigate("Subscribe")}
+              >
+                <Text style={styles.buttonTextSub}>Obtenir une licence</Text>
+              </TouchableOpacity>
+            </>
+          )}
+          </View>
+        
+
+        </View>
+        </>)}
+
+        <View style={styles.sectionCanalMember}>
+          {canals.length > 0 && (
+            <>
+              <View style={{ backgroundColor: "#fff" }}>
+                <Text style={styles.title2}>
+                  Canals dont vous êtes membres
+                </Text>
+              </View>
+              <View style={styles.sectionBloc}>
+                <View style={styles.inputsModify}>
+                  {canals.map((canal, index) => (
+                    <View style={styles.inputModify} key={index}>
+                      {canal.adminId !== userId ? (
+                        <>
+                          <Text style={styles.text}>
+                            {canal.name} (
+                            {userIsAdmin ? "admin" : "visiteur"})
                           </Text>
-                        </TouchableOpacity>
-                      </>
-                    ) : (
-                      <Text style={styles.text}>
-                        {association.name} (Super admin)
-                      </Text>
-                    )}
-                  </View>
-                ))}
+                          <TouchableOpacity
+                            onPress={() =>
+                              openDeassociateModal(
+                                uid,
+                                canal.id,
+                                "Se désassocier de cette canal ?"
+                              )
+                            }
+                            style={styles.btnDeassociate}
+                          >
+                            <Text style={styles.btnDeassociateText}>
+                              Retirer de vos canals
+                            </Text>
+                          </TouchableOpacity>
+                        </>
+                      ) : (
+                        <Text style={styles.text}>
+                          {canal.name} (Super admin)
+                        </Text>
+                      )}
+                    </View>
+                  ))}
+                </View>
               </View>
             </>
           )}
         </View>
 
-        <View style={styles.sectionAssociationAdmin}>
-          <Text style={styles.title2}>
-            Associations dont vous avez la gestion :{" "}
-          </Text>
-
-          <View style={styles.inputsModify}>
-            {creatorAssociation.map((asso, index) => (
-              <>
-                <View key={index} style={styles.inputModify}>
-                  <Text key={index} style={styles.text}>
-                    {asso.name} (
-                    {asso.adminId === userId ? "Super admin" : "admin"})
-                  </Text>
-                  <TouchableOpacity
-                  onPress={() =>
-                    openDeleteModal(
-                      uid,
-                      asso.id,
-                      "Supprimer cette association ?"
-                    )
-                  }
-                  style={styles.btnSuppAssociation}
-                >
-                  <Text style={styles.btnSuppAssociationText}>
-                    Supprimer cette association
-                  </Text>
-                </TouchableOpacity>
-                </View>
-
-              </>
-            ))}
+        <View style={styles.sectionCanalAdmin}>
+          <View style={{ backgroundColor: "#fff" }}>
+            <Text style={styles.title2}>
+              Canals dont vous avez la gestion
+            </Text>
+          </View>
+          <View style={styles.sectionBloc}>
+            <View style={styles.inputsModify}>
+              {creatorCanal.map((asso, index) => (
+                <>
+                  <View key={index} style={styles.inputModify}>
+                    <Text key={index} style={styles.text}>
+                      {asso.name} (
+                      {asso.adminId === userId ? "Super admin" : "admin"})
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        openDeleteModal(
+                          uid,
+                          asso.id,
+                          "Supprimer cette canal ?"
+                        )
+                      }
+                      style={styles.btnSuppCanal}
+                    >
+                      <Text style={styles.btnSuppCanalText}>
+                        Supprimer cette canal
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ))}
+            </View>
           </View>
         </View>
         <View style={styles.suppAccount}>
-          <TouchableOpacity
-            onPress={() => openDeleteAccountModal()}
-            style={styles.btnSupp}
-          >
-            <Text style={styles.buttonSuppText}>SUPPRIMER LE COMPTE</Text>
-          </TouchableOpacity>
-
+          <View style={styles.sectionBloc}>
+            <TouchableOpacity
+              onPress={() => openDeleteAccountModal()}
+              style={styles.btnSupp}
+            >
+              <Text style={styles.buttonSuppText}>SUPPRIMER LE COMPTE</Text>
+            </TouchableOpacity>
+          </View>
           {/* Add all the other interface elements here */}
         </View>
 
@@ -423,14 +486,14 @@ const Settings = () => {
         <ConfirmationModal
           visible={deassociateModal}
           onClose={() => setDeassociateModal(false)}
-          onConfirm={handleConfirmUnlinkAssociation}
+          onConfirm={handleConfirmUnlinkCanal}
           messageType={"Voulez vous désassocier le compte ? "}
         />
         <ConfirmationModal
           visible={deleteModal}
           onClose={() => setDeleteModal(false)}
-          onConfirm={handleConfirmDeleteAssociation}
-          messageType={"Voulez vous supprimer l'association ?"}
+          onConfirm={handleConfirmDeleteCanal}
+          messageType={"Voulez vous supprimer l'canal ?"}
         />
         <ConfirmationModal
           visible={deleteAccountModal}
@@ -443,26 +506,26 @@ const Settings = () => {
           onClose={() => setAlertVisible(false)}
           message={alertMessage}
         />
-      {/* </ScrollView> */}
-    </ScrollView>
-    {/* </> */}
+        {/* </ScrollView> */}
+      </ScrollView>
+      {/* </> */}
     </View>
   );
 };
 
 const styles = {
-  container:{
-    height: '100%',
+  container: {
+    height: "100%",
     backgroundColor: "#2F4F4F",
     // marginBottom: 150
-    flexDirection: 'column'
+    flexDirection: "column",
   },
   mainView: {
     backgroundColor: "#2F4F4F",
     // backgroundColor: "#075bb5",
-    padding: 20,
-    height : '100%',
-    paddingBottom: 100
+    // padding: 20,
+    height: "100%",
+    paddingBottom: 100,
   },
   title1: {
     color: "#FFF",
@@ -474,17 +537,21 @@ const styles = {
     marginTop: 20,
     marginBottom: 10,
   },
-  sectionAssociationMember: {
+  sectionBloc: {
+    padding: 20,
+  },
+  sectionCanalMember: {
     marginVertical: 10,
   },
-  sectionAssociationAdmin: {
+  sectionCanalAdmin: {
     marginVertical: 10,
   },
   title2: {
-    color: "#FFF",
+    color: "#2f4f4f",
     fontSize: 19,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
+    marginLeft: 20,
   },
   inputsModify: {
     rowGap: 10,
@@ -603,22 +670,36 @@ const styles = {
     color: "white",
     fontFamily: "WixMadeforDisplay-Bold",
     textAlign: "center",
-    fontSize: 10
+    fontSize: 10,
   },
-  btnSuppAssociation:{
+  btnSuppCanal: {
     backgroundColor: "#c40030",
-    width: '50%'
+    width: "50%",
   },
-  btnSuppAssociationText: {
+  btnSuppCanalText: {
     padding: 5,
     color: "white",
     fontFamily: "WixMadeforDisplay-Bold",
     textAlign: "center",
     fontSize: 10,
-    
   },
   suppAccount: {
-    paddingBottom: 100
+    paddingBottom: 100,
+  },
+  button: {
+    backgroundColor: '#d15e41',
+    padding: 8,
+    borderRadius: 2,
+    width: '100%'
+  },
+  buttonTextSub: {
+    textAlign: 'center',
+    color: '#fff'
+  },
+  licences: {
+    color: '#fff',
+    marginBottom: 20,
+    fontFamily: "WixMadeforDisplay-Regular",
   }
 };
 

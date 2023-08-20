@@ -19,18 +19,9 @@ import Icon from "react-native-vector-icons/Ionicons";
 
 interface FilterValues {
   text: string;
-  selectCity: string;
-  selectSector: string;
+  selectCitySector: string;
 }
 
-// interface FilteredSectors {
-//   id: string;
-//   city: string;
-//   cityId: string;
-//   associationid: string;
-//   name: string;
-//   userId: string;
-// }
 
 interface Animal {
   id: string;
@@ -38,29 +29,19 @@ interface Animal {
   image?: string;
   sex: string;
   isMother: boolean;
-  cityName: string;
-  sectorName: string;
+  citySectorName: string;
 }
 
-interface Sector {
-  id: string;
-  city: string;
-  cityId: string;
-  associationid: string;
-  name: string;
-  userId: string;
-}
 
-interface City {
+interface CitySector {
   id: string;
-  associationid: string;
+  canalid: string;
   name: string;
   userId: string;
 }
 
 interface AnimalFiltersProps {
   animals: Animal[];
-  sectorized: Sector[];
   archiveType: string;
 }
 
@@ -73,9 +54,8 @@ interface DataState<T> {
 
 // Utilisez cette interface dans l'interface RootState
 interface RootState {
-  cities: DataState<City>;
+  citiesSector: DataState<CitySector>;
   animals: DataState<Animal>;
-  sectors: DataState<Sector>;
   auth: {
     isAuthenticated: boolean;
     uid: string;
@@ -84,22 +64,14 @@ interface RootState {
 
 const AnimalFilters: React.FC<AnimalFiltersProps> = ({
   animals,
-  sectorized,
   archiveType,
 }) => {
-  const { data: cities, status: citiesStatus } = useSelector(
-    (state: RootState) => state.cities
+  const { data: citiesSector, status: citiesSectorStatus } = useSelector(
+    (state: RootState) => state.citiesSector
   );
 
-  const { data: sectors, status: sectorsStatus } = useSelector(
-    (state: RootState) => state.sectors
-  );
-
-  console.log(sectors);
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedCityId, setSelectedCityId] = useState<string | null>(null);
-  const [selectedSector, setSelectedSector] = useState("");
-  const [selectedSectorId, setSelectedSectorId] = useState<string | null>(null);
+  const [selectedCitySector, setSelectedCitySector] = useState("");
+  const [selectedCitySectorId, setSelectedCitySectorId] = useState<string | null>(null);
 
   const [selectedColor, setSelectedColor] = useState("");
   const [filterByDisease, setFilterByDisease] = useState(null);
@@ -111,85 +83,26 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
   const [filterByMom, setFilterByMom] = useState(null);
   const [filters, setFilters] = useState<FilterValues>({
     text: "",
-    selectCity: "option1",
-    selectSector: "option1",
+    selectCitySector: "option1",
   });
-
-  const [filteredSectors, setFilteredSectors] = useState([]);
-  // useEffect(() => {
-  //   if (selectedCityId) {
-  //     const relevantSectors = sectorized.filter(
-  //       (sector) => sector.cityId === selectedCityId
-  //     );
-  //     console.log(relevantSectors);
-  //     setFilteredSectors(relevantSectors);
-  //   } else if (archiveType === "city") {
-  //     console.log('SECTORIZED')
-  //     console.log(sectorized)
-  //     const relevantSectors = sectors;
-  //     console.log(relevantSectors);
-  //     setFilteredSectors(relevantSectors);
-  //   }
-  // }, [selectedCityId], sectors);
-
-  useEffect(() => {
-    if (selectedCityId) {
-      const relevantSectors = sectorized.filter(
-        (sector) => sector.cityId === selectedCityId
-      );
-      console.log(relevantSectors);
-      setFilteredSectors(relevantSectors);
-    }
-
-    // else if (archiveType === "city") {
-    //   console.log('SECTORIZED')
-    //   console.log(sectorized)
-    //   const relevantSectors = sectors;
-    //   console.log(relevantSectors);
-    //   setFilteredSectors(relevantSectors);
-    // }
-  }, [selectedCityId]);
 
   const handleNameChange = (name: string, value: any) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const cityOptions = [
+  const citySectorOptions = [
     { id: "", label: "Toutes" },
-    ...cities.map((city) => ({ id: city.id, label: city.name })),
+    ...citiesSector.map((citySector) => ({ id: citySector.id, label: citySector.name })),
   ];
 
-  const handleCityChange = (value: string) => {
-    const selectedCity = cityOptions.find((city) => city.id === value);
-    if (selectedCity) {
-      setSelectedCityId(selectedCity.id);
-      setSelectedCity(selectedCity.label);
+  const handleCitySectorChange = (value: string) => {
+    const selectedCitySector = citySectorOptions.find((citySector) => citySector.id === value);
+    if (selectedCitySector) {
+      setSelectedCitySectorId(selectedCitySector.id);
+      setSelectedCitySector(selectedCitySector.label);
     } else {
-      setSelectedCityId(null); // Réinitialisez la valeur sélectionnée
-      setSelectedCity(""); // Réinitialisez le label sélectionné
-    }
-
-    setSelectedSector("");
-  };
-
-  const sectorOptions = [
-    { id: "", label: "Tous" },
-    ...filteredSectors.map((sector) => ({ id: sector.id, label: sector.name })),
-  ];
-
-  let sectorizedOptions = [
-    { id: "", label: "Tous" },
-    ...sectors.map((sector) => ({ id: sector.id, label: sector.name })),
-  ];
-
-  const handleSectorChange = (value: string) => {
-    const selectedSector = sectorOptions.find((sector) => sector.id === value);
-    if (selectedSector) {
-      setSelectedSectorId(selectedSector.id);
-      setSelectedSector(selectedSector.label);
-    } else {
-      setSelectedSectorId(null); // Réinitialisez la valeur sélectionnée
-      setSelectedSector(""); // Réinitialisez le label sélectionné
+      setSelectedCitySectorId(null); // Réinitialisez la valeur sélectionnée
+      setSelectedCitySector(""); // Réinitialisez le label sélectionné
     }
   };
 
@@ -224,8 +137,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
   // Filtrer les animaux par le nom.
   const filteredAnimals = getFilteredAnimals(
     animals,
-    selectedCity,
-    selectedSector,
+    selectedCitySector,
     selectedColor,
     filterByDisease,
     filterBySterilization,
@@ -282,19 +194,19 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
                 onChangeText={(value) => handleNameChange("text", value)}
               />
             </View>
-            {archiveType === "association" ? (
+            {archiveType === "canal" ? (
               <View style={styles.filterContainer}>
-                <Text style={styles.filterLabel}>Ville :</Text>
+                <Text style={styles.filterLabel}>Secteur :</Text>
                 <Picker
                   style={{ height: 50, width: 150 }}
-                  selectedValue={selectedCityId}
-                  onValueChange={handleCityChange}
+                  selectedValue={selectedCitySectorId}
+                  onValueChange={handleCitySectorChange}
                 >
-                  {cityOptions.map((city) => (
+                  {citySectorOptions.map((citySector) => (
                     <Picker.Item
-                      key={city.id}
-                      label={city.label}
-                      value={city.id}
+                      key={citySector.id}
+                      label={citySector.label}
+                      value={citySector.id}
                     />
                   ))}
                 </Picker>
@@ -303,45 +215,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
               <></>
             )}
 
-            {archiveType !== "sector" ? (
-              <View style={styles.filterContainer}>
-                <Text style={styles.filterLabel}>Secteurs :</Text>
-                <Picker
-                  style={{ height: 50, width: 150 }}
-                  selectedValue={selectedSectorId}
-                  onValueChange={handleSectorChange}
-                >
-                  {sectorOptions.length > 1 ? (
-                    sectorOptions.map((sector) => (
-                      <Picker.Item
-                        key={sector.id}
-                        label={sector.label}
-                        value={sector.id}
-                      />
-                    ))
-                  ) : sectorizedOptions.length > 1 &&
-                    archiveType !== "association" ? (
-                    sectorizedOptions.map((sector) => (
-                      <Picker.Item
-                        key={sector.id}
-                        label={sector.label}
-                        value={sector.id}
-                      />
-                    ))
-                  ) : (
-                    <Picker.Item
-                      key={''}
-                      label={'Tous'}
-                      value={''}
-                    />
-                  )}
-                </Picker>
 
-                {/* </Picker> */}
-              </View>
-            ) : (
-              <></>
-            )}
 
             <View style={styles.filterContainer}>
               <Text style={styles.filterLabel}>Robe :</Text>
@@ -436,13 +310,6 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
                 <Picker.Item label="Oui" value={true} />
                 <Picker.Item label="Non" value={""} />
               </Picker>
-
-              {/* <View style={styles.filterContainer}>
-                <Button
-                  title="Valider"
-                  onPress={() => setModalVisible(false)}
-                />
-              </View> */}
             </View>
             <View style={styles.sectionBtns}>
               <TouchableOpacity

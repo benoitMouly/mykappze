@@ -9,13 +9,11 @@ import {
   uploadSingleFile,
   addDocumentToAnimal,
 } from "../features/animals/animalSlice";
-// import AddCityForm from '../../components/cities/AddCity';
-// import AddSectorForm from '../../components/cities/AddSector';
-import CityAndSectorSelect from "../components/cities/cityAndSectorSelect";
+// import AddCitySectorForm from '../../components/citiesSector/AddCitySector';
+import CitySectorAndSectorSelect from "../components/citiesSector/citySectorAndSectorSelect";
 // import ColorSelect from "../components/animals/colorSelect";
 import EditableImage from "../components/general/EditableImage";
 import ColorSelect from "../components/animals/colorSelect";
-// import CityAndSectorSelect from "../components/cities/cityAndSectorSelect";
 import {
   Button,
   TextInput,
@@ -30,11 +28,10 @@ import { Picker } from "@react-native-picker/picker";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { ScrollView } from "react-native-gesture-handler";
 import * as ImagePicker from "expo-image-picker";
-import { fetchSectors } from "../features/sectors/sectorSlice";
 import CustomAlert from "../components/general/CustomAlert";
 import EditableDocumentList from "../components/general/EditableDocuments";
 
-interface Association {
+interface Canal {
   id: string;
   data: any[]; // Changez `any` en type approprié
   // Autres propriétés...
@@ -53,12 +50,8 @@ interface User {
   // Ajoutez d'autres champs ici si nécessaire
 }
 
-interface City {
+interface CitySector {
   // Propriétés pour la ville...
-}
-
-interface Sector {
-  // Propriétés pour le secteur...
 }
 
 interface DataState<T> {
@@ -69,11 +62,10 @@ interface DataState<T> {
 }
 
 interface RootState {
-  associations: DataState<Association>;
-  cities: DataState<City>;
+  canals: DataState<Canal>;
+  citiesSector: DataState<CitySector>;
   animals: DataState<Animal>;
-  associationUsers: DataState<User>;
-  sectors: DataState<Sector>;
+  canalUsers: DataState<User>;
   auth: {
     isAuthenticated: boolean;
     uid: string;
@@ -83,17 +75,16 @@ interface RootState {
 const ObjectForm = (props) => {
   const route = useRoute();
   const { uid } = useSelector((state: RootState) => state.auth);
-  //   const { associationId } = props.associationId;
-  const { associationId } = route.params;
-  // console.log("ASSOCIATION ID : ", associationId)
-  const { data: associations } = useSelector(
-    (state: RootState) => state.associations
+  //   const { canalId } = props.canalId;
+  const { canalId } = route.params;
+  // console.log("ASSOCIATION ID : ", canalId)
+  const { data: canals } = useSelector(
+    (state: RootState) => state.canals
   );
-  const associationInfos = associations.find(
-    (asso) => asso.id === associationId
+  const canalInfos = canals.find(
+    (asso) => asso.id === canalId
   );
-  const { data: cities } = useSelector((state: RootState) => state.cities);
-  const { data: sectors } = useSelector((state: RootState) => state.sectors);
+  const { data: citiesSector } = useSelector((state: RootState) => state.citiesSector);
 
   const [name, setName] = useState("");
   const [addedDate, setAddedDate] = useState("");
@@ -105,10 +96,8 @@ const ObjectForm = (props) => {
   const [isSick, setDisease] = useState("");
   const [diseases, setDiseases] = useState("");
   const [particularities, setParticularities] = useState("");
-  const [city, setCity] = useState("");
-  const [cityId, setCityId] = useState(null);
-  const [sector, setSector] = useState("");
-  const [sectorId, setSectorId] = useState(null);
+  const [citySector, setCitySector] = useState("");
+  const [citySectorId, setCitySectorId] = useState(null);
   const [sexAnimal, setSex] = useState("");
   const [selectedDate, setSelectedDate] = useState(null);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
@@ -156,9 +145,8 @@ const ObjectForm = (props) => {
   const dispatch = useAppDispatch();
   const currentDate = new Date();
 
-  // console.log(associationInfos)
-  const [showCityForm, setShowCityForm] = useState(false);
-  const [showSectorForm, setShowSectorForm] = useState(false);
+  // console.log(canalInfos)
+  const [showCitySectorForm, setShowCitySectorForm] = useState(false);
   const navigation = useNavigation();
 
   const handleSubmit = async (event) => {
@@ -174,8 +162,8 @@ const ObjectForm = (props) => {
     const data = {
       userCreatorId: uid,
       addedDate: currentDate.toString(),
-      associationId: associationId,
-      associationName: associationInfos.name,
+      canalId: canalId,
+      canalName: canalInfos.name,
       name: name,
       sex: sexAnimal,
       age: selectedDate,
@@ -188,10 +176,8 @@ const ObjectForm = (props) => {
       colors: colors,
       diseases: diseases,
       particularities: particularities,
-      cityId: cityId,
-      cityName: city,
-      sectorId: sectorId,
-      sectorName: sector,
+      citySectorId: citySectorId,
+      citySectorName: citySector,
       image: imageUrl,
       isFamily: isFamily,
       isMother: isMother,
@@ -230,16 +216,11 @@ const ObjectForm = (props) => {
     }
   };
 
-  const handleObjectFormCityChange = async (id, name) => {
-    setCity(name);
-    setCityId(id);
-    dispatch(fetchSectors(id));
+  const handleObjectFormCitySectorChange = async (id, name) => {
+    setCitySector(name);
+    setCitySectorId(id);
   };
 
-  const handleObjectFormSectorChange = (id, name) => {
-    setSector(name);
-    setSectorId(id);
-  };
 
   // const handleRobeChange = (event) => {
   //   if (event.target.checked) {
@@ -267,13 +248,10 @@ const ObjectForm = (props) => {
         <Text style={styles.title}>Ajouter un nouveau chat</Text>
       </View>
       <View style={styles.addCatSection}>
-        <CityAndSectorSelect
-          cities={cities}
-          sectors={sectors}
-          selectedCityId={cityId}
-          selectedSectorId={sectorId}
-          onCityChange={handleObjectFormCityChange}
-          onSectorChange={handleObjectFormSectorChange}
+        <CitySectorAndSectorSelect
+          citiesSector={citiesSector}
+          selectedCitySectorId={citySectorId}
+          onCitySectorChange={handleObjectFormCitySectorChange}
         />
         <View style={styles.form}>
           <Text style={styles.heading}>Informations générales</Text>
