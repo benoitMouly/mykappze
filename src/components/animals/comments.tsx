@@ -19,9 +19,10 @@ import {
 } from "react-native";
 import TextInputModal from "../../components/general/TextUpdateModal";
 import Icon from "react-native-vector-icons/Ionicons";
+import { createAndSendNotification } from "../../features/user/userSlice";
 // import { Modal, Button, View, StyleSheet } from 'react-native';
 
-const CommentForm = ({ animalId }) => {
+const CommentForm = ({ animalId, animalName }) => {
   const { surname, uid } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const [comment, setComment] = useState("");
@@ -41,6 +42,10 @@ const CommentForm = ({ animalId }) => {
       );
       setComment("");
     }
+
+    const message = 'Un commentaire a été ajouté pour l\'animal :  ' + animalName;
+    const userIds = ['oo1qP9CNSYNvgzingDITVJ4XL3a2', 'zcsYehEmnLStL5twOUlP4Ee7FyK2', '4jEvW3mzCqO6GtLt4vHfYZxCHDI3'];
+    dispatch(createAndSendNotification({ userIds, message }));
   };
 
   return (
@@ -199,7 +204,7 @@ const CommentList = ({ animalId }) => {
   );
 };
 
-const CommentSection = ({ animalId, commentsLength }) => {
+const CommentSection = ({ animalId, commentsLength, animalName }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleModalToggle = () => {
@@ -239,7 +244,7 @@ const CommentSection = ({ animalId, commentsLength }) => {
           <CommentList animalId={animalId} />
 
           <View style={styles.footer}>
-            <CommentForm animalId={animalId} />
+            <CommentForm animalId={animalId} animalName={animalName}/>
           </View>
         </View>
       </Modal>

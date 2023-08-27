@@ -44,14 +44,14 @@ const HomePage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  console.log("LICENSE NUMBER : ", licenseNumber);
+  // console.log("LICENSE NUMBER : ", licenseNumber);
 
   const handleJoinCanal = (canalId) => {
     dispatch(joinCanal({ userId: uid, canalId }))
       .then(() => {
         Alert.alert(
           "Canal créée avec succès !",
-          "L'canal est désormais disponible dans votre listing.",
+          "Le canal est désormais disponible dans votre listing.",
           [{ text: "OK", onPress: () => navigation.navigate("Main") }],
           { cancelable: false }
         );
@@ -59,7 +59,7 @@ const HomePage: React.FC = () => {
       .catch((error) => {
         console.error("Error adding canal: ", error);
         Alert.alert(
-          "L'canal n'a pas pu être créée.",
+          "Le canal n'a pas pu être créée.",
           `En cas de besoin, transmettez le message d'erreur suivant au support : ${error}`,
           [{ text: "OK" }],
           { cancelable: false }
@@ -97,7 +97,7 @@ const HomePage: React.FC = () => {
             navigationCreateCanal.navigate("CreateCanal")
           }
         >
-          <Text style={styles.buttonText}>Créer une canal</Text>
+          <Text style={styles.buttonText}>Créer un canal</Text>
           <View style={styles.buttonGroupIcons}>
             <Image
               source={require("../assets/icons/icon-house.png")}
@@ -111,15 +111,15 @@ const HomePage: React.FC = () => {
         onPress={() => setEditVisible(true)}
         style={styles.sectionHeader}
       >
-        <Text style={styles.text}>Rejoindre un canal d'associatioon</Text>
+        <Text style={styles.text}>Rejoindre un canal</Text>
       </TouchableOpacity>
 
       <TextInputModal
         visible={isEditNameVisible}
         onClose={() => setEditVisible(false)} // Fermeture de la modale
         onConfirm={handleJoinCanal}
-        messageType={"Rejoindre une canal"}
-        subMessageType={"Veuillez rentrer l'appId de l'canal"}
+        messageType={"Rejoindre un canal"}
+        subMessageType={"Veuillez rentrer l'appId du canal"}
         onChangeText={setCanalId}
         placeholder={"Exemple: 9dJh453HJszana ... "}
       />

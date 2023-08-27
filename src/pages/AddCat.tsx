@@ -11,6 +11,7 @@ import {
 } from "../features/animals/animalSlice";
 // import AddCitySectorForm from '../../components/citiesSector/AddCitySector';
 import CitySectorAndSectorSelect from "../components/citiesSector/citySectorAndSectorSelect";
+import MotherSelect from "../components/animals/motherSelect";
 // import ColorSelect from "../components/animals/colorSelect";
 import EditableImage from "../components/general/EditableImage";
 import ColorSelect from "../components/animals/colorSelect";
@@ -30,6 +31,8 @@ import { ScrollView } from "react-native-gesture-handler";
 import * as ImagePicker from "expo-image-picker";
 import CustomAlert from "../components/general/CustomAlert";
 import EditableDocumentList from "../components/general/EditableDocuments";
+import { createAndSendNotification } from "../features/user/userSlice";
+import LoadingScreen from "../components/general/loadingPage";
 
 interface Canal {
   id: string;
@@ -78,13 +81,15 @@ const ObjectForm = (props) => {
   //   const { canalId } = props.canalId;
   const { canalId } = route.params;
   // console.log("ASSOCIATION ID : ", canalId)
-  const { data: canals } = useSelector(
+  const { data: canals, status } = useSelector(
     (state: RootState) => state.canals
   );
-  const canalInfos = canals.find(
-    (asso) => asso.id === canalId
+  const canalInfos = canals.find((asso) => asso.id === canalId);
+  const { data: citiesSector } = useSelector(
+    (state: RootState) => state.citiesSector
   );
-  const { data: citiesSector } = useSelector((state: RootState) => state.citiesSector);
+  const { data: animals } = useSelector((state) => state.animals);
+  const motherAnimals = animals.filter((animal) => animal.isMother);
 
   const [name, setName] = useState("");
   const [addedDate, setAddedDate] = useState("");
@@ -103,6 +108,7 @@ const ObjectForm = (props) => {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
   const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const [nameError, setNameError] = useState(false);
 
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -132,10 +138,11 @@ const ObjectForm = (props) => {
     hideDatePicker2();
   };
 
+  const [isLoading, setIsLoading] = useState(false);
   const [dateIdentification, setDateIdentification] = useState(null);
   const [isFamily, setFamily] = useState(null);
   const [motherId, setMotherId] = useState(null);
-  const [fatherId, setFatherId] = useState(null);
+  const [mother, setMother] = useState(null);
   const [isMother, setIsMother] = useState(null);
 
   const [image, setImage] = useState(null);
@@ -153,6 +160,11 @@ const ObjectForm = (props) => {
     event.preventDefault();
     let imageUrl = "";
     let documentUrls = [];
+    if (!name.trim()) {
+      // Si le champ name est vide ou n'a que des espaces blancs
+      setNameError(true);
+      return; // Ne continuez pas la soumission
+    }
 
     if (imageUri) {
       imageUrl = await uploadImage(imageUri);
@@ -182,10 +194,10 @@ const ObjectForm = (props) => {
       isFamily: isFamily,
       isMother: isMother,
       motherAppId: motherId,
-      fatherAppId: fatherId,
     };
 
     try {
+      setIsLoading(true); // Activer le loader
       const createdAnimal = await dispatch(addAnimal(data));
       const animalId = createdAnimal.payload.id;
       if (documents.length > 0) {
@@ -197,22 +209,36 @@ const ObjectForm = (props) => {
             animalId: animalId,
             documents: uploadedDocuments,
           })
-
-          
         );
-
-        
-        
       }
-      setIsAlertVisible(true); 
+      setIsLoading(false); // Désactiver le loader après tout traitement
 
-        // Attendez quelques secondes puis revenez à l'écran précédent
-  setTimeout(() => {
-    navigation.goBack();
-  }, 2000); // 2000 millisecondes soit 2 secondes
+      const message = "Un nouvel animal a été ajouté " + data.name;
+      const userIds = [
+        "oo1qP9CNSYNvgzingDITVJ4XL3a2",
+        "zcsYehEmnLStL5twOUlP4Ee7FyK2",
+        "4jEvW3mzCqO6GtLt4vHfYZxCHDI3",
+      ];
+      dispatch(createAndSendNotification({ userIds, message }));
 
+      setIsAlertVisible(true);
+
+      // Attendez quelques secondes puis revenez à l'écran précédent
+      setTimeout(() => {
+        navigation.goBack();
+      }, 2000);
+      
+      // 2000 millisecondes soit 2 secondes
     } catch (error) {
       console.error("Error adding object: ", error);
+      setIsLoading(false); // Désactiver le loader après tout traitement
+    }
+  };
+
+  const handleNameChange = (text) => {
+    setName(text);
+    if (nameError) {
+      setNameError(false);
     }
   };
 
@@ -221,14 +247,10 @@ const ObjectForm = (props) => {
     setCitySectorId(id);
   };
 
-
-  // const handleRobeChange = (event) => {
-  //   if (event.target.checked) {
-  //     setColor([...colors, event.target.value]);
-  //   } else {
-  //     setColor(colors.filter((color) => color !== event.target.value));
-  //   }
-  // };
+  const handleObjectFormAnimalChange = async (id, name) => {
+    setMother(name);
+    setMotherId(id);
+  };
 
   const handleRobeChange = (color: string) => {
     if (colors.includes(color)) {
@@ -240,247 +262,264 @@ const ObjectForm = (props) => {
 
   return (
     <View style={styles.container}>
-    <ScrollView >
-      <View style={styles.header}>
-        {/* <TouchableOpacity onPress={() => {}}>
-          <Text style={styles.text}>Retour</Text>
-        </TouchableOpacity> */}
-        <Text style={styles.title}>Ajouter un nouveau chat</Text>
-      </View>
-      <View style={styles.addCatSection}>
-        <CitySectorAndSectorSelect
-          citiesSector={citiesSector}
-          selectedCitySectorId={citySectorId}
-          onCitySectorChange={handleObjectFormCitySectorChange}
-        />
-        <View style={styles.form}>
-          <Text style={styles.heading}>Informations générales</Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Nom :</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Sexe : </Text>
-            <View style={styles.radioGroup}>
-              <TouchableOpacity
-                style={styles.radioButton}
-                onPress={() => setSex("Mâle")}
-              >
-                <View
-                  style={[
-                    styles.radioDot,
-                    sexAnimal === "Mâle" && styles.radioDotSelected,
-                  ]}
-                />
-                <Text style={styles.text}>Mâle</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.radioButton}
-                onPress={() => setSex("Femelle")}
-              >
-                <View
-                  style={[
-                    styles.radioDot,
-                    sexAnimal === "Femelle" && styles.radioDotSelected,
-                  ]}
-                />
-                <Text style={styles.text}>Femelle</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.radioButton}
-                onPress={() => setSex("Inconnu")}
-              >
-                <View
-                  style={[
-                    styles.radioDot,
-                    sexAnimal === "Inconnu" && styles.radioDotSelected,
-                  ]}
-                />
-                <Text style={styles.text}>Inconnu</Text>
-              </TouchableOpacity>
+      <ScrollView>
+        <View style={styles.header}>
+          <Text style={styles.title}>Ajouter un nouveau chat</Text>
+        </View>
+        <View style={styles.addCatSection}>
+          <CitySectorAndSectorSelect
+            citiesSector={citiesSector}
+            selectedCitySectorId={citySectorId}
+            onCitySectorChange={handleObjectFormCitySectorChange}
+          />
+          <View style={styles.form}>
+            <Text style={styles.heading}>Informations générales</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Nom * :</Text>
+              <TextInput
+                style={styles.input}
+                value={name}
+                onChangeText={handleNameChange}
+              />
+              {nameError && (
+                <View>
+                <Text style={styles.errorText}>Le nom est obligatoire.</Text>
+                </View>
+              )}
             </View>
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Le chat est stérilisé :</Text>
-            <Switch value={isSterilize} onValueChange={setSterilize} trackColor={{true: '#d15e41'}} thumbColor={'#2F2F2F'}/>
-          </View>
-          {/* <View style={styles.inputGroup}>
-            <Text style={styles.text}>Date de naissance :</Text>
-            <Button title="Show Date Picker" onPress={showDatePicker} />
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="date"
-              onConfirm={handleConfirm}
-              onCancel={hideDatePicker}
-            />
-            <Text>{selectedDate}</Text>
-          </View> */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Date de naissance : </Text>
-            <TouchableOpacity
-              onPress={showDatePicker}
-              style={styles.buttonsPicker}
-            >
-              <Text style={styles.buttonText}>
-                {selectedDate ? selectedDate : "Choisir"}
-              </Text>
-            </TouchableOpacity>
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible}
-              mode="date"
-              onConfirm={handleConfirm}
-              onCancel={hideDatePicker}
-            />
-          </View>
-          <View style={styles.inputGroup && styles.checkboxes}>
-            <Text style={styles.text}>Couleurs de la robe :</Text>
-            {/* Composant de sélection des couleurs */}
-            <View style={{backgroundColor: '#2f2f2f', margin: 10}}>
-            <ColorSelect selectedColors={colors} onChange={handleRobeChange} />
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Sexe : </Text>
+              <View style={styles.radioGroup}>
+                <TouchableOpacity
+                  style={styles.radioButton}
+                  onPress={() => setSex("Mâle")}
+                >
+                  <View
+                    style={[
+                      styles.radioDot,
+                      sexAnimal === "Mâle" && styles.radioDotSelected,
+                    ]}
+                  />
+                  <Text style={styles.text}>Mâle</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.radioButton}
+                  onPress={() => setSex("Femelle")}
+                >
+                  <View
+                    style={[
+                      styles.radioDot,
+                      sexAnimal === "Femelle" && styles.radioDotSelected,
+                    ]}
+                  />
+                  <Text style={styles.text}>Femelle</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.radioButton}
+                  onPress={() => setSex("Inconnu")}
+                >
+                  <View
+                    style={[
+                      styles.radioDot,
+                      sexAnimal === "Inconnu" && styles.radioDotSelected,
+                    ]}
+                  />
+                  <Text style={styles.text}>Inconnu</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-           
-          </View>
-          <View style={styles.inputGroup}>
-            <View style={styles.imagePicker}>
-              <Text style={styles.text}>Image :</Text>
-              <View style={{margin: 10}}>
-              <EditableImage imageUri={imageUri} setImageUri={setImageUri} />
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Le chat est stérilisé :</Text>
+              <Switch
+                value={isSterilize}
+                onValueChange={setSterilize}
+                trackColor={{ true: "#d15e41" }}
+                thumbColor={"#2F2F2F"}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Date de naissance : </Text>
+              <TouchableOpacity
+                onPress={showDatePicker}
+                style={styles.buttonsPicker}
+              >
+                <Text style={styles.buttonText}>
+                  {selectedDate ? selectedDate : "Choisir"}
+                </Text>
+              </TouchableOpacity>
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible}
+                mode="date"
+                onConfirm={handleConfirm}
+                onCancel={hideDatePicker}
+              />
+            </View>
+            <View style={styles.inputGroup && styles.checkboxes}>
+              <Text style={styles.text}>Couleurs de la robe :</Text>
+              <View style={{ backgroundColor: "#2f2f2f", margin: 10 }}>
+                <ColorSelect
+                  selectedColors={colors}
+                  onChange={handleRobeChange}
+                />
+              </View>
+            </View>
+            <View style={styles.inputGroup}>
+              <View style={styles.imagePicker}>
+                <Text style={styles.text}>Image :</Text>
+                <View style={{ margin: 10 }}>
+                  <EditableImage
+                    imageUri={imageUri}
+                    setImageUri={setImageUri}
+                  />
+                </View>
               </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.form}>
-          <Text style={styles.heading}>Identification</Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Le chat est-il identifié ?</Text>
-            <Switch value={identification} onValueChange={setIdentification} trackColor={{true: '#d15e41'}} thumbColor={'#2F2F2F'} />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Date d'identification : </Text>
-            <TouchableOpacity
-              onPress={showDatePicker2}
-              style={styles.buttonsPicker}
-            >
-              <Text style={styles.buttonText}>
-                {dateIdentification ? dateIdentification : "Choisir"}
-              </Text>
-            </TouchableOpacity>
-            <DateTimePickerModal
-              isVisible={isDatePickerVisible2}
-              mode="date"
-              onConfirm={handleConfirm2}
-              onCancel={hideDatePicker2}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Numéro d'identification :</Text>
-            <TextInput
-              style={styles.input}
-              value={numberIdentification}
-              onChangeText={setNumberIdentification}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>
-              Le chat a un propriétaire (identifié ou non) :
-            </Text>
-            <Switch value={isBelonged} onValueChange={setBelong} trackColor={{true: '#d15e41'}} thumbColor={'#2F2F2F'} />
-          </View>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.heading}>Lié à une famille</Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Le chat est lié à une famille :</Text>
-            <Switch value={isFamily} onValueChange={setFamily} trackColor={{true: '#d15e41'}} thumbColor={'#2F2F2F'} />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Le chat est une mère :</Text>
-            <Switch value={isMother} onValueChange={setIsMother} trackColor={{true: '#d15e41'}} thumbColor={'#2F2F2F'} />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>appID de la mère :</Text>
-            <TextInput
-              style={styles.input}
-              value={motherId}
-              onChangeText={setMotherId}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>appID du père :</Text>
-            <TextInput
-              style={styles.input}
-              value={fatherId}
-              onChangeText={setFatherId}
-            />
-          </View>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.heading}>Autre</Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Le chat semble malade ?</Text>
-            <Switch value={isSick} onValueChange={setDisease} trackColor={{true: '#d15e41'}} thumbColor={'#2F2F2F'}/>
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Maladies :</Text>
-            <TextInput
-              style={styles.input}
-              value={diseases}
-              onChangeText={setDiseases}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.text}>Particularités :</Text>
-            <TextInput
-              style={styles.input}
-              value={particularities}
-              onChangeText={setParticularities}
-            />
-          </View>
-        </View>
-
-        <View style={styles.form}>
-          <Text style={styles.heading}>Documents</Text>
-          <View style={styles.inputGroup}>
-            {/* <Text style={styles.text}>Ajouter des documents : </Text>
-            <TouchableOpacity
-              onPress={''}
-              style={styles.buttonsPicker}
-            >
-              <Text style={styles.buttonText}>
-                Sélectionner
-              </Text>
-            </TouchableOpacity> */}
-            <EditableDocumentList documents={documents} setDocuments={setDocuments} />
-
-          </View>
-        </View>
-
-        <View style={styles.handleSubmit}>
-        <TouchableOpacity
-              onPress={handleSubmit}
-              style={styles.buttonsPicker}
-            >
-              <Text style={styles.buttonTextSubmit}>
-                Ajouter
-              </Text>
-            </TouchableOpacity>
+          <View style={styles.form}>
+            <Text style={styles.heading}>Identification</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Le chat est-il identifié ?</Text>
+              <Switch
+                value={identification}
+                onValueChange={setIdentification}
+                trackColor={{ true: "#d15e41" }}
+                thumbColor={"#2F2F2F"}
+              />
             </View>
-      </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Date d'identification : </Text>
+              <TouchableOpacity
+                onPress={showDatePicker2}
+                style={styles.buttonsPicker}
+              >
+                <Text style={styles.buttonText}>
+                  {dateIdentification ? dateIdentification : "Choisir"}
+                </Text>
+              </TouchableOpacity>
+              <DateTimePickerModal
+                isVisible={isDatePickerVisible2}
+                mode="date"
+                onConfirm={handleConfirm2}
+                onCancel={hideDatePicker2}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Numéro d'identification :</Text>
+              <TextInput
+                style={styles.input}
+                value={numberIdentification}
+                onChangeText={setNumberIdentification}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>
+                Le chat a un propriétaire (identifié ou non) :
+              </Text>
+              <Switch
+                value={isBelonged}
+                onValueChange={setBelong}
+                trackColor={{ true: "#d15e41" }}
+                thumbColor={"#2F2F2F"}
+              />
+            </View>
+          </View>
 
-      
-      
-  
-    </ScrollView>
-    <CustomAlert visible={isAlertVisible} message={'Animal ajouté avec succès ! '} onClose={() => setIsAlertVisible(false)} />
+          <View style={styles.form}>
+            <Text style={styles.heading}>Lié à une famille</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Le chat est lié à une famille :</Text>
+              <Switch
+                value={isFamily}
+                onValueChange={setFamily}
+                trackColor={{ true: "#d15e41" }}
+                thumbColor={"#2F2F2F"}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Le chat est une mère :</Text>
+              <Switch
+                value={isMother}
+                onValueChange={setIsMother}
+                trackColor={{ true: "#d15e41" }}
+                thumbColor={"#2F2F2F"}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>appID de la mère :</Text>
+              <TextInput
+                style={styles.input}
+                value={motherId}
+                onChangeText={setMotherId}
+              />
+            </View>
+
+            <MotherSelect
+              animals={motherAnimals}
+              selectedAnimalId={motherId}
+              onAnimalChange={handleObjectFormAnimalChange}
+            />
+          </View>
+
+          <View style={styles.form}>
+            <Text style={styles.heading}>Autre</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Le chat semble malade ?</Text>
+              <Switch
+                value={isSick}
+                onValueChange={setDisease}
+                trackColor={{ true: "#d15e41" }}
+                thumbColor={"#2F2F2F"}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Maladies :</Text>
+              <TextInput
+                style={styles.input}
+                value={diseases}
+                onChangeText={setDiseases}
+              />
+            </View>
+            <View style={styles.inputGroup}>
+              <Text style={styles.text}>Particularités :</Text>
+              <TextInput
+                style={styles.input}
+                value={particularities}
+                onChangeText={setParticularities}
+              />
+            </View>
+          </View>
+
+          <View style={styles.form}>
+            <Text style={styles.heading}>Documents</Text>
+            <View style={styles.inputGroup}>
+              <EditableDocumentList
+                documents={documents}
+                setDocuments={setDocuments}
+              />
+            </View>
+          </View>
+          
+
+          <View style={styles.handleSubmit}>
+            <TouchableOpacity
+              onPress={handleSubmit}
+              style={styles.buttonsValidateCat}
+            >
+              
+              {!isLoading ? (<Text style={styles.buttonTextSubmit}>Ajouter</Text>) : (<Text style={styles.buttonTextSubmit}>Envoi ..</Text>)}
+              
+            </TouchableOpacity>
+            
+          </View>
+        </View>
+      </ScrollView>
+      <CustomAlert
+        visible={isAlertVisible}
+        message={"Animal ajouté avec succès ! "}
+        onClose={() => setIsAlertVisible(false)}
+      />
     </View>
-    
   );
 };
 
@@ -526,7 +565,7 @@ const styles = {
   },
   inputGroup: {
     flexDirection: "row",
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
     alignItems: "center",
     marginBottom: 10,
     // marginRight: 10
@@ -594,14 +633,26 @@ const styles = {
     fontFamily: "WixMadeforDisplay-Bold",
   },
   handleSubmit: {
-    margin: 20,
-    alignItems: 'center',
+    marginRight: 10,
+    alignItems: "center",
   },
   buttonTextSubmit: {
-    padding: 2,
+    padding: 10,
+    paddingHorizontal: 40,
+    marginBottom: 20,
     color: "white",
     fontFamily: "WixMadeforDisplay-Bold",
-    fontSize: 20
+    fontSize: 17,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    borderRadius: 2,
+  },
+  buttonValidateCats: {
+    alignSelf: "flex-end",
+  },
+  errorText: {
+    color: '#c40030',
+    marginLeft: 10
   }
 };
 

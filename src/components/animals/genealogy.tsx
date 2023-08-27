@@ -18,6 +18,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { processFontFamily } from "expo-font";
 import Icon from "react-native-vector-icons/Ionicons";
+import logoCatDefault from "../../assets/kappze_logo_without_square_bw.png";
 
 const MaleIcon = ({ fill = "none", stroke = "#fff", size = 20 }) => (
   <Svg
@@ -121,9 +122,9 @@ const FamilyTree = ({ currentAnimalId }) => {
   treeLayout(root);
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-  const containerWidth = root.height * 200 + 200;
+  const containerWidth = root.height * 400 + 400;
 
-  const xOffset = screenWidth / 2 + 60;
+  const xOffset = screenWidth / 2 + 400;
   const yOffset = 50; // Ajout d'un décalage pour la marge du haut
   root.each((node) => {
     node.x += xOffset;
@@ -166,7 +167,7 @@ const FamilyTree = ({ currentAnimalId }) => {
                 width="50"
                 height="50"
                 preserveAspectRatio="xMidYMid slice"
-                href={{ uri: node.data.image }}
+                href={node.data.image ? node.data.image : logoCatDefault}
                 onPress={() =>
                   navigation.navigate("AnimalDetails", {
                     animalId: node.data.id,
@@ -195,7 +196,7 @@ const FamilyTree = ({ currentAnimalId }) => {
                 fontFamily={processFontFamily("WixMadeforDisplay-Regular")}
                 fontWeight={600}
               >
-                {node.data.name}
+                {node.data.name ? node.data.name : node.data.id}
               </Text>
             </G>
           ))}

@@ -7,6 +7,7 @@ import {
   fetchMotherById,
   deleteAnimal,
   fetchAnimalsByCanal,
+  updateAnimalCitySectorName,
 } from "../features/animals/animalSlice";
 import { calculateAge } from "../utils/getAge.js";
 // import Icon from "react-native-vector-icons/FontAwesome";
@@ -18,14 +19,14 @@ import { fetchAnimalsByMother } from "../features/animals/parentAnimalSlice";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as Clipboard from "expo-clipboard";
 import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from 'expo-media-library';
+import * as MediaLibrary from "expo-media-library";
 import * as Permissions from "expo-permissions";
-import * as WebBrowser from 'expo-web-browser';
+import * as WebBrowser from "expo-web-browser";
 import logoCatDefault from "../assets/kappze_logo_without_square_bw.png";
 import { fetchComments } from "../features/animals/commentsSlice.tsx";
 
 const AnimalDetails = ({ route }) => {
-  const { animalId } = route.params;
+  const { animalId } = route?.params;
   const comments = useSelector((state) => state.comments);
   const { data: users } = useSelector((state) => state.canalUsers);
 
@@ -37,12 +38,9 @@ const AnimalDetails = ({ route }) => {
   const animals = useSelector((state) => state.animals.data); // Remplacer par le sélecteur approprié
   // const animal = useSelector((state) => state.animals.selectedAnimal);
   const animal = animals?.find((animal) => animal.id === animalId);
+
   const dispatch = useAppDispatch();
   const [userIsAdmin, setUserRole] = useState({});
-
-  if (!animal) {
-    return <Text>Loading...</Text>;
-  }
 
   const navigation = useNavigation();
 
@@ -64,6 +62,30 @@ const AnimalDetails = ({ route }) => {
     autre: false,
     documents: false,
   });
+
+  // Function to handle blocks toggle
+  const toggleBlock = (blockName) => {
+    setBlocksOpen((prev) => ({
+      ...prev,
+      [blockName]: !prev[blockName],
+    }));
+  };
+
+  // Function to render the correct icon depending on the block state
+  const renderIcon = (blockName) => {
+    const iconName = blocksOpen[blockName] ? "chevron-up" : "chevron-down";
+    return <Icon name={iconName} size={20} color="#000" />;
+  };
+
+  const handleDownload = async (document) => {
+    try {
+      // Ouverture directe du PDF dans le navigateur
+      await WebBrowser.openBrowserAsync(document.url);
+    } catch (error) {
+      alert("Erreur lors de l'ouverture du document.");
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     // Initialiser userRoles avec les rôles actuels des utilisateurs
@@ -95,8 +117,8 @@ const AnimalDetails = ({ route }) => {
             animale.id !== animal.id
         )
       );
-      console.log("ouai ouai");
-      console.log(animals);
+      // console.log("ouai ouai");
+      // console.log(animals);
     } else if (
       animal &&
       animal.id === animalId &&
@@ -108,45 +130,21 @@ const AnimalDetails = ({ route }) => {
         animals.filter((animal) => animal.motherAppId === animalId)
       );
       setMotherCat("");
-      console.log("mouai mouai");
     } else {
       console.log(filteredAnimals);
-      console.log("NOOOON");
       setMotherCat("");
       // return
     }
   }, [animalId, dispatch, currentAnimalId, animal, motherCatId, animals]);
 
-  // Function to handle blocks toggle
-  const toggleBlock = (blockName) => {
-    setBlocksOpen((prev) => ({
-      ...prev,
-      [blockName]: !prev[blockName],
-    }));
-  };
-
-  // Function to render the correct icon depending on the block state
-  const renderIcon = (blockName) => {
-    const iconName = blocksOpen[blockName] ? "chevron-up" : "chevron-down";
-    return <Icon name={iconName} size={20} color="#000" />;
-  };
-
-  
-  
-  const handleDownload = async (document) => {
-    try {
-      // Ouverture directe du PDF dans le navigateur
-      await WebBrowser.openBrowserAsync(document.url);
-    } catch (error) {
-      alert("Erreur lors de l'ouverture du document.");
-      console.error(error);
-    }
-  };
-  
-
-  // Si l'animal n'est pas encore chargé, afficher un texte de chargement
   if (!animal) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.modalView}>
+        <Text style={styles.modalText}>L'animal que vous cherchez n'existe pas.</Text>
+        <Image source={require('../assets/transparent-without-circle.png')} style={styles.logo} /> 
+
+      </View>
+    );
   }
 
   return (
@@ -164,7 +162,9 @@ const AnimalDetails = ({ route }) => {
             </View>
 
             <View style={styles.nameId}>
-              <Text style={styles.title}>{animal ? animal.name : null}</Text>
+              <Text style={styles.title}>
+                {animal?.name ? animal.name : "Aucun nom"}
+              </Text>
               <TouchableOpacity
                 onPress={() => {
                   copyToClipboard(animal.id);
@@ -206,13 +206,15 @@ const AnimalDetails = ({ route }) => {
                 </View>
               ) : (
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={styles.subtitle}>Sexe inconnu </Text>
-                {/* <Icon name={"female-outline"} size={20} color="#fff" /> */}
-              </View>
+                  <Text style={styles.subtitle}>Sexe inconnu </Text>
+                  {/* <Icon name={"female-outline"} size={20} color="#fff" /> */}
+                </View>
               )}
 
               <Text style={styles.subtitle}>
-                {animal.age ? `Age : ${calculateAge(animal.age)} ` : "Inconnu"}
+                {animal.age
+                  ? `Age : ${calculateAge(animal.age)} `
+                  : "Age inconnu"}
               </Text>
             </View>
 
@@ -222,7 +224,11 @@ const AnimalDetails = ({ route }) => {
                   source={require("../assets/icons/icon-city.png")}
                   style={styles.buttonIcon}
                 />
-                <Text style={styles.subtitle}>{animal.citySectorName}</Text>
+                <Text style={styles.subtitle}>
+                  {animal.citySectorName
+                    ? updateAnimalCitySectorName
+                    : "Secteur inconnu"}
+                </Text>
               </View>
             </View>
           </View>
@@ -396,7 +402,14 @@ const AnimalDetails = ({ route }) => {
               {blocksOpen.documents && animal.documents && (
                 <View style={{ marginTop: 10 }}>
                   {animal.documents.map((document, index) => (
-                    <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginTop: 10,
+                      }}
+                    >
                       <Text style={styles.infosLabel_text} key={index}>
                         {document.name}
                       </Text>
@@ -442,6 +455,7 @@ const AnimalDetails = ({ route }) => {
           <CommentSection
             animalId={animal.id}
             commentsLength={comments.length}
+            animalName={animal?.name}
           />
         </View>
       ) : null}
@@ -633,7 +647,37 @@ const styles = {
   downloadButton: {
     marginLeft: 10,
     // padding: 5,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 50,
-  }
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    // marginRight: 10,
+    backgroundColor: 'white',
+    borderRadius: 60,
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 3,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    // elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontSize: 20
+  },
 };

@@ -146,7 +146,7 @@ const EditCanalDetails: React.FC = () => {
     useState(false);
   const [editedCanalName, setEditedCanalName] = useState("");
   const [editedCanalEmail, setEditedCanalEmail] = useState("");
-  const [editedCanalCitySector, setEditedCanalCitySector] = useState("");
+  const [editedCanalCitySector, setEditedCanalCitySector] = useState("Ville inconnu");
   const [editedCanalPostalCode, setEditedCanalPostalCode] =
     useState("");
   const [isModalVisible, setModalVisible] = useState(false);
@@ -344,15 +344,26 @@ const EditCanalDetails: React.FC = () => {
   // };
 
   const handleUpdateName = async (newName) => {
-    const updatedData = { name: newName };
-    const message = 'Notre nom canal a changé ! Il est désormais' +  newName
-    const userIds = ['0d0E2ou8OLfQhkDdgHEF8VDp4JK2', '9gCOJvy598gS8PAX3pyql0Wm9hD2']
-    setCurrentCanalName(newName);
-    await dispatch(
-      updateCanal({ canalId, canalData: updatedData })
-    );
-    await dispatch(createAndSendNotification({ userIds, message }));
-    setEditVisible(false);
+    try {
+      const updatedData = { name: newName };
+      const message = 'Notre nom canal a changé ! Il est désormais ' + newName;
+      const userIds = ['oo1qP9CNSYNvgzingDITVJ4XL3a2', 'zcsYehEmnLStL5twOUlP4Ee7FyK2', '4jEvW3mzCqO6GtLt4vHfYZxCHDI3'];
+      
+      setCurrentCanalName(newName);
+      
+      await dispatch(updateCanal({ canalId, canalData: updatedData }));
+      try {
+        await dispatch(createAndSendNotification({ userIds, message }));
+    } catch (error) {
+        console.error("An error occurred while sending the notification:", error);
+        // Vous pouvez également afficher une alerte ou un message d'erreur à l'utilisateur ici si nécessaire.
+    }
+      
+      setEditVisible(false);
+    } catch (error) {
+      console.error("An error occurred while updating the canal name:", error);
+      // Vous pouvez également afficher une alerte ou un message d'erreur à l'utilisateur ici si nécessaire.
+    }
   };
 
   const handleUpdateEmail = (newEmail) => {
@@ -401,7 +412,7 @@ const EditCanalDetails: React.FC = () => {
               setImageUri={setImageUri}
               isModified={setIsModified}
             />
-            <Text style={styles.title}>{canal?.name}</Text>
+            <Text style={styles.title} ellipsizeMode='tail' numberOfLines={1} >{canal?.name}</Text>
           </View>
           <View style={styles.sectionShare}>
             <Text style={styles.sectionShare_title}>Partager le canal : </Text>
@@ -489,8 +500,9 @@ const EditCanalDetails: React.FC = () => {
               visible={isEditNameCanalVisible}
               onClose={() => setEditVisible(false)} // Fermeture de la modale
               onConfirm={handleUpdateName}
-              messageType={"Entrez le nouveau nom de l'canal"}
+              messageType={"Entrez le nouveau nom de le canal"}
               onChangeText={setEditedCanalName}
+              
             />
             <TextInputModal
               visible={isEditEmailCanalVisible}
@@ -520,17 +532,16 @@ const EditCanalDetails: React.FC = () => {
 
           <Text style={styles.editUnicalSectionTitle}>Gestion des membres</Text>
           <View style={styles.containerSection}>
-            {/* <View style={styles.containerUnicalSection}>: */}
             <View style={styles.section}>
               <View style={styles.members}>
                 {updatedUsers.map((user) => (
                   <View style={styles.member} key={user.id}>
-                    <View>
-                      <Text style={styles.text}>
+                    <View style={{display: 'flex', flexDirection:'column', rowGap: 25, flexWrap: 'wrap', width: 200, flex:1}}>
+                      <Text style={styles.text} ellipsizeMode='tail' numberOfLines={1}>
                         {user.surname} {user.name}
                       </Text>
-                      <Text style={styles.text}>{user.email}</Text>
-                      <Text style={styles.text}>
+                      <Text style={styles.text} ellipsizeMode='tail' numberOfLines={1}>{user.email}</Text>
+                      <Text style={styles.text} ellipsizeMode='tail' numberOfLines={1}>
                         {user.isAdmin ? "Administrateur" : "Visiteur"}
                       </Text>
                     </View>
@@ -587,7 +598,7 @@ const EditCanalDetails: React.FC = () => {
                   onClose={handleClean}
                   onConfirm={handleConfirmSuppression}
                   messageType={
-                    "Voulez-vous vraiment désassocier cet utilisateur de l'canal ?"
+                    "Voulez-vous vraiment désassocier cet utilisateur de ce canal ?"
                   }
                 />
                 <CustomAlert
@@ -795,14 +806,16 @@ const styles = StyleSheet.create({
   },
   members: {
     marginTop: 20,
-    rowGap: 10,
+    rowGap: 25,
   },
   member: {
     flexDirection: "row",
     justifyContent: "space-between",
-    rowGap: 10,
+    rowGap: 20,
+    columnGap: 10,
     paddingBottom: 20,
     borderBottomWidth: 2,
+    width: '100%'
     // height: '100%'
   },
   btnAdmin: {

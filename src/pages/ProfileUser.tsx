@@ -20,6 +20,8 @@ import { joinCanal } from "../features/canals/canalSlice";
 import LoadingPage from "../components/general/loadingPage"; // Importez votre composant de chargement ici
 import TextInputModal from "../components/general/TextUpdateModal";
 import Icon from "react-native-vector-icons/Ionicons";
+import LoadingScreen from "../components/general/loadingPage";
+// import { isLoading } from "expo-font";
 
 type RootStackParamList = {
   ListingCanal: undefined;
@@ -36,9 +38,17 @@ type CreateCanalScreenNavigationProp = StackNavigationProp<
 >;
 
 const ProfileUser = () => {
-  const { uid, isAuthenticated, name, surname, licenseNumber, mairieName } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const {
+    uid,
+    isAuthenticated,
+    name,
+    surname,
+    isMairie,
+    licenseNumber,
+    mairieName,
+    associationName,
+    userHasLicenseNumber,
+  } = useSelector((state: RootState) => state.auth);
   const {
     data: canals,
     status,
@@ -55,15 +65,16 @@ const ProfileUser = () => {
   const [isEditNameVisible, setEditVisible] = useState(false);
   const [editedName, setEditedName] = useState("");
   const [settedCanalId, setCanalId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  console.log("LICENSE NUMBER : ", licenseNumber);
+  // console.log("LICENSE NUMBER : ", licenseNumber);
 
   const handleJoinCanal = (canalId) => {
     dispatch(joinCanal({ userId: uid, canalId }))
       .then(() => {
         Alert.alert(
           "Canal créée avec succès !",
-          "L'canal est désormais disponible dans votre listing.",
+          "Le canal est désormais disponible dans votre listing.",
           [{ text: "OK", onPress: () => navigation.navigate("Main") }],
           { cancelable: false }
         );
@@ -71,7 +82,7 @@ const ProfileUser = () => {
       .catch((error) => {
         console.error("Error adding canal: ", error);
         Alert.alert(
-          "L'canal n'a pas pu être créée.",
+          "Le canal n'a pas pu être créée.",
           `En cas de besoin, transmettez le message d'erreur suivant au support : ${error}`,
           [{ text: "OK" }],
           { cancelable: false }
@@ -81,57 +92,76 @@ const ProfileUser = () => {
   useEffect(() => {
     if (isAuthenticated && uid) {
       dispatch(fetchCanals(uid));
+      // setIsLoading(false);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2000);
     }
 
     console.log(canals);
   }, [dispatch, uid, isAuthenticated]);
 
+  if (status === 'loading') {
+    return <LoadingScreen isLoading={true} />;
+}
+
   return (
     <ScrollView style={styles.container}>
+
+      {isLoading ? (
+         <LoadingScreen isLoading={false}/>
+      ) : (null)}
       {canals.length ? (
         <>
           <Text style={styles.greeting}>
             Bonjour {surname} {name}.
           </Text>
 
-          <Text>{mairieName}</Text>
+          {associationName || mairieName ? (
+            <Text style={styles.legacyName}>
+              {associationName ? associationName : mairieName}
+            </Text>
+          ) : null}
 
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() =>
-                navigationCreateCanal.navigate("CreateCanal")
-              }
-            >
-              <Text style={styles.buttonText}>Créer</Text>
-              <View style={styles.buttonGroupIcons}>
-                <Icon name="home-outline" size={24} color="#fff" />
-                <Text style={styles.text}>+</Text>
-              </View>
-            </TouchableOpacity>
+            {isMairie && licenseNumber && (
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => navigationCreateCanal.navigate("CreateCanal")}
+              >
+                <Text style={styles.buttonText}>Créer</Text>
+                <View style={styles.buttonGroupIcons}>
+                  <Icon name="home-outline" size={24} color="#fff" />
+                  <Text style={styles.text}>+</Text>
+                </View>
+              </TouchableOpacity>
+            )}
 
-            <TouchableOpacity
-              onPress={() => setEditVisible(true)}
-              style={styles.buttonJoinCanal}
-            >
-              <Text style={styles.buttonText}>Rejoindre</Text>
-              <View style={styles.buttonGroupIcons}>
-                <Icon name="enter-outline" size={24} color="#fff" />
-                <Text style={styles.text}>+</Text>
-              </View>
-            </TouchableOpacity>
+            {!isMairie && (
+              <TouchableOpacity
+                onPress={() => setEditVisible(true)}
+                style={styles.buttonJoinCanal}
+              >
+                <Text style={styles.buttonText}>Rejoindre</Text>
+                <View style={styles.buttonGroupIcons}>
+                  <Icon name="enter-outline" size={24} color="#fff" />
+                  <Text style={styles.text}>+</Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
 
           <TextInputModal
             visible={isEditNameVisible}
             onClose={() => setEditVisible(false)} // Fermeture de la modale
             onConfirm={handleJoinCanal}
-            messageType={"Rejoindre une canal"}
-            subMessageType={"Veuillez rentrer l'appId de l'canal"}
+            messageType={"Rejoindre un canal"}
+            subMessageType={"Veuillez rentrer l'appId du canal"}
             onChangeText={setCanalId}
             placeholder={"Exemple: 9dJh453HJszana ... "}
           />
-          <Text style={styles.title}>Voici la liste de vos canals :</Text>
+
+          <Text style={styles.title}>Vos canaux :</Text>
           <View style={styles.listCanal}>
             {canals.map((canal) => (
               <CanalCard key={canal.id} canal={canal} />
@@ -140,7 +170,12 @@ const ProfileUser = () => {
         </>
       ) : (
         <View style={styles.authPage}>
-          <Text>Vous n'avez pas encore d'canals. </Text>
+          <Text>Vous n'avez pas encore de canaux. </Text>
+          <Text>Achetez une licence</Text>
+          {/* <button className="button-general" style={styles.button}
+                onPress={() => navigationCreateCanal.navigate("Subscribe")}>
+                  Acheter une licence
+          </button> */}
         </View>
       )}
     </ScrollView>
@@ -181,12 +216,19 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 20,
-    // fontWeight: "bold",
     color: "white",
     marginVertical: 30,
     fontFamily: "WixMadeforDisplay-Bold",
-    textAlign:'center'
+    textAlign: "center",
   },
+  legacyName: {
+    fontSize: 14,
+    color: "white",
+    marginVertical: 30,
+    fontFamily: "WixMadeforDisplay-Bold",
+    textAlign: "center",
+  },
+
   buttonContainer: {
     display: "flex",
     flexDirection: "row",

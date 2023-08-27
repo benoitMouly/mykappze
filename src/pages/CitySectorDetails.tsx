@@ -120,10 +120,10 @@ const CitySectorDetails: React.FC = () => {
   const [citySectorName, setCitySectorName] = useState(citySector?.name);
   const [editableFields, setEditableFields] = useState<string[]>([]);
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
-  const [isOpenBlock1, setIsOpenBlock1] = useState<boolean>(true);
+  const [isOpenBlock1, setIsOpenBlock1] = useState<boolean>(false);
   const [isOpenBlock2, setIsOpenBlock2] = useState<boolean>(false);
   const [isOpenBlock3, setIsOpenBlock3] = useState<boolean>(false);
-  const [isOpenBlock4, setIsOpenBlock4] = useState<boolean>(false);
+  const [isOpenBlock4, setIsOpenBlock4] = useState<boolean>(true);
   const [isCopied, setIsCopied] = useState<boolean>(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [editCitySectorMode, setEditCitySectorMode] = useState(false);
@@ -307,28 +307,26 @@ const CitySectorDetails: React.FC = () => {
 
         <View style={styles.containerSection}>
           {isOpenBlock1 && <View style={styles.sectionCitySector}></View>}
-
           <TouchableOpacity
-            onPress={() => setIsOpenBlock2(!isOpenBlock2)}
+            onPress={() => setIsOpenBlock4(!isOpenBlock4)}
             style={styles.sectionHeader}
           >
-            <Text style={styles.sectionTitle}>Animaux : ({users.length})</Text>
+            <Text style={styles.sectionTitle}>
+              Animaux : ({animals.length})
+            </Text>
             <Icon
-              name={isOpenBlock2 ? "chevron-down" : "chevron-forward"}
+              name={isOpenBlock4 ? "chevron-down" : "chevron-forward"}
               size={24}
               color="#000"
             />
           </TouchableOpacity>
-          {isOpenBlock2 && (
-            <View style={styles.section}>
-              {users.map((user) => (
-                <View key={user.id}>
-                  <Text>{user.name}</Text>
-                  <Text>{user.email}</Text>
-                </View>
-              ))}
-            </View>
-          )}
+          {isOpenBlock4 && <View style={styles.section}>
+            <Text> Il y a {animals.length} chat(s) dans ce secteur</Text>
+            <Text>Dont : </Text>
+            <Text>{numSterilizedCats} sont stérilisé(s)</Text>
+            <Text>{numNotIdentifiedCats} n'étant pas identifié(s)</Text>
+            <Text>{numIsBelongedCats} n'ayant été réclamé(s) par aucun propriétaire</Text>
+            </View>}
         </View>
 
         <View style={styles.line} />

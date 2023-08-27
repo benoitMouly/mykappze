@@ -16,6 +16,9 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
+import * as FileSystem from 'expo-file-system';
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+
 
 interface Canal {
   id: string;
@@ -253,11 +256,32 @@ export const joinCanal = createAsyncThunk(
  ***
  */
 
-export const uploadImage = async (image) => {
+// export const uploadImage = async (image) => {
+//   console.log('IMMAAAGE : ' , image)
+//   try {
+//     const storage = getStorage();
+//     const storageRef = ref(storage, `images/${image.name}`);
+//     await uploadBytes(storageRef, image);
+//     const imageUrl = await getDownloadURL(storageRef);
+//     return imageUrl;
+//   } catch (error) {
+//     throw new Error(
+//       `Une erreur s'est produite lors du téléchargement de l'image : ${error.message}`
+//     );
+//   }
+// };
+
+export const uploadImage = async (imageUri, imageName) => {
   try {
     const storage = getStorage();
-    const storageRef = ref(storage, `images/${image.name}`);
-    await uploadBytes(storageRef, image);
+    const storageRef = ref(storage, `images/${imageName}`);
+
+    // Convertir l'image en blob
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+
+    // Télécharger le blob sur Firebase Storage
+    await uploadBytes(storageRef, blob);
     const imageUrl = await getDownloadURL(storageRef);
     return imageUrl;
   } catch (error) {
@@ -413,7 +437,7 @@ const canalsSlice = createSlice({
       })
       .addCase(updateCanal.fulfilled, (state, action) => {
         state.status = "succeeded";
-        console.log('ouyai')
+        console.log('updated canal')
         state.data = state.data.map((canal) => {
           if (canal.id === action.payload.canalId) {
             return { ...canal, ...action.payload.canalData };

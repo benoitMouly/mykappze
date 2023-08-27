@@ -47,47 +47,55 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
   return (
     <View style={styles.cardContainer}>
       <TouchableOpacity onPress={handlePress}>
-      <View style={styles.card}>
+        <View style={styles.card}>
+          <Image
+            style={styles.image}
+            source={
+              props.animal.image
+                ? { uri: props.animal.image }
+                : require("../../assets/kappze_logo_without_square_bw.png")
+            }
+          />
+          <View style={styles.infoContainer}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              {/* <Text style={styles.title}>{props.animal?.name ? props.animal.name : props.animal.id}
+            </Text> */}
 
-        <Image
-          style={styles.image}
-          source={
-            props.animal.image
-              ? { uri: props.animal.image }
-              : require("../../assets/kappze_logo_without_square_bw.png")
-          }
-        />
-        <View style={styles.infoContainer}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Text style={styles.title}>{props.animal.name}</Text>
-            {props.animal.sex === "Mâle" ? (
-              <Icon name={"male-outline"} size={20} color="#000" />
-            ) : props.animal.sex === "Femelle" ? (
-              <Icon name={"female-outline"} size={20} color="#000" />
-            ) : (<Icon name={"help-outline"} size={20} color="#000" />)}
-          </View>
-          <View
-            style={{ flexDirection: "column", rowGap: 10, marginVertical: 5 }}
-          >
-            <View style={styles.buttonGroupIcons}>
-              <Image
-                source={require("../../assets/icons/icon-city.png")}
-                style={styles.buttonIcon}
-              />
-              <Text>{props.animal.citySectorName}</Text>
+              {props.animal?.name ? (
+                <Text style={styles.title}>{props.animal.name}</Text>
+              ) : (
+                <Text style={styles.id}>{props.animal.id}</Text>
+              )}
+              {props.animal.sex === "Mâle" ? (
+                <Icon name={"male-outline"} size={20} color="#000" />
+              ) : props.animal.sex === "Femelle" ? (
+                <Icon name={"female-outline"} size={20} color="#000" />
+              ) : (
+                <Icon name={"help-outline"} size={20} color="#000" />
+              )}
             </View>
+            <View
+              style={{ flexDirection: "column", rowGap: 10, marginVertical: 5 }}
+            >
+              <View style={styles.buttonGroupIcons}>
+                <Image
+                  source={require("../../assets/icons/icon-city.png")}
+                  style={styles.buttonIcon}
+                />
+                <Text>{props.animal.citySectorName}</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.button} onPress={handlePress}>
+              <Icon name={"arrow-forward-outline"} size={20} color="#000" />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.button} onPress={handlePress}>
-            <Icon name={"arrow-forward-outline"} size={20} color="#000" />
-          </TouchableOpacity>
         </View>
-      </View>
       </TouchableOpacity>
     </View>
   );
@@ -106,7 +114,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    position: 'relative'
+    position: "relative",
   },
   image: {
     width: "100%",
@@ -122,6 +130,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginBottom: 5,
     fontFamily: "WixMadeforDisplay-Bold",
+  },
+  id: {
+    fontSize: 10,
+    padding: 5,
   },
   info: {
     fontSize: 14,

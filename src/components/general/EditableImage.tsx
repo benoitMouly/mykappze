@@ -4,6 +4,7 @@ import Modal from 'react-native-modal';
 import * as ImagePicker from 'expo-image-picker';
 // import Icon from "react-native-vector-icons/Ionicons";
 import { Icon, Avatar, Badge } from '@rneui/base';
+import { uploadImage } from '../../features/canals/canalSlice';
 
 const EditableImage = ({imageUri, setImageUri, isModified}) => {
   const [isModalVisible, setModalVisible] = useState(false);
@@ -13,8 +14,20 @@ const EditableImage = ({imageUri, setImageUri, isModified}) => {
     setModalVisible(!isModalVisible);
   };
 
-  const handleSave = uri => {
-    setImageUri(uri);
+  // const handleSave = (uri) => {
+  //   console.log(uri)
+  //   setImageUri(uri);
+  //   setModalVisible(false);
+  //   isModified(true);
+
+  // };
+  
+
+  const handleSave = async (uri) => {
+    console.log(uri);
+    const imageName = `image_${Date.now()}.jpg`; // Génère un nom unique pour l'image
+    const imageUrl = await uploadImage(uri, imageName); // Télécharge l'image et récupère l'URL
+    setImageUri(imageUrl); // Met à jour l'URI de l'image avec l'URL de l'image téléchargée
     setModalVisible(false);
     isModified(true);
   };

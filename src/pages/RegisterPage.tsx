@@ -96,10 +96,9 @@ const RegisterPage: React.FC = () => {
   // });
   // Dans Login
   const handleLogin = async () => {
-
     if (userType === "mairie" || userType === "association") {
       await dispatch(fetchSirenData(siren));
-      console.log(sirenData)
+      console.log(sirenData);
       if (userType === "mairie" && !sirenData.isMairie) {
         setErrSiren("Le SIREN fourni n'appartient pas à une mairie.");
         return;
@@ -121,8 +120,6 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-
-
     const actionResult = await dispatch(
       registerUser({
         email,
@@ -134,7 +131,8 @@ const RegisterPage: React.FC = () => {
         isMairie: userType === "mairie",
         mairieName: userType === "mairie" ? sirenData.mairieName : null,
         isAssociation: userType === "association",
-        associationName: userType === "association" ? sirenData.associaionName : null,
+        associationName:
+          userType === "association" ? sirenData.associaionName : null,
       })
     );
 
@@ -185,18 +183,40 @@ const RegisterPage: React.FC = () => {
           />
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Type d'utilisateur:</Text>
+          <Text style={styles.label}>Vous êtes :</Text>
           <View style={styles.radioContainer}>
             <TouchableOpacity onPress={() => handleUserTypeChange("visitor")}>
-              <Text style={styles.radioText}>Visiteur</Text>
+              <Text
+                style={[
+                  styles.radioText,
+                  userType === "visitor" && styles.selectedRadioText,
+                ]}
+              >
+                Visiteur
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => handleUserTypeChange("mairie")}>
-              <Text style={styles.radioText}>Mairie</Text>
+              <Text
+                style={[
+                  styles.radioText,
+                  userType === "mairie" && styles.selectedRadioText,
+                ]}
+              >
+                Mairie
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleUserTypeChange("association")}>
-              <Text style={styles.radioText}>Association</Text>
+            <TouchableOpacity
+              onPress={() => handleUserTypeChange("association")}
+            >
+              <Text
+                style={[
+                  styles.radioText,
+                  userType === "association" && styles.selectedRadioText,
+                ]}
+              >
+                Association
+              </Text>
             </TouchableOpacity>
-            
           </View>
 
           {userType !== "visitor" && (
@@ -255,7 +275,11 @@ const RegisterPage: React.FC = () => {
           >
             Déja inscrit ? Se connecter
           </Text>
-          {errSiren && (<><Text style={{color:'red'}}>{errSiren}</Text></>)}
+          {errSiren && (
+            <>
+              <Text style={{ color: "red" }}>{errSiren}</Text>
+            </>
+          )}
         </View>
 
         <Modal
@@ -315,8 +339,10 @@ const styles = StyleSheet.create({
   },
   link: {
     color: "white",
-    marginTop: 20,
+    marginTop: 40,
+    marginBottom: 0,
     textDecorationLine: "underline",
+    alignSelf: "center",
   },
   button: {
     flexDirection: "row",
@@ -347,25 +373,36 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
-    // backgroundColor: 'red'
+    marginBottom: 25,
   },
   radioText: {
-    padding: 10,
+    padding: 5,
     borderWidth: 1,
     borderColor: "#FFF",
-    borderRadius: 5,
+    borderRadius: 2,
     color: "#FFF",
     fontSize: 16,
     textAlign: "center",
-    // flex: 1,
     margin: 5,
-    // backgroundColor:'blue'
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  selectedRadioText: {
+    padding: 5,
+    borderWidth: 1,
+    borderColor: "#FFF",
+    borderRadius: 2,
+    color: "#2f2f2f",
+    fontSize: 16,
+    textAlign: "center",
+    margin: 5,
+    backgroundColor: '#fff',
+    fontFamily: "WixMadeforDisplay-Regular",
   },
   label: {
     color: "#FFF",
     fontSize: 18,
     marginBottom: 10,
+    fontFamily: "WixMadeforDisplay-Regular",
   },
 });
 

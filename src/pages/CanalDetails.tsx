@@ -53,7 +53,6 @@ interface CitySector {
   // Propriétés pour la ville...
 }
 
-
 interface DataState<T> {
   data: T[];
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -90,12 +89,12 @@ type AddCatScreenNavigationProp = StackNavigationProp<
   "AddCat"
 >;
 
-type CitySectorDetailScreen = StackNavigationProp<RootStackParamList, "CitySectorDetails">;
-
-type EditCanalScreen = StackNavigationProp<
+type CitySectorDetailScreen = StackNavigationProp<
   RootStackParamList,
-  "EditCanal"
+  "CitySectorDetails"
 >;
+
+type EditCanalScreen = StackNavigationProp<RootStackParamList, "EditCanal">;
 
 const CanalDetails: React.FC = () => {
   const route = useRoute();
@@ -187,8 +186,6 @@ const CanalDetails: React.FC = () => {
     }
   }, [canalId, isAuthenticated]);
 
-
-
   useEffect(() => {
     users.forEach((user) => {
       if (user.id === uid) {
@@ -217,14 +214,14 @@ const CanalDetails: React.FC = () => {
       >
         <View style={styles.header}>
           <View style={styles.header1st}>
-          {canal.image ? (
-        <Image style={styles.image} source={{ uri: canal.image }} />
-      ) : (
-        <Image
-          style={styles.image}
-          source={require("../assets/kappze_logo_without_square_bw.png")}
-        />
-      )}
+            {canal.image ? (
+              <Image style={styles.image} source={{ uri: canal.image }} />
+            ) : (
+              <Image
+                style={styles.image}
+                source={require("../assets/kappze_logo_without_square_bw.png")}
+              />
+            )}
             <Text style={styles.title}>{canal?.name}</Text>
             <View style={styles.settingsBtn}>
               {userIsAdmin && (
@@ -317,7 +314,7 @@ const CanalDetails: React.FC = () => {
             />
           </TouchableOpacity>
           {isOpenBlock3 && (
-            <View style={styles.sectionCitySector}>
+            <View style={styles.section}>
               {citiesSector.map((citySector) => (
                 <View style={styles.citySectorList} key={citySector.id}>
                   <TouchableOpacity
@@ -329,49 +326,64 @@ const CanalDetails: React.FC = () => {
                     }
                     style={styles.sectionBtns_btnCitySector}
                   >
-                    <Text style={styles.sectionTitleCitySector}>{citySector?.name}</Text>
+                    <Text style={styles.sectionTitleCitySector}>
+                      {citySector?.name}
+                    </Text>
                     <Icon name={"chevron-forward"} size={24} color="#FFF" />
                   </TouchableOpacity>
                 </View>
               ))}
             </View>
           )}
-        </View>
 
-        {/* <SafeAreaView style={{flex: 1}}> */}
-        {/* <View style={styles.line} /> */}
-
-        <AnimalFilters
-          animals={animals}
-          archiveType={archiveType}
-        />
-        {/* </SafeAreaView> */}
-        <Text>Pull down to see RefreshControl indicator</Text>
-      </ScrollView>
-      <View style={styles.footer}>
-        <AddCitySectorModal
-          style={styles.sectionBtns_btn}
-          canalId={canal?.id}
-        />
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("AddCat", { canalId: canal?.id })
-          }
-          style={styles.sectionBtns_btn}
-        >
-          <View style={styles.buttonGroupIcons}>
-            <Image
-              source={require("../assets/icon-paw.png")}
-              style={styles.buttonIcon}
+          <TouchableOpacity
+            onPress={() => setIsOpenBlock4(!isOpenBlock4)}
+            style={styles.sectionHeader}
+          >
+            <Text style={styles.sectionTitle}>
+              Animaux : ({animals.length})
+            </Text>
+            <Icon
+              name={isOpenBlock4 ? "chevron-down" : "chevron-forward"}
+              size={24}
+              color="#000"
             />
-            {/* <Image
-              source={require("../assets/icons/icon-add.png")}
-              style={styles.buttonIcon}
-            /> */}
-            <Text style={{ color: "white" }}>+</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+          </TouchableOpacity>
+          {isOpenBlock4 && <View style={styles.section}>
+            <Text> Il y a {animals.length} chat(s) dans ce canal</Text>
+            <Text>Dont : </Text>
+            <Text>{numSterilizedCats} sont stérilisé(s)</Text>
+            <Text>{numNotIdentifiedCats} n'étant pas identifié(s)</Text>
+            <Text>{numIsBelongedCats} n'ayant été réclamé(s) par aucun propriétaire</Text>
+            </View>}
+
+
+        </View>
+        <AnimalFilters animals={animals} archiveType={archiveType} />
+      </ScrollView>
+
+      {userIsAdmin && (
+        <View style={styles.footer}>
+          <AddCitySectorModal
+            style={styles.sectionBtns_btn}
+            canalId={canal?.id}
+          />
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("AddCat", { canalId: canal?.id })
+            }
+            style={styles.sectionBtns_btn}
+          >
+            <View style={styles.buttonGroupIcons}>
+              <Image
+                source={require("../assets/icon-paw.png")}
+                style={styles.buttonIcon}
+              />
+              <Text style={{ color: "white" }}>+</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };

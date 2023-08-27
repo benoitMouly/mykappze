@@ -18,6 +18,7 @@ import {
   uploadSingleFile,
   addDocumentToAnimal,
   deleteAnimal,
+  fetchAnimalsByCanal,
 } from "../features/animals/animalSlice";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Picker } from "@react-native-picker/picker";
@@ -29,12 +30,14 @@ import ConfirmationModal from "../components/general/ConfirmationModal";
 import CustomAlert from "../components/general/CustomAlert";
 import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
 import Icon from "react-native-vector-icons/Ionicons";
+import { createAndSendNotification } from "../features/user/userSlice";
 
 const EditAnimalDetails = ({ route, navigation }) => {
   const { animalId } = route.params;
   const [animal_id, setAnimalId] = useState("");
   const dispatch = useDispatch();
   const { data: citiesSector } = useSelector((state: RootState) => state.citiesSector);
+  const { data: id} = useSelector((state: RootState) => state.canals);
   const [citySector, setCitySector] = useState(citiesSector ? citiesSector[0] : "");
   const [citySectorId, setCitySectorId] = useState(null);
   const [selectedColors, setSelectedColors] = useState([]);
@@ -62,6 +65,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
   const [isDatePickerVisible2, setDatePickerVisibility2] = useState(false);
   const [imageUri, setImageUri] = useState("");
   const [isModified, setIsModified] = useState(false);
+  const [isDocModified, setIsDocModified] = useState(false);
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
@@ -97,7 +101,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
       setSelectedColors(animal.colors);
       setInitialColors(animal.colors);
       setImageUri(animal.image);
-      // setDocuments(animal.documents);
+      setDocuments(animal.documents);
       setAnimalId(animal.id);
     }
   }, [animal]);
@@ -105,6 +109,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
   useEffect(() => {
     if (documents) {
       setUpdatedAnimal((prevAnimal) => ({ ...prevAnimal, documents }));
+      console.log('documents : ' , documents)
     }
   }, [documents]);
 
@@ -172,22 +177,16 @@ const EditAnimalDetails = ({ route, navigation }) => {
       dispatch(updateAnimalImage({ animalId, image: imageUri }));
     }
 
-    // if (documents && documents.length > 0) {
-    //   const uploadedDocuments = (await Promise.all(documents.map(uploadSingleFile))).filter(Boolean);
+    if(isDocModified){
+      const message = 'Un nouveau document est disponible pour l\'animal : ' + (animal?.name || animal?.id);
+      const userIds = ['oo1qP9CNSYNvgzingDITVJ4XL3a2', 'zcsYehEmnLStL5twOUlP4Ee7FyK2', '4jEvW3mzCqO6GtLt4vHfYZxCHDI3'];
+      dispatch(createAndSendNotification({ userIds, message }));
 
-    //   console.log("UPLOADED DOCUMENTS : ", uploadedDocuments);
-    //   await dispatch(
-    //     addDocumentToAnimal({
-    //       animalId: animalId,
-    //       documents: uploadedDocuments,
-    //     })
-    //   );
-    // }
-      console.log('ANIMAL ID ', animalId)
-      console.log('ANIMALDATA', updatedAnimal)
+    }
       dispatch(updateAnimal({ animalId, animalData: updatedAnimal }));
 
     setIsModified(false);
+    setIsDocModified(false);
   };
 
   const handleSuppAnimal = async () => {
@@ -203,6 +202,9 @@ const EditAnimalDetails = ({ route, navigation }) => {
     setConfirmationVisible(false); // Ferme la modale de confirmation
     setAlertMessage("L'animal a été supprimé avec succès"); // Définir le message d'alerte
     setAlertVisible(true); // Affiche la modale d'alerte
+    // dispatch(fetchAnimalsByCanal(animal.canalId))
+    // navigation.navigate(-1);
+
   };
 
   // If animal is not yet loaded, display a loading text
@@ -233,9 +235,6 @@ const EditAnimalDetails = ({ route, navigation }) => {
               onChangeText={(text) => handleInputChange("name", text)}
               style={styles.textInput}
             />
-            {/* <View style={styles.buttonIcon}>
-            <Icon style={styles.buttonIconElt} name="pencil-outline" size={15} color="#fff" />
-          </View> */}
           </View>
 
           <View style={styles.editElt}>
@@ -267,9 +266,6 @@ const EditAnimalDetails = ({ route, navigation }) => {
             />
           </View>
         </View>
-
-        {/* <View style={styles.line} /> */}
-
         <View style={styles.editUnicalSection}>
           <Text style={styles.editUnicalSectionTitle}>
             Informations générales{" "}
@@ -456,6 +452,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
               <EditableDocumentList
                 documents={documents}
                 setDocuments={setDocuments}
+                setIsDocModified={setIsDocModified}
               />
             </View>
           {/* </View> */}

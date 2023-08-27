@@ -1,61 +1,64 @@
-import React, { useEffect, useState } from 'react';
-import { Provider } from 'react-redux';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import  { store } from './src/store/store';
+import React, { useEffect, useState } from "react";
+import { Provider } from "react-redux";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { store } from "./src/store/store";
 import * as Font from "expo-font";
 // import LoginPage from './src/pages/LoginPage';
-import  './src/firebaseConfig';  // Importez simplement votre configuration Firebase ici
-import AppNavigator from './src/AppNavigator'
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
-import Constants from 'expo-constants';
-import { Platform } from 'react-native';
-import { initStripe } from '@stripe/stripe-react-native';
+import "./src/firebaseConfig"; // Importez simplement votre configuration Firebase ici
+import AppNavigator from "./src/AppNavigator";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
+import { initStripe } from "@stripe/stripe-react-native";
+import { registerForPushNotificationsAsync } from "./src/features/notifications/notificationSlice";
 
+// export async function registerForPushNotificationsAsync() {
+//   let token;
 
+//   try {
+//     if (Platform.OS === "android") {
+//       await Notifications.setNotificationChannelAsync("default", {
+//         name: "default",
+//         importance: Notifications.AndroidImportance.MAX,
+//         vibrationPattern: [0, 250, 250, 250],
+//         lightColor: "#FF231F7C",
+//       });
+//     }
 
-export async function registerForPushNotificationsAsync() {
-  let token;
+//     if (Device.isDevice) {
+//       const { status: existingStatus } =
+//         await Notifications.getPermissionsAsync();
+//       let finalStatus = existingStatus;
 
-  try{
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'default',
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
-      });
-    }
-  
-    if (Device.isDevice) {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== 'granted') {
-        alert('Failed to get push token for push notification!');
-        return;
-      }
-      token = (await Notifications.getExpoPushTokenAsync()).data;
-      console.log(token);
-    } else {
-      alert('Must use physical device for Push Notifications');
-    }
-  } catch(error){
-    console.log(error)
-  }
+//       if (existingStatus !== "granted") {
+//         const { status } = await Notifications.requestPermissionsAsync();
+//         finalStatus = status;
+//       }
+//       if (finalStatus !== "granted") {
+//         alert("Failed to get push token for push notification!");
+//         return;
+//       }
+//       console.log("finalStatus : ", existingStatus);
+//       token = (
+//         await Notifications.getExpoPushTokenAsync({
+//           projectId: "2215e4a8-f48a-4db8-86a5-8463fef7ce41",
+//         })
+//       ).data;
+//       // token = (await Notifications.getExpoPushTokenAsync({projectId: '2215e4a8-f48a-4db8-86a5-8463fef7ce41'})).data;
+//       console.log(token);
+//     } else {
+//       alert("Must use physical device for Push Notifications");
+//     }
+//   } catch (error) {
+//     console.log(error);
+//   }
 
-
-  return token;
-}
+//   return token;
+// }
 
 export default function App() {
-
   const [fontsLoaded, setFontsLoaded] = useState(false);
-
-
 
   const loadFonts = async () => {
     await Font.loadAsync({
@@ -66,47 +69,49 @@ export default function App() {
     });
     setFontsLoaded(true);
   };
-  
+
   useEffect(() => {
     loadFonts();
   }, []);
 
   useEffect(() => {
     initStripe({
-        publishableKey: 'pk_test_51Ng7WZKu63J8L2mL7dvfBNlwLZuhwHBiNdjM50Il4BLNklaaw7fq1gKFOERzW4SRbHPJJQpW9cis4RDY9TQH5OUW00BEIm8fzk',
+      publishableKey:
+        "pk_test_51Ng7WZKu63J8L2mL7dvfBNlwLZuhwHBiNdjM50Il4BLNklaaw7fq1gKFOERzW4SRbHPJJQpW9cis4RDY9TQH5OUW00BEIm8fzk",
     });
-}, []);
+  }, []);
+
+  useEffect(() => {
+    // registerForPushNotificationsAsync().then((token) => console.log(token));
+
+    // When a notification is received when the app is open
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log(notification);
+      }
+    );
+
+    // When a user interacts with a notification (e.g. taps on it)
+    const responseSubscription =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log(response);
+      });
+
+    return () => {
+      subscription.remove();
+      responseSubscription.remove();
+    };
+  }, []);
 
   // useEffect(() => {
   //   registerForPushNotificationsAsync().then(token => console.log(token));
-
-  //   // When a notification is received when the app is open
-  //   const subscription = Notifications.addNotificationReceivedListener(notification => {
-  //     console.log(notification);
-  //   });
-
-  //   // When a user interacts with a notification (e.g. taps on it)
-  //   const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
-  //     console.log(response);
-  //   });
-
-  //   return () => {
-  //     subscription.remove();
-  //     responseSubscription.remove();
-  //   };
   // }, []);
-
-  useEffect(() => {
-    registerForPushNotificationsAsync().then(token => console.log(token));
-  }, []);
 
   return (
     <SafeAreaProvider>
-
-    <Provider store={store}>
-    <AppNavigator />
-    </Provider>
-
+      <Provider store={store}>
+        <AppNavigator />
+      </Provider>
     </SafeAreaProvider>
   );
 }

@@ -9,10 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import {
-  fetchCanals,
-  removeCanal,
-} from "../features/canals/canalSlice";
+import { fetchCanals, removeCanal } from "../features/canals/canalSlice";
 import TextInputModal from "../components/general/TextUpdateModal";
 import {
   deleteUser,
@@ -29,31 +26,41 @@ import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
 import Icon from "react-native-vector-icons/Ionicons";
 import { fetchLicenseById } from "../features/licences/licenceSlice";
 import { formatDateToFrench } from "../utils/formatDate";
+import { PaymentsScreen } from "./Payments";
 
 const Settings = () => {
   //   const {
   //     params: { userId },
   //   } = useRoute();
-  const { name, surname, email, isAuthenticated, uid, licenseNumber, isMairie, isAssociation} =
-    useSelector((state) => state.auth);
+  const {
+    name,
+    surname,
+    email,
+    isAuthenticated,
+    uid,
+    licenseNumber,
+    isMairie,
+    isAssociation,
+    registrationDate,
+  } = useSelector((state) => state.auth);
   const userId = uid;
   const { data: canals } = useSelector((state) => state.canals);
   const { data: users } = useSelector((state) => state.canalUsers);
-  //   const user =
+  const stripeCustomerId = useSelector((state) => state.auth.stripeCustomerId);
+
+  console.log(stripeCustomerId)
+
+  const registrationDateObj = registrationDate
 
   const dispatch = useDispatch();
   const navigate = useNavigation();
 
   const [editableFields, setEditableFields] = useState([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [
-    showConfirmationUnlinkedCanal,
-    setShowConfirmationUnlinkCanal,
-  ] = useState(false);
-  const [
-    showConfirmationDeleteCanal,
-    setShowConfirmationDeleteCanal,
-  ] = useState(false);
+  const [showConfirmationUnlinkedCanal, setShowConfirmationUnlinkCanal] =
+    useState(false);
+  const [showConfirmationDeleteCanal, setShowConfirmationDeleteCanal] =
+    useState(false);
 
   const [selectedCanalId, setSelectedCanalId] = useState(null);
   const [creatorCanal, setCreatorCanal] = useState([]);
@@ -109,7 +116,11 @@ const Settings = () => {
         for (let canal of canals) {
           if (Array.isArray(canal.role)) {
             for (let role of canal.role) {
-              if (role.isAdmin === true && role.uid === userId && canal.adminId === userId) {
+              if (
+                role.isAdmin === true &&
+                role.uid === userId &&
+                canal.adminId === userId
+              ) {
                 creatorCanals.push(canal);
                 break;
               }
@@ -214,7 +225,7 @@ const Settings = () => {
       })
     );
     setConfirmationVisible(false); // Ferme la modale de confirmation
-    setAlertMessage("L'canal a été supprimée avec succès'"); // Définir le message d'alerte
+    setAlertMessage("Le canal a été supprimée avec succès'"); // Définir le message d'alerte
     setAlertVisible(true); // Affiche la modale d'alerte
     setSelectedUserId(null); // ferme la modale
   };
@@ -235,11 +246,11 @@ const Settings = () => {
       {/* <> */}
       <HeaderEditAnimal navigation={navigate} animalName={surname} />
       <ScrollView style={styles.mainView}>
-
-        <View style={{padding: 20}}>
+        <View style={{ padding: 20 }}>
           <Text>{surname}</Text>
-          <Text>Membre depuis le 5 mai 2021</Text>
-          <Text>Formule : gratuite</Text></View>
+          <Text>Inscrit depuis le {registrationDateObj?.toLocaleString()}</Text>
+          <Text>Formule : gratuite</Text>
+        </View>
         <View style={{ backgroundColor: "#fff" }}>
           <Text style={styles.title2}>
             Informations générales de l'utilisateur
@@ -316,55 +327,65 @@ const Settings = () => {
           </View>
         </View>
 
-        {isMairie && (<>
+        {isMairie && (
+          <>
+            <View style={styles.sectionGeneral}>
+              <View style={{ backgroundColor: "#fff" }}>
+                <Text style={styles.title2}>Abonnement</Text>
+              </View>
+              <View style={styles.sectionBloc}>
+                {licenseNumber ? (
+                  <>
+                    <Text style={styles.licences}>
+                      Numéro de license : {licenseNumber}. La license expirera
+                      le
+                      {expiryDateFrench}
+                    </Text>
 
-          <View style={styles.sectionGeneral}>
-        <View style={{ backgroundColor: "#fff" }}>
-          <Text style={styles.title2}>
-            Abonnement
-          </Text></View>
-          <View style={styles.sectionBloc}>
-          {licenseNumber ? (
-            <>
-              <Text style={styles.licences}>
-                Numéro de license : {licenseNumber}. La license expirera le 
-                {expiryDateFrench}
-              </Text>
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => navigate.navigate("Subscribe")}
+                    >
+                      <Text style={styles.buttonTextSub}>
+                        Renouveler la licence
+                      </Text>
+                    </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigate.navigate("Subscribe")}
-              >
-                <Text style={styles.buttonTextSub}>Renouveler la licence</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <Text style={styles.licences}>
-                Vous ne disposez pas d'un abonnement actif.
-              </Text>
+                    <TouchableOpacity
+                      style={styles.buttonInvoices}
+                      onPress={() => navigate.navigate("Invoices")}
+                    >
+                      <Text style={styles.buttonTextSub}>
+                        Accéder à mes paiements
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.licences}>
+                      Vous ne disposez pas d'un abonnement actif.
+                    </Text>
 
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => navigate.navigate("Subscribe")}
-              >
-                <Text style={styles.buttonTextSub}>Obtenir une licence</Text>
-              </TouchableOpacity>
-            </>
-          )}
-          </View>
-        
-
-        </View>
-        </>)}
+                    <TouchableOpacity
+                      style={styles.button}
+                      onPress={() => navigate.navigate("Subscribe")}
+                    >
+                      <Text style={styles.buttonTextSub}>
+                        Obtenir une licence
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </View>
+          </>
+        )}
 
         <View style={styles.sectionCanalMember}>
           {canals.length > 0 && (
             <>
               <View style={{ backgroundColor: "#fff" }}>
-                <Text style={styles.title2}>
-                  Canals dont vous êtes membres
-                </Text>
+                <Text style={styles.title2}>Canals dont vous êtes membres</Text>
               </View>
               <View style={styles.sectionBloc}>
                 <View style={styles.inputsModify}>
@@ -373,21 +394,20 @@ const Settings = () => {
                       {canal.adminId !== userId ? (
                         <>
                           <Text style={styles.text}>
-                            {canal.name} (
-                            {userIsAdmin ? "admin" : "visiteur"})
+                            {canal.name} ({userIsAdmin ? "admin" : "visiteur"})
                           </Text>
                           <TouchableOpacity
                             onPress={() =>
                               openDeassociateModal(
                                 uid,
                                 canal.id,
-                                "Se désassocier de cette canal ?"
+                                "Se désassocier de ce canal ?"
                               )
                             }
                             style={styles.btnDeassociate}
                           >
                             <Text style={styles.btnDeassociateText}>
-                              Retirer de vos canals
+                              Retirer de vos canaux
                             </Text>
                           </TouchableOpacity>
                         </>
@@ -406,31 +426,30 @@ const Settings = () => {
 
         <View style={styles.sectionCanalAdmin}>
           <View style={{ backgroundColor: "#fff" }}>
-            <Text style={styles.title2}>
-              Canals dont vous avez la gestion
-            </Text>
+            <Text style={styles.title2}>Canals dont vous avez la gestion</Text>
           </View>
           <View style={styles.sectionBloc}>
             <View style={styles.inputsModify}>
               {creatorCanal.map((asso, index) => (
                 <>
                   <View key={index} style={styles.inputModify}>
-                    <Text key={index} style={styles.text}>
+                    <Text
+                      key={index}
+                      style={styles.text}
+                      numberOfLines={1}
+                      ellipsizeMode="head"
+                    >
                       {asso.name} (
                       {asso.adminId === userId ? "Super admin" : "admin"})
                     </Text>
                     <TouchableOpacity
                       onPress={() =>
-                        openDeleteModal(
-                          uid,
-                          asso.id,
-                          "Supprimer cette canal ?"
-                        )
+                        openDeleteModal(uid, asso.id, "Supprimer ce canal ?")
                       }
                       style={styles.btnSuppCanal}
                     >
                       <Text style={styles.btnSuppCanalText}>
-                        Supprimer cette canal
+                        Supprimer ce canal
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -493,7 +512,7 @@ const Settings = () => {
           visible={deleteModal}
           onClose={() => setDeleteModal(false)}
           onConfirm={handleConfirmDeleteCanal}
-          messageType={"Voulez vous supprimer l'canal ?"}
+          messageType={"Voulez vous supprimer le canal ?"}
         />
         <ConfirmationModal
           visible={deleteAccountModal}
@@ -560,6 +579,8 @@ const styles = {
   inputModify: {
     flexDirection: "row",
     columnGap: 10,
+    flexWrap: "wrap",
+    marginBottom: 20,
   },
   text: {
     color: "#FFF",
@@ -687,20 +708,29 @@ const styles = {
     paddingBottom: 100,
   },
   button: {
-    backgroundColor: '#d15e41',
+    backgroundColor: "#d15e41",
     padding: 8,
     borderRadius: 2,
-    width: '100%'
+    width: "100%",
   },
+
+  buttonInvoices: {
+    backgroundColor: "#2f2f2f",
+    padding: 8,
+    marginTop: 16,
+    borderRadius: 2,
+    width: "100%",
+  },
+
   buttonTextSub: {
-    textAlign: 'center',
-    color: '#fff'
+    textAlign: "center",
+    color: "#fff",
   },
   licences: {
-    color: '#fff',
+    color: "#fff",
     marginBottom: 20,
     fontFamily: "WixMadeforDisplay-Regular",
-  }
+  },
 };
 
 export default Settings;

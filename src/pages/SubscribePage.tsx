@@ -29,7 +29,7 @@ const SubscribePage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  console.log("LICENSE NUMBER : ", licenseNumber);
+  // console.log("LICENSE NUMBER : ", licenseNumber);
 
   return (
     <ScrollView style={styles.container}>

@@ -36,10 +36,11 @@ const CanalCard = ({ canal }) => {
     });
   };
 
+  
   useEffect(() => {
     if (isAuthenticated) {
         dispatch(fetchAnimalsByCanal(canal.id)).then((result) => {
-            setLocalAnimals(result.payload); // Ou utilisez la structure de données correcte
+            setLocalAnimals(result.payload);
         });
         dispatch(fetchCanalUsers(canal.id)).then((result) => {
             setLocalUsersCanal(result.payload)
@@ -71,7 +72,7 @@ const CanalCard = ({ canal }) => {
 
       <View style={styles.canalInfos}>
         <View style={{flexDirection: 'row', alignItems: 'center', columnGap: 5}}><Icon name="location-sharp" size={24} color="#2f4f4f" /><Text style={styles.textInfo}>{canal.city}</Text></View>
-        <View style={{flexDirection: 'row', alignItems: 'center', columnGap: 5}}><Icon name="mail-sharp" size={24} color="#2f4f4f" /><Text style={styles.textNumber}>{canal.email}</Text></View>
+        <View style={{flexDirection: 'row', alignItems: 'center', columnGap: 5, width: '100%'}}><Icon name="mail-sharp" size={24} color="#2f4f4f" /><Text  style={styles.textInfo} ellipsizeMode='tail' numberOfLines={1} >{canal.email}</Text></View>
         <View style={{flexDirection: 'row', alignItems: 'center', columnGap: 5}}><Icon name="call-sharp" size={24} color="#2f4f4f" /><Text style={styles.textInfo}>{canal.phoneNumber}</Text></View>
       </View>
       </TouchableOpacity>
@@ -81,7 +82,7 @@ const CanalCard = ({ canal }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: "48%",
+    width: "80%",
     borderRadius: 2,
     backgroundColor: "#FFF",
     shadowColor: "#000",
@@ -117,6 +118,8 @@ const styles = StyleSheet.create({
   textInfo: {
     fontSize: 13,
     fontFamily: "WixMadeforDisplay-Regular",
+    width:100
+
     // alignSelf: "flex-start",
   },
   // text: {

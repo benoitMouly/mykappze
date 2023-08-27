@@ -3,15 +3,15 @@ import { useAppDispatch } from "../store/store";
 import { loginUser } from "../features/user/userSlice.tsx";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import * as Google from 'expo-auth-session/providers/google';
-import firebase from 'firebase/compat/app';
+import * as Google from "expo-auth-session/providers/google";
+import firebase from "firebase/compat/app";
+import { checkUserAuthStatus } from "../features/user/userSlice.tsx";
 
-import * as WebBrowser from 'expo-web-browser';
+import * as WebBrowser from "expo-web-browser";
 
-import 'firebase/auth';
+import "firebase/auth";
 
-import * as AuthSession from 'expo-auth-session';
-
+import * as AuthSession from "expo-auth-session";
 
 import {
   View,
@@ -25,13 +25,13 @@ import {
 } from "react-native";
 import * as Font from "expo-font";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Icon from "react-native-vector-icons/Ionicons";
 
 WebBrowser.maybeCompleteAuthSession();
 
 // web : 169421691212-b6edhc4v6tl2g0s5fcbgecp796ipqin0.apps.googleusercontent.com
 // IOS : 169421691212-gnfq5fkabqbr8ng611emgmm35nd3vt7b.apps.googleusercontent.com
-// Android : 169421691212-jiefe2qrfhlv62ha45cj67kflc6e9brf.apps.googleusercontent.com 
-
+// Android : 169421691212-jiefe2qrfhlv62ha45cj67kflc6e9brf.apps.googleusercontent.com
 
 // Define the navigation type
 type RootStackParamList = {
@@ -42,20 +42,15 @@ type RootStackParamList = {
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Register"
+  "Register",
 >;
 
 const LoginPage: React.FC = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   // const navigation = useNavigation();
-  const [accessToken, setAccessToken] = useState(null)
-  const [user , setUser] = useState(null)
-  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: '169421691212-b6edhc4v6tl2g0s5fcbgecp796ipqin0.apps.googleusercontent.com',
-    androidClientId: '169421691212-jiefe2qrfhlv62ha45cj67kflc6e9brf.apps.googleusercontent.com',
-    iosClientId: '169421691212-gnfq5fkabqbr8ng611emgmm35nd3vt7b.apps.googleusercontent.com',
-    
-  });
+  const [accessToken, setAccessToken] = useState(null);
+  const [user, setUser] = useState(null);
+
 
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
@@ -64,43 +59,15 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [isRequestReady, setIsRequestReady] = useState(false);
 
-
   useEffect(() => {
-    if(response?.type === "success"){
-      setAccessToken(response.authentication.accessToken);
-      accessToken && fetchUserInfo();
-    } else{
-      console.log('REQUEST !!!! ', request)
-    }
-  }, [response, accessToken]);
-
-  const fetchUserInfo = async () => {
-    let response = await fetch("https://www.googleapis.com/userinfo/v2/me" , {
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    });
-    const userInfo = await response.json();
-    setUser(userInfo)
-  }
-
-  const ShowUserInfo = () => {
-    if(user) {
-      return(
-        <View>
-          <Text>{user.email} && {user.name}</Text>
-        </View>
-      )
-    }
-  }
+    dispatch(checkUserAuthStatus());
+  }, [dispatch]);
 
   const handleLogin = async () => {
     if (email === "" || password === "") {
       Alert.alert("Erreur", "Veuillez remplir tous les champs.");
       return;
     }
-
-
 
     const actionResult = await dispatch(loginUser({ email, password }));
 
@@ -109,9 +76,9 @@ const LoginPage: React.FC = () => {
       try {
         const token = await AsyncStorage.getItem("@userIsLoggedIn");
         if (token === "true") {
-          console.log(token);
-          console.log("ON Y VA");
-          console.log(user)
+          // console.log(token);
+          
+          console.log(user);
         }
       } catch (error) {
         console.log(error);
@@ -170,17 +137,30 @@ const LoginPage: React.FC = () => {
               style={styles.buttonIcon}
             />
           </TouchableOpacity>
-          <Text
-            style={styles.link}
-            onPress={() => navigation.navigate("Register")}
-          >
-            Pas encore de compte ? S'inscrire
-          </Text>
-          <Text style={styles.link} onPress={() => navigation.navigate("ForgotPassword")}>
-            Mot de passe oublié
-          </Text>
+
+          <View style={{ margin: 40 }}>
+            {/* <TouchableOpacity
+              style={styles.buttonGoogle}
+              onPress={() => promptAsync()}
+            >
+              <Text style={styles.buttonText}>Se connecter avec Google</Text>
+
+              <Icon name="logo-google" size={24} color="#fff" />
+            </TouchableOpacity> */}
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate("Register")}
+            >
+              Pas encore de compte ? S'inscrire
+            </Text>
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate("ForgotPassword")}
+            >
+              Mot de passe oublié
+            </Text>
+          </View>
         </View>
-        <Button title="Se connecter avec Google" onPress={() => promptAsync()} />
       </View>
     );
   }
@@ -221,7 +201,9 @@ const styles = StyleSheet.create({
   link: {
     color: "white",
     marginTop: 20,
-    textDecorationLine: 'underline'
+    marginBottom: 20,
+    textDecorationLine: "underline",
+    alignSelf: "center",
   },
   button: {
     flexDirection: "row",
@@ -231,6 +213,27 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 5,
   },
+  // buttonGoogle: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   justifyContent: "space-between",
+  //   backgroundColor: "blue",
+  //   padding: 20,
+  //   borderRadius: 5,
+  // },
+  buttonGoogle: {
+    flexDirection: "row", // pour avoir l'icône et le texte côte à côte
+    alignItems: "center", // pour centrer verticalement l'icône et le texte
+    justifyContent: "center", // pour centrer horizontalement l'icône et le texte
+    backgroundColor: "#4285F4", // couleur de fond typique de Google
+    padding: 10,
+    borderRadius: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
   buttonIcon: {
     marginRight: 10,
     width: 20,
@@ -239,6 +242,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#ffffff",
     fontFamily: "WixMadeforDisplay-Regular",
+    marginRight: 10,
   },
 });
 

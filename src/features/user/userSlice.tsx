@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
-import { registerForPushNotificationsAsync } from "../../../App";
+import { registerForPushNotificationsAsync } from "../notifications/notificationSlice.tsx";
 import axios from "axios";
 
 import firebase from "firebase/compat/app";
@@ -16,6 +16,7 @@ import {
   signOut,
   deleteUser as deleteAuthUser,
   signInWithCustomToken,
+  onAuthStateChanged,
 } from "firebase/auth";
 import {
   updateDoc,
@@ -29,9 +30,18 @@ import {
   setDoc,
   deleteDoc,
   addDoc,
+  Timestamp,
 } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { addLicense } from '../licences/licenceSlice.tsx';
+import { addLicense } from "../licences/licenceSlice.tsx";
+
+
+// const fetchStripeCustomerId = async (uid) => {
+//   const db = getFirestore();
+//   const userRef = doc(db, "users", uid);
+//   const userDoc = await getDoc(userRef);
+//   return userDoc.data().stripeCustomerId;
+// };
 
 // import messaging from '@react-native-firebase/messaging';
 // import PushNotification from 'react-native-push-notification';
@@ -65,6 +75,7 @@ import { addLicense } from '../licences/licenceSlice.tsx';
 export const createAndSendNotification = createAsyncThunk(
   "notifications/createAndSend",
   async ({ userIds, message }, thunkAPI) => {
+    console.log("userIDS !!", userIds);
     try {
       const db = getFirestore();
 
@@ -90,6 +101,7 @@ export const loginUser = createAsyncThunk<
 >(
   "auth/loginUser",
   async ({ email, password }, { dispatch, rejectWithValue }) => {
+    
     try {
       const auth = getAuth();
       // console.log('auth', auth);
@@ -111,6 +123,8 @@ export const loginUser = createAsyncThunk<
       // console.log('userRef', userRef);
 
       const docSnapshot = await getDoc(userRef);
+      const registrationDateJS = docSnapshot.data().registrationDate.toDate();
+
       // console.log('docSnapshot', docSnapshot);
 
       try {
@@ -119,7 +133,7 @@ export const loginUser = createAsyncThunk<
 
         // Stocker le token dans Firestore
         // const db = getFirestore();
-        // const userRef = doc(db, 'users', userId);
+        // const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { expoPushToken });
       } catch (error) {
         console.error(
@@ -129,6 +143,11 @@ export const loginUser = createAsyncThunk<
       }
 
       if (docSnapshot.exists()) {
+        const stripeCustomerId = docSnapshot.data().stripeCustomerId;
+        if (stripeCustomerId) {
+            dispatch(setStripeCustomerId(stripeCustomerId));
+        }
+
         const {
           name,
           surname,
@@ -146,12 +165,13 @@ export const loginUser = createAsyncThunk<
         dispatch(setIsAssociation(isAssociation));
         dispatch(setMairieName(mairieName));
         dispatch(setAssociationName(associationName));
+        dispatch(setRegistrationDate(registrationDateJS));
       }
 
       // Si la connexion est réussie, mettez à jour AsyncStorage
       await AsyncStorage.setItem("@userIsLoggedIn", "true");
 
-      console.log("CONNECTE");
+      // console.log("CONNECTE");
       // console.log(AsyncStorage.getItem('userIsLoggedIn'));
       return { uid: user.uid, email: user.email };
     } catch (error) {
@@ -165,46 +185,125 @@ export const loginUser = createAsyncThunk<
   }
 );
 
-
-export const loginWithGoogle = createAsyncThunk(
-  'auth/loginWithGoogle',
+export const checkUserAuthStatus = createAsyncThunk(
+  "auth/checkUserAuthStatus",
   async (_, { dispatch, rejectWithValue }) => {
-      try {
-          const provider = new firebaseInstance.auth.GoogleAuthProvider();
-          const userCredential = await firebaseInstance.auth().signInWithPopup(provider);
-          const user = userCredential.user;
+    const auth = getAuth();
 
-          const db = firebaseInstance.firestore();
-          const userRef = db.doc(`users/${user.uid}`);
-          const docSnapshot = await userRef.get();
+    return new Promise((resolve, reject) => {
+      const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          console.log('user is already connected by his status')
+          // Si l'utilisateur est connecté
+          const db = getFirestore();
+          const userRef = doc(db, "users", user.uid);
+          const docSnapshot = await getDoc(userRef);
 
-          // Si l'utilisateur n'existe pas dans Firestore, créez-le
-          if (!docSnapshot.exists) {
-              const userData = {
-                  name: user.displayName,
-                  surname: '',  // Google ne fournit pas de prénom/nom séparés, donc vous devrez peut-être gérer cela différemment
-                  email: user.email,
-                  photoURL: user.photoURL
-              };
-              
-              await userRef.set(userData);
-              dispatch(setName(userData.name));
-              dispatch(setSurname(userData.surname));
+
+
+
+          if (docSnapshot.exists()) {
+            const stripeCustomerId = docSnapshot.data().stripeCustomerId;
+            if (stripeCustomerId) {
+                dispatch(setStripeCustomerId(stripeCustomerId));
+            }
+    
+            const {
+              name,
+              surname,
+              licenseNumber,
+              isMairie,
+              isAssociation,
+              mairieName,
+              associationName,
+            } = docSnapshot.data();
+            // console.log('name, surname', name, surname);
+            dispatch(setName(name));
+            dispatch(setSurname(surname));
+            dispatch(setLicense(licenseNumber));
+            dispatch(setIsMairie(isMairie));
+            dispatch(setIsAssociation(isAssociation));
+            dispatch(setMairieName(mairieName));
+            dispatch(setAssociationName(associationName));
+            // dispatch(setRegistrationDate(registrationDateJS));
+
+            // Si la connexion est réussie, mettez à jour AsyncStorage
+            await AsyncStorage.setItem("@userIsLoggedIn", "true");
+            resolve({ uid: user.uid, email: user.email });
           } else {
-              const { name, surname } = docSnapshot.data();
-              dispatch(setName(name));
-              dispatch(setSurname(surname));
-              
+            reject("User data does not exist in Firestore");
           }
-          console.log('UUUSSSSEERRR : ')
-          console.log(user.displayName)
-          return { uid: user.uid, email: user.email, name: user.displayName, photoURL: user.photoURL };
-      } catch (error) {
-          return rejectWithValue(error.toString());
-      }
+        } else {
+          // Si l'utilisateur est déconnecté
+          await AsyncStorage.removeItem("@userIsLoggedIn");
+          reject("User is not logged in");
+        }
+
+        // Se désabonner de l'écouteur
+        unsubscribe();
+      }, reject);
+    });
   }
 );
 
+const updateUserState = (state, action) => {
+  state.uid = action.payload.uid;
+  state.email = action.payload.email;
+  state.isAuthenticated = true;
+  state.error = null;
+  state.status = "congrats";
+  state.userIsMairie = action.payload.isMairie;
+  state.userIsAssociation = action.payload.isAssociation;
+  state.userAssociationName = action.payload.associationName;
+  state.userMairieName = action.payload.mairieName;
+  state.userHasLicenseNumber = action.payload.licenseNumber;
+};
+
+
+export const loginWithGoogle = createAsyncThunk(
+  "auth/loginWithGoogle",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const provider = new firebaseInstance.auth.GoogleAuthProvider();
+      const userCredential = await firebaseInstance
+        .auth()
+        .signInWithPopup(provider);
+      const user = userCredential.user;
+
+      const db = firebaseInstance.firestore();
+      const userRef = db.doc(`users/${user.uid}`);
+      const docSnapshot = await userRef.get();
+
+      // Si l'utilisateur n'existe pas dans Firestore, créez-le
+      if (!docSnapshot.exists) {
+        const userData = {
+          name: user.displayName,
+          surname: "", // Google ne fournit pas de prénom/nom séparés, donc vous devrez peut-être gérer cela différemment
+          email: user.email,
+          photoURL: user.photoURL,
+        };
+
+        await userRef.set(userData);
+        dispatch(setName(userData.name));
+        dispatch(setSurname(userData.surname));
+      } else {
+        const { name, surname } = docSnapshot.data();
+        dispatch(setName(name));
+        dispatch(setSurname(surname));
+      }
+      console.log("UUUSSSSEERRR : ");
+      console.log(user.displayName);
+      return {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName,
+        photoURL: user.photoURL,
+      };
+    } catch (error) {
+      return rejectWithValue(error.toString());
+    }
+  }
+);
 
 // Async action for logging out
 export const logoutAsync = createAsyncThunk("auth/logoutAsync", async () => {
@@ -241,8 +340,10 @@ export const registerUser = createAsyncThunk<
         password
       );
       const user = userCredential.user;
+      const registrationDate = Timestamp.now().toDate();
 
       const db = getFirestore();
+      const registrationDateJS = registrationDate.toDate();
       const userDoc = doc(db, "users", user.uid);
       const userData = {
         name,
@@ -254,9 +355,10 @@ export const registerUser = createAsyncThunk<
         mairieName,
         isAssociation,
         associationName,
+        registrationDate: registrationDateJS
       };
       await setDoc(userDoc, userData);
-
+      dispatch(setRegistrationDate(userData.registrationDate));
       return { uid: user.uid, email: user.email };
     } catch (error) {
       return rejectWithValue(error.toString());
@@ -435,6 +537,7 @@ const initialState: AuthState = {
   email: null,
   status: "idle",
   licenseNumber: null, // ajoutez cela car vous avez défini le status dans AuthState
+  registrationDate: null,
 };
 
 const authSlice = createSlice({
@@ -444,6 +547,12 @@ const authSlice = createSlice({
     resetError: (state) => {
       state.error = null;
     },
+    setRegistrationDate: (state, action) => {
+      state.registrationDate = action.payload;
+    },
+    setStripeCustomerId: (state, action) => {
+      state.stripeCustomerId = action.payload;
+  },
 
     loginSuccess: (state, action) => {
       state.isAuthenticated = true;
@@ -487,18 +596,18 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(loginUser.fulfilled, (state, action) => {
-      state.uid = action.payload.uid;
-      state.email = action.payload.email;
-      state.isAuthenticated = true;
-      state.error = null;
-      state.status = "congrats";
-      state.userIsMairie = action.payload.isMairie;
-      state.userIsAssociation = action.payload.isAssociation;
-      state.userAssociationName = action.payload.associationName;
-      state.userMairieName = action.payload.mairieName;
-      state.userHasLicenseNumber = action.payload.licenseNumber;
+    builder.addCase(createAndSendNotification.rejected, (state, action) => {
+      state.status = "loading";
+      if (action.payload) {
+        const errorMessage = action.payload || "";
+        const errorCode = errorMessage.split("Error (")[1]?.split(").")[0];
+        state.error = errorCode;
+      } else {
+        state.error = action.error.message; // this is the fallback if payload is not available
+      }
     });
+    builder.addCase(loginUser.fulfilled, updateUserState);
+    builder.addCase(checkUserAuthStatus.fulfilled, updateUserState);
     builder.addCase(loginUser.pending, (state) => {
       state.status = "loading";
       state.error = null;
@@ -626,6 +735,8 @@ export const {
   setIsAssociation,
   setAssociationName,
   setMairieName,
+  setRegistrationDate,
+  setStripeCustomerId
 } = authSlice.actions;
 // export const selectIsLoggedIn = (state) => state.user.isLoggedIn;
 export default authSlice.reducer;

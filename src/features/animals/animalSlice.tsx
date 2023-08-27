@@ -321,8 +321,16 @@ export const uploadSingleFile = async (file) => {
     try {
         const storage = getStorage();
         const storageRef = ref(storage, `files/${file.name}`);
-        await uploadBytes(storageRef, file);
+        
+        // Utilisez file.uri pour obtenir le chemin du fichier
+        const response = await fetch(file.uri);
+        console.log('RESPONSE :>', response)
+        const blob = await response.blob();
+        console.log('BLOB :>', blob)
+        await uploadBytes(storageRef, blob);
         const fileUrl = await getDownloadURL(storageRef);
+        console.log('FILE URL :>', fileUrl)
+        console.log('FILE NAME :>', file.name)
         return {
             name: file.name,
             url: fileUrl
@@ -331,6 +339,7 @@ export const uploadSingleFile = async (file) => {
         throw new Error(error.message);
     }
 };
+
 
 
 

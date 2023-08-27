@@ -2,6 +2,7 @@ import React from "react";
 import { Modal, View, Text, Button, StyleSheet, Image, TouchableOpacity } from "react-native";
 
 const CustomAlert = ({ visible, onClose, message }) => (
+  
   <Modal
     animationType="slide"
     transparent={true}
@@ -11,12 +12,12 @@ const CustomAlert = ({ visible, onClose, message }) => (
     <View style={styles.centeredView}>
       <View style={styles.centeredBlock}>
       
-      <View style={styles.backGroundLogo}>
+      {/* <View style={styles.backGroundLogo}>
           <Image
             source={require("../../assets/transparent-without-circle.png")}
             style={styles.logo}
           />
-        </View>
+        </View> */}
 
       <View style={styles.modalView}>
         <Text style={styles.modalText}>{message}</Text>

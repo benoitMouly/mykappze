@@ -23,16 +23,16 @@ const CitySectorAndSectorSelect: FC<CitySectorAndSectorSelectProps> = ({
     onCitySectorChange(citySectorId, citySectorName);
   };
 
-  console.log('citiiiees sector : ', citiesSector)
+  // console.log('citiiiees sector : ', citiesSector)
 
   return (
     <View style={styles.selectCitySectorSector}>
-      <Text style={styles.text}>Sélectionner la ville : </Text>
+      <Text style={styles.text}>Sélectionner le secteur : </Text>
       <Picker
         selectedValue={selectedCitySectorId}
         onValueChange={handleCitySectorChange}
       >
-        <Picker.Item label="Choisir une ville" value="" />
+        <Picker.Item label="Choisir un secteur" value="" />
         {citiesSector.map((citySector) => (
           <Picker.Item
             key={citySector.id}

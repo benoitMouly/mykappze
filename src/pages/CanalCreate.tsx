@@ -37,8 +37,8 @@ const CanalForm = () => {
     dispatch(addCanal({ userId: uid, canalData: data }))
       .then(() => {
         Alert.alert(
-          "Canal créée avec succès !",
-          "L'canal est désormais disponible dans votre listing.",
+          "Canal créé avec succès !",
+          "Le canal est désormais disponible dans votre listing.",
           [{ text: "OK", onPress: () => navigate.navigate("Main") }],
           { cancelable: false }
         );
@@ -46,7 +46,7 @@ const CanalForm = () => {
       .catch((error) => {
         console.error("Error adding canal: ", error);
         Alert.alert(
-          "L'canal n'a pas pu être créée.",
+          "Le canal n'a pas pu être créée.",
           `En cas de besoin, transmettez le message d'erreur suivant au support : ${error}`,
           [{ text: "OK" }],
           { cancelable: false }
@@ -58,7 +58,7 @@ const CanalForm = () => {
     <View style={styles.container}>
       <ScrollView>
         <View style={styles.header}>
-          <Text style={styles.title}>Ajouter une nouvelle canal</Text>
+          <Text style={styles.title}>Ajouter un nouveau canal</Text>
         </View>
         <Text style={styles.subtitle}>
           Veillez à remplir le maximum de champ possible. Vous pourrez malgré
