@@ -8,6 +8,7 @@ import {
   Alert,
   TouchableOpacity,
   ScrollView,
+  Switch
 } from "react-native";
 import { fetchCanals, removeCanal } from "../features/canals/canalSlice";
 import TextInputModal from "../components/general/TextUpdateModal";
@@ -19,6 +20,7 @@ import {
   updateUserName,
   updateUserSurname,
 } from "../features/user/userSlice";
+import { updateUserNotificationPreference } from "../features/notifications/notificationSlice";
 import { removeUserFromCanal } from "../features/canals/canalUsersSlice";
 import CustomAlert from "../components/general/CustomAlert";
 import ConfirmationModal from "../components/general/ConfirmationModal";
@@ -27,6 +29,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { fetchLicenseById } from "../features/licences/licenceSlice";
 import { formatDateToFrench } from "../utils/formatDate";
 import { PaymentsScreen } from "./Payments";
+import { registerForPushNotificationsAsync } from "../features/notifications/notificationSlice";
 
 const Settings = () => {
   //   const {
@@ -42,6 +45,7 @@ const Settings = () => {
     isMairie,
     isAssociation,
     registrationDate,
+    notificationsEnabled
   } = useSelector((state) => state.auth);
   const userId = uid;
   const { data: canals } = useSelector((state) => state.canals);
@@ -65,7 +69,9 @@ const Settings = () => {
   const [selectedCanalId, setSelectedCanalId] = useState(null);
   const [creatorCanal, setCreatorCanal] = useState([]);
   const [userIsAdmin, setUserRole] = useState({});
+  const [isEnabled, setIsEnabled] = useState(notificationsEnabled);
 
+  console.log('isEnabled : ', isEnabled)
   const animalsStatus = useSelector((state) => state.animals.status);
   const canalsStatus = useSelector((state) => state.canals.status);
   const [isEditNameVisible, setEditVisible] = useState(false);
@@ -188,6 +194,38 @@ const Settings = () => {
     // dispatch(logout());
   };
 
+//   const toggleSwitch = () => {
+//     setIsEnabled(previousState => !previousState);
+//     // Ici, appelez également une fonction pour mettre à jour la base de données avec la nouvelle valeur.
+    
+//     dispatch(updateUserNotificationPreference({ newValue: !isEnabled, userId: userId }));
+//     console.log('isEnabled : ', isEnabled)
+// };
+
+const toggleSwitch = async () => {
+  const currentEnabledState = isEnabled;
+  setIsEnabled(!currentEnabledState);
+
+  if (!currentEnabledState) { // Si l'utilisateur essaie d'activer les notifications
+      const token = await registerForPushNotificationsAsync();
+      if (token) {
+          // L'utilisateur a donné l'autorisation
+          dispatch(updateUserNotificationPreference({ newValue: true, userId }));
+          // (Optionnel) Si vous souhaitez enregistrer le token Expo en Firestore, faites-le ici.
+      } else {
+          // L'utilisateur n'a pas donné la permission ou il y a eu une erreur.
+          // Pour refléter cela dans l'interface utilisateur, vous pourriez vouloir remettre le toggle à "off".
+          setIsEnabled(false);
+      }
+  } else {
+      // L'utilisateur essaie de désactiver les notifications.
+      dispatch(updateUserNotificationPreference({ newValue: false, userId }));
+  }
+
+  console.log('isEnabled : ', !currentEnabledState);
+};
+
+
   //   const handleConfirmSuppression = async () => {
   //     // console.log(id)
   //     await dispatch(
@@ -246,10 +284,18 @@ const Settings = () => {
       {/* <> */}
       <HeaderEditAnimal navigation={navigate} animalName={surname} />
       <ScrollView style={styles.mainView}>
+        <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', padding: 15, columnGap: 10}}>
+          <Text style={{color:'#fff'}}>Activer les notifications</Text>
+          <Switch
+                value={isEnabled}
+                onValueChange={toggleSwitch}
+                trackColor={{ true: "#d15e41" }}
+                thumbColor={"#2F2F2F"}
+              />
+        </View>
         <View style={{ padding: 20 }}>
-          <Text>{surname}</Text>
-          <Text>Inscrit depuis le {registrationDateObj?.toLocaleString()}</Text>
-          <Text>Formule : gratuite</Text>
+          <Text style={styles.text}>{surname}</Text>
+          <Text style={styles.text}>Inscrit depuis le {registrationDateObj?.toLocaleString()}</Text>
         </View>
         <View style={{ backgroundColor: "#fff" }}>
           <Text style={styles.title2}>
@@ -385,7 +431,7 @@ const Settings = () => {
           {canals.length > 0 && (
             <>
               <View style={{ backgroundColor: "#fff" }}>
-                <Text style={styles.title2}>Canals dont vous êtes membres</Text>
+                <Text style={styles.title2}>Canaux dont vous êtes membres</Text>
               </View>
               <View style={styles.sectionBloc}>
                 <View style={styles.inputsModify}>
@@ -418,6 +464,8 @@ const Settings = () => {
                       )}
                     </View>
                   ))}
+
+                  
                 </View>
               </View>
             </>
@@ -425,8 +473,9 @@ const Settings = () => {
         </View>
 
         <View style={styles.sectionCanalAdmin}>
+        {creatorCanal.length > 0 && (<>
           <View style={{ backgroundColor: "#fff" }}>
-            <Text style={styles.title2}>Canals dont vous avez la gestion</Text>
+            <Text style={styles.title2}>Canaux dont vous avez la gestion</Text>
           </View>
           <View style={styles.sectionBloc}>
             <View style={styles.inputsModify}>
@@ -457,6 +506,9 @@ const Settings = () => {
               ))}
             </View>
           </View>
+
+        </>)}
+
         </View>
         <View style={styles.suppAccount}>
           <View style={styles.sectionBloc}>
@@ -480,7 +532,7 @@ const Settings = () => {
 
         <TextInputModal
           visible={isEditSurnameVisible}
-          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onClose={() => setEditVisibleSurname(false)} // Fermeture de la modale
           onConfirm={handleUpdateSurname}
           messageType={"Entrer un nouveau prénom"}
           onChangeText={setEditedSurname}
@@ -488,7 +540,7 @@ const Settings = () => {
 
         <TextInputModal
           visible={isEditEmailVisible}
-          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onClose={() => setEditVisibleEmail(false)} // Fermeture de la modale
           onConfirm={handleUpdateEmail}
           messageType={"Entrez le nouvel email"}
           onChangeText={setEditedEmail}
@@ -496,10 +548,11 @@ const Settings = () => {
 
         <TextInputModal
           visible={isEditPasswordVisible}
-          onClose={() => setEditVisible(false)} // Fermeture de la modale
+          onClose={() => setEditVisiblePassword(false)} // Fermeture de la modale
           onConfirm={handleUpdatePassword}
           messageType={"Entrez le nouveau mot de passe"}
           onChangeText={setEditedPassword}
+          secure={true}
         />
 
         <ConfirmationModal
@@ -685,6 +738,7 @@ const styles = {
   },
   btnDeassociate: {
     backgroundColor: "#c40030",
+    marginTop: 10
   },
   btnDeassociateText: {
     padding: 5,
@@ -696,6 +750,7 @@ const styles = {
   btnSuppCanal: {
     backgroundColor: "#c40030",
     width: "50%",
+    marginTop: 10
   },
   btnSuppCanalText: {
     padding: 5,
@@ -703,6 +758,7 @@ const styles = {
     fontFamily: "WixMadeforDisplay-Bold",
     textAlign: "center",
     fontSize: 10,
+    
   },
   suppAccount: {
     paddingBottom: 100,

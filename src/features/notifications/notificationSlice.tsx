@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { getFirestore, collection, query, orderBy, limit, getDocs, where } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, limit, getDocs, where, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
@@ -70,6 +70,59 @@ const fetchNotifications = createAsyncThunk(
       return notifications;
     } catch (error) {
       return rejectWithValue(error.toString());
+    }
+  }
+);
+
+
+
+export const createAndSendNotification = createAsyncThunk(
+  "notifications/createAndSend",
+  async ({ userIds, message }, thunkAPI) => {
+      try {
+          const db = getFirestore();
+          const notificationsEnabledUsers = [];
+
+          // Parcourez chaque userId et vérifiez la préférence de notification
+          for (let userId of userIds) {
+              const userRef = doc(db, "users", userId);
+              const userDoc = await getDoc(userRef);
+              const userData = userDoc.data();
+
+              if (userData && userData.notificationsEnabled) {
+                  notificationsEnabledUsers.push(userId);
+              }
+          }
+
+          // Créez la notification dans Firestore uniquement pour les utilisateurs qui ont activé les notifications
+          // if (notificationsEnabledUsers.length > 0) {
+              const notificationsCollection = collection(db, "notifications");
+              await addDoc(notificationsCollection, {
+                  userIds,
+                  message,
+                  view: false,
+                  date: Date.now(),
+              });
+          // }
+      } catch (error) {
+          console.log(error);
+          return thunkAPI.rejectWithValue(error.toString());
+      }
+  }
+);
+
+export const updateUserNotificationPreference = createAsyncThunk(
+  "notifications/updateUserNotificationPreference",
+  async ({ newValue, userId }) => {
+    console.log('New value->', newValue)
+    console.log('userId-> ', userId)
+    try {
+      const db = getFirestore();
+      const userRef = doc(db, "users", userId); // Assurez-vous d'avoir l'userId
+
+      await updateDoc(userRef, { notificationsEnabled: newValue });
+    } catch (error) {
+      console.error("Error updating user notification preference: ", error);
     }
   }
 );

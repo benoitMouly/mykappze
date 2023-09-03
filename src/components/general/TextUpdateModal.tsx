@@ -15,7 +15,8 @@ const TextInputModal = ({
   onChangeText,
   messageType,
   subMessageType,
-  placeholder
+  placeholder,
+  secure
 }) => {
   const [value, setValue] = useState("");
   const [isClose, setClose] = useState(false);
@@ -32,7 +33,7 @@ const TextInputModal = ({
 
   return (
     <Modal
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       visible={visible}
       onRequestClose={onClose}
@@ -51,6 +52,7 @@ const TextInputModal = ({
             onChangeText={(text) => setValue(text)}
             value={value}
             placeholder={placeholder}
+            secureTextEntry={secure}
           />
           <View style={styles.btnChoice}>
             <TouchableOpacity
@@ -79,7 +81,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)", // demi-transparent
+    backgroundColor: "rgba(0,0,0,0.6)", // demi-transparent
+    // backgroundColor: '#c40030',
     rowGap: 0,
   },
   centeredBlock: {
@@ -96,7 +99,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    // elevation: 5,
     width: '100%'
   },
   modalText: {
@@ -128,26 +130,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    // elevation: 5,
 
   },
   backGroundLogo: {
     margin: 20,
-    // marginHorizontal: 30,
-    // paddingHorizontal: 20,
-    // marginTop: -40,
     backgroundColor: "white",
     borderTopLeftRadius: 2,
     borderTopRightRadius: 2,
-    // padding: 35,
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: "#2f4f4f",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 5,
+    elevation: 2,
     zIndex: 100
-    // width: '100%',
   },
   buttonsPicker: {
     backgroundColor: "transparent",
@@ -165,17 +161,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     color: "white",
     fontFamily: "WixMadeforDisplay-Bold",
-    fontSize: 15,
-    backgroundColor: "rgb(47, 79, 79)",
+    fontSize: 12,
+    backgroundColor: "#4CAF50",
     borderRadius: 2,
+    borderWidth: 2,
+    borderColor: '#4CAF50'
+    
   },
   buttonTextNo: {
     paddingVertical: 10,
     paddingHorizontal: 20,
-    color: "white",
+    color: "#607D8B",
     fontFamily: "WixMadeforDisplay-Bold",
-    fontSize: 15,
-    backgroundColor: "#FA5950",
+    fontSize: 12,
+    borderWidth: 2,
+    borderColor: "#607D8B"
   },
   btnChoice: {
     flexDirection: "row",

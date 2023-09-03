@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-const MotherSelect = ({ animals, selectedAnimalId, onAnimalChange }) => {
+const MotherSelect = ({ animals, selectedAnimalId, currentAnimal, onAnimalChange, needsLabel }) => {
     // const handleAnimalChange = (itemValue, itemIndex) => {
     //     onAnimalChange(animals[itemIndex].id, animals[itemIndex].name);
     // };
@@ -19,7 +19,8 @@ const MotherSelect = ({ animals, selectedAnimalId, onAnimalChange }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>Sélectionner une mère</Text>
+            {needsLabel && (<Text style={styles.label}>Sélectionner une mère</Text>)}
+            
             <Picker
                 selectedValue={selectedAnimalId}
                 onValueChange={handleAnimalChange}

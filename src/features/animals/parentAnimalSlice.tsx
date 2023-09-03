@@ -398,7 +398,7 @@ const animalsSlice = createSlice({
                     animal.image = imageUrl;
                 }
                 if (state.selectedAnimal && state.selectedAnimal.id === animalId) {
-                    state.selectedAnimal.image = imageUrl;
+                    state.selectedAnimal.image.url = imageUrl;
                 }
             })
             .addCase(updateAnimalImage.rejected, (state, action) => {

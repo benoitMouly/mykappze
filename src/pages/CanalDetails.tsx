@@ -122,7 +122,13 @@ const CanalDetails: React.FC = () => {
     (state: RootState) => state.canalUsers
   );
 
+  const femaleAnimals = animals.filter((animal) => animal.sex === "Femelle");
+  const femaleAnimalsSterilized = femaleAnimals.filter(
+    (animal) => animal.isSterilise === true
+  );
+
   const canal = canals.find((asso) => asso.id === canalId);
+  const [activeTab, setActiveTab] = useState("animaux");
 
   const [editableFields, setEditableFields] = useState<string[]>([]);
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
@@ -176,6 +182,9 @@ const CanalDetails: React.FC = () => {
   const numIsBelongedCats = animals.filter(
     (animal) => !animal.isBelonged
   ).length;
+  const sterilizationPercentage = (numSterilizedCats / animals.length) * 100;
+  const sterilizationFemalePercentage =
+    (femaleAnimalsSterilized.length / femaleAnimals.length) * 100;
   // const archiveType = linkedCitySectorId;
 
   useEffect(() => {
@@ -257,109 +266,240 @@ const CanalDetails: React.FC = () => {
           </View>
         </View>
 
-        <View style={styles.containerSection}>
-          <TouchableOpacity
-            onPress={() => setIsOpenBlock1(!isOpenBlock1)}
-            style={styles.sectionHeader}
-          >
-            <Text style={styles.sectionTitle}>Informations générales</Text>
-            <Icon
-              name={isOpenBlock1 ? "chevron-down" : "chevron-forward"}
-              size={24}
-              color="#000"
-            />
-          </TouchableOpacity>
-          {isOpenBlock1 && (
-            <View style={styles.section}>
-              <Text>{canal?.name}</Text>
-              <Text>{canal?.email}</Text>
-              <Text>{canal?.citySector}</Text>
-              <Text>{canal?.postalCode}</Text>
-            </View>
-          )}
+        <View />
 
-          <TouchableOpacity
-            onPress={() => setIsOpenBlock2(!isOpenBlock2)}
-            style={styles.sectionHeader}
-          >
-            <Text style={styles.sectionTitle}>Membres : ({users.length})</Text>
-            <Icon
-              name={isOpenBlock2 ? "chevron-down" : "chevron-forward"}
-              size={24}
-              color="#000"
-            />
-          </TouchableOpacity>
-          {isOpenBlock2 && (
-            <View style={styles.section}>
-              {users.map((user) => (
-                <View key={user.id}>
-                  <Text>{user.name}</Text>
-                  <Text>{user.email}</Text>
+        <View style={styles.module}>
+          <View style={styles.tabs}>
+            <TouchableOpacity
+              style={styles.labeltabs}
+              onPress={() => setActiveTab("animaux")}
+            >
+              <Text
+                style={activeTab === "animaux" ? styles.activeTab : styles.tab}
+              >
+                Animaux
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.labeltabs}
+              onPress={() => setActiveTab("secteurs")}
+            >
+              <Text
+                style={activeTab === "secteurs" ? styles.activeTab : styles.tab}
+              >
+                Secteurs
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.labeltabs}
+              onPress={() => setActiveTab("informations")}
+            >
+              <Text
+                style={
+                  activeTab === "informations" ? styles.activeTab : styles.tab
+                }
+              >
+                Informations
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <View style={styles.tabsContent}>
+              {activeTab === "animaux" && (
+                <View style={styles.contentAnimaux}>
+                  <View style={styles.statAnimal}>
+                    <View style={styles.dataAnimal}>
+                      <Text style={styles.dataAnimalText}>
+                        {animals.length}
+                      </Text>
+                    </View>
+                    <View>
+                      <Text style={styles.labelAnimal}>Chat(s)</Text>
+                      <Text style={styles.labelAnimalMore}>
+                        dont {femaleAnimals.length} femelles répertoriées
+                      </Text>
+                    </View>
+                  </View>
+                  {numNotIdentifiedCats > 0 ? (
+                    <View style={styles.statAnimal}>
+                      <View style={styles.dataAnimal}>
+                        <Text style={styles.dataAnimalText}>
+                          {numNotIdentifiedCats}
+                        </Text>
+                      </View>
+                      <View>
+                        <Text style={styles.labelAnimal}>
+                          Chats non identifiés
+                        </Text>
+                      </View>
+                    </View>
+                  ) : (
+                    <View style={styles.statAnimal}>
+                      <View
+                        style={styles.dataAnimal}
+                        // style={{ backgroundColor: "#2f4f4f" }}
+                      >
+                        <Text style={styles.dataAnimalText}>OK</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.labelAnimal}>
+                          Tous les chats sont identifiés.
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {sterilizationFemalePercentage > 0 &&
+                    (sterilizationFemalePercentage > 75 ? (
+                      <View style={styles.statAnimal}>
+                        <View
+                          style={styles.dataAnimalSuccess}
+                          // style={{ backgroundColor: "#2f4f4f" }}
+                        >
+                          <Text style={styles.dataAnimalTextSuccess}>
+                            {sterilizationFemalePercentage}%
+                          </Text>
+                        </View>
+                        <View>
+                          <Text style={styles.labelAnimal}>
+                            Taux de femelles stérilisées
+                          </Text>
+                          <Text style={styles.labelAnimalMore}>
+                            soit un total de {femaleAnimalsSterilized.length}{" "}
+                            femelles stérilisées / {femaleAnimals.length}{" "}
+                            répertoriées
+                          </Text>
+                        </View>
+                      </View>
+                    ) : (
+                      <View style={styles.statAnimal}>
+                        <View style={styles.dataAnimal}>
+                          <Text style={styles.dataAnimalText}>
+                            {sterilizationFemalePercentage}%
+                          </Text>
+                        </View>
+                        <View>
+                          <Text style={styles.labelAnimal}>
+                            Taux de femelles stérilisées
+                          </Text>
+                          <Text style={styles.labelAnimalMore}>
+                            soit un total de {femaleAnimalsSterilized.length}{" "}
+                            femelles stérilisées / {femaleAnimals.length}{" "}
+                            répertoriées
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+
+                  {sterilizationPercentage > 75 ? (
+                    <View style={styles.statAnimal}>
+                      <View style={styles.dataAnimal}>
+                        <Text style={{ color: "#000" }}>
+                          {sterilizationPercentage}%
+                        </Text>
+                      </View>
+                      <View>
+                        <Text style={styles.labelAnimal}>
+                          Taux de stérilisation global
+                        </Text>
+                      </View>
+                    </View>
+                  ) : (
+                    <View style={styles.statAnimal}>
+                      <View
+                        style={styles.dataAnimalDanger}
+                        // style={{ borderColor: "#872929" }}
+                      >
+                        <Text style={styles.dataAnimalText}>
+                          {sterilizationPercentage}%
+                        </Text>
+                      </View>
+                      <View>
+                        <Text style={styles.labelAnimal}>
+                          Taux de stérilisation global
+                        </Text>
+                      </View>
+                    </View>
+                  )}
                 </View>
-              ))}
-            </View>
-          )}
+              )}
 
-          <TouchableOpacity
-            onPress={() => setIsOpenBlock3(!isOpenBlock3)}
-            style={styles.sectionHeader}
-          >
-            <Text style={styles.sectionTitle}>
-              Secteurs couverts : ({citiesSector.length})
-            </Text>
-            <Icon
-              name={isOpenBlock3 ? "chevron-down" : "chevron-forward"}
-              size={24}
-              color="#000"
-            />
-          </TouchableOpacity>
-          {isOpenBlock3 && (
-            <View style={styles.section}>
-              {citiesSector.map((citySector) => (
-                <View style={styles.citySectorList} key={citySector.id}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      navigationCitySector.navigate("CitySectorDetails", {
-                        canalId: canalId,
-                        citySectorId: citySector?.id,
-                      })
-                    }
-                    style={styles.sectionBtns_btnCitySector}
-                  >
-                    <Text style={styles.sectionTitleCitySector}>
-                      {citySector?.name}
+              {activeTab === "secteurs" && (
+                <View style={styles.sectionCitySector}>
+                  {citiesSector.map((citySector) => (
+                    <View style={styles.citySectorList} key={citySector.id}>
+                      <TouchableOpacity
+                        onPress={() =>
+                          navigationCitySector.navigate("CitySectorDetails", {
+                            canalId: canalId,
+                            citySectorId: citySector?.id,
+                          })
+                        }
+                        style={styles.sectionBtns_btnCitySector}
+                      >
+                        <Text style={styles.sectionTitleCitySector}>
+                          {citySector?.name}
+                        </Text>
+                        <Icon
+                          name={"chevron-forward"}
+                          size={24}
+                          color="#2f4f4f"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {activeTab === "informations" && (
+                <View style={styles.sectionInformations}>
+                  <View>
+                    <Text style={styles.generalInfoLabel}>{canal?.name}</Text>
+                    <Text style={styles.generalInfoLabel}>{canal?.email}</Text>
+                    <Text style={styles.generalInfoLabel}>
+                      {canal?.citySector ? canal.citySector : "Ville indéfinie"}
+                      , {canal?.postalCode}
                     </Text>
-                    <Icon name={"chevron-forward"} size={24} color="#FFF" />
-                  </TouchableOpacity>
+                  </View>
+
+                  <View style={{ marginTop: 20 }}>
+                    <Text style={styles.generalInfoMembersTitle}>
+                      Membres ({users.length})
+                    </Text>
+                    {users.map((user) => (
+                      <View style={styles.generalInfoMemberElt} key={user.id}>
+                        <View>
+                          <Text style={styles.generalInfoMemberText}>
+                            {user.name} {user.surname}
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            columnGap: 5,
+                          }}
+                        >
+                          <Icon name={"mail-outline"} size={14} color="#000" />
+
+                          <Text style={styles.generalInfoMemberText}>
+                            {user.email}
+                          </Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
                 </View>
-              ))}
+              )}
             </View>
-          )}
-
-          <TouchableOpacity
-            onPress={() => setIsOpenBlock4(!isOpenBlock4)}
-            style={styles.sectionHeader}
-          >
-            <Text style={styles.sectionTitle}>
-              Animaux : ({animals.length})
-            </Text>
-            <Icon
-              name={isOpenBlock4 ? "chevron-down" : "chevron-forward"}
-              size={24}
-              color="#000"
-            />
-          </TouchableOpacity>
-          {isOpenBlock4 && <View style={styles.section}>
-            <Text> Il y a {animals.length} chat(s) dans ce canal</Text>
-            <Text>Dont : </Text>
-            <Text>{numSterilizedCats} sont stérilisé(s)</Text>
-            <Text>{numNotIdentifiedCats} n'étant pas identifié(s)</Text>
-            <Text>{numIsBelongedCats} n'ayant été réclamé(s) par aucun propriétaire</Text>
-            </View>}
-
+          </View>
+        </View>
+        <View style={{backgroundColor: '#2f4f4f'}}>
+        <AnimalFilters animals={animals} archiveType={archiveType} />
 
         </View>
-        <AnimalFilters animals={animals} archiveType={archiveType} />
       </ScrollView>
 
       {userIsAdmin && (
@@ -487,7 +627,7 @@ const styles = StyleSheet.create({
 
   section: {
     marginBottom: 20,
-    padding: 25,
+    padding: 30,
     paddingTop: 0,
     // borderWidth: 2,
   },
@@ -527,25 +667,30 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   sectionCitySector: {
-    flexDirection: "column",
+    flexDirection: "row",
     rowGap: 5,
-    // alignItems: 'center',
-    justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "space-around",
+    padding: 5,
+    marginVertical: 40,
   },
   citySectorList: {
-    maxWidth: 200,
+    maxWidth: 150,
+    marginBottom: 15,
     // backgroundColor: 'blue'
   },
   sectionBtns_btnCitySector: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#000",
+    backgroundColor: "transparent",
     color: "#FFF",
     padding: 10,
     borderRadius: 2,
+    borderWidth: 2,
+    borderColor: "#2f4f4f",
   },
   sectionTitleCitySector: {
-    color: "#FFF",
+    color: "#2f4f4f",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
@@ -556,6 +701,9 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginVertical: 20, // space above and below the line
     width: "80%", // change this to fit your design
+  },
+  sectionInformations: {
+    padding: 15,
   },
   footer: {
     position: "absolute",
@@ -575,6 +723,149 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
   },
+  generalInfoLabel: {
+    color: "#000",
+    fontSize: 12,
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontWeight: "600",
+  },
+  generalInfoMembersTitle: {
+    color: "#2f2f2f",
+    fontSize: 14,
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  generalInfoMemberElt: {
+    flexDirection: "column",
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  generalInfoMemberText: {
+    color: "#000",
+    fontSize: 14,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    marginBottom: 5,
+  },
+  module: {
+    // padding : 25,
+    backgroundColor: "#2f4f4f",
+  },
+  tabs: {
+    display: "flex",
+    flexDirection: "row",
+    // justifyContent: "space-around",
+    backgroundColor: "#2f4f4f",
+  },
+  labeltabs: {
+    backgroundColor: "#2f4f4f",
+    borderRadius: 2,
+  },
+  tab: {
+    fontSize: 16,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    padding: 10,
+    backgroundColor: "#2f4f4f",
+    color: "#fff",
+    borderRadius: 2,
+  },
+  activeTab: {
+    backgroundColor: "rgb(242,242,242)",
+    fontSize: 16,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    padding: 10,
+    color: "#2f4f4f",
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
+  },
+  tabsContent: {
+    padding: 0,
+    backgroundColor: "rgb(242,242,242)",
+  },
+  contentAnimaux: {
+    display: "flex", // implicitement défini pour tous les éléments React Native
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start", // centré verticalement
+    justifyContent: "space-between",
+    padding: 12,
+    // columnGap: 20
+  },
+  contentSecteurs: {
+    padding: 10,
+  },
+  statAnimal: {
+    width: "48%", // moins que 50% pour tenir compte de justifyContent: 'space-between'
+    marginVertical: 5, // pour simuler rowGap
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 5,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    maxWidth: 200,
+  },
+  dataAnimal: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#2f4f4f", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "transparent", // Fond transparent
+    marginTop: 10,
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  dataAnimalSuccess: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#2f4f4f", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "#2f4f4f", // Fond transparent
+    marginTop: 10,
+  },
+  dataAnimalDanger: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#872929", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "transparent", // Fond transparent
+    marginTop: 10,
+  },
+  dataAnimalText: {
+    fontWeight: "bold",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  dataAnimalTextSuccess: {
+    fontWeight: "bold",
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  labelAnimal: {
+    textAlign: "center",
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontSize: 14,
+  },
+  labelAnimalMore: {
+    fontSize: 12,
+    textAlign: "center",
+    flexWrap: "wrap",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+
+  // tabsContent: {
+  //   display: 'flex',
+  //   flexDirection: 'row'
+  // }
 });
 
 export default CanalDetails;

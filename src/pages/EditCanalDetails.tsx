@@ -36,7 +36,7 @@ import ConfirmationModal from "../components/general/ConfirmationModal";
 import CustomAlert from "../components/general/CustomAlert";
 import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
 import * as Clipboard from 'expo-clipboard';
-import { createAndSendNotification } from "../features/user/userSlice";
+import { createAndSendNotification } from "../features/notifications/notificationSlice";
 // définir les interfaces
 interface Canal {
   id: string;

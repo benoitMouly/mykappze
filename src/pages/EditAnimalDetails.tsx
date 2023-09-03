@@ -30,15 +30,21 @@ import ConfirmationModal from "../components/general/ConfirmationModal";
 import CustomAlert from "../components/general/CustomAlert";
 import { HeaderEditAnimal } from "../components/general/headerEditAnimal";
 import Icon from "react-native-vector-icons/Ionicons";
-import { createAndSendNotification } from "../features/user/userSlice";
+import { createAndSendNotification } from "../features/notifications/notificationSlice";
+import MotherSelect from "../components/animals/motherSelect";
 
 const EditAnimalDetails = ({ route, navigation }) => {
   const { animalId } = route.params;
   const [animal_id, setAnimalId] = useState("");
+  const { data: animals } = useSelector((state) => state.animals)
   const dispatch = useDispatch();
-  const { data: citiesSector } = useSelector((state: RootState) => state.citiesSector);
-  const { data: id} = useSelector((state: RootState) => state.canals);
-  const [citySector, setCitySector] = useState(citiesSector ? citiesSector[0] : "");
+  const { data: citiesSector } = useSelector(
+    (state: RootState) => state.citiesSector
+  );
+  const { data: id } = useSelector((state: RootState) => state.canals);
+  const [citySector, setCitySector] = useState(
+    citiesSector ? citiesSector[0] : ""
+  );
   const [citySectorId, setCitySectorId] = useState(null);
   const [selectedColors, setSelectedColors] = useState([]);
   const [initialColors, setInitialColors] = useState([]);
@@ -58,6 +64,9 @@ const EditAnimalDetails = ({ route, navigation }) => {
   }, [animalId, dispatch]);
 
   const animal = useSelector((state) => state.animals.selectedAnimal);
+  const motherAnimals = animals.filter((animal) => animal.isMother);
+
+  const motherAnimal = useSelector((state) => state.animals.motherAnimal);
   const [updatedAnimal, setUpdatedAnimal] = useState(animal);
 
   // Additional states for DateTimePickerModal
@@ -67,11 +76,17 @@ const EditAnimalDetails = ({ route, navigation }) => {
   const [isModified, setIsModified] = useState(false);
   const [isDocModified, setIsDocModified] = useState(false);
 
-  React.useEffect(() => {
+
+  const [motherId, setMotherId] = useState(motherAnimal?.id);
+  const [mother, setMother] = useState(motherAnimal?.name);
+
+  useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      console.log('DEDANS')
       // Empêche le geste de retour par défaut
       if (!isModified) {
         // Si aucune modification n'a été apportée, laissez l'utilisateur quitter la page.
+        console.log('conditoin rempli')
         return;
       }
 
@@ -94,13 +109,13 @@ const EditAnimalDetails = ({ route, navigation }) => {
     });
 
     return unsubscribe;
-  }, [navigation, isModified]);
+  }, [navigation, isModified, isDocModified]);
 
   useEffect(() => {
     if (animal) {
       setSelectedColors(animal.colors);
       setInitialColors(animal.colors);
-      setImageUri(animal.image);
+      setImageUri(animal.image.url);
       setDocuments(animal.documents);
       setAnimalId(animal.id);
     }
@@ -109,7 +124,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
   useEffect(() => {
     if (documents) {
       setUpdatedAnimal((prevAnimal) => ({ ...prevAnimal, documents }));
-      console.log('documents : ' , documents)
+      // console.log("documents : ", documents);
     }
   }, [documents]);
 
@@ -119,8 +134,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
       ...prev,
       colors: selectedColors,
     }));
-  }, [selectedColors]);
-
+  }, [selectedColors, isModified]);
 
   // Function to handle input changes
   const handleInputChange = (field, value) => {
@@ -143,6 +157,11 @@ const EditAnimalDetails = ({ route, navigation }) => {
     }));
   };
 
+  const handleObjectFormAnimalChange = async (id, name) => {
+    setMother(name);
+    setMotherId(id);
+    handleInputChange("motherAppId", id)
+  };
 
 
   const handleConfirmIdentificationDate = (date) => {
@@ -162,28 +181,36 @@ const EditAnimalDetails = ({ route, navigation }) => {
   };
 
   const handleColorChange = (color) => {
-    setIsModified(true);
+    
     if (selectedColors.includes(color)) {
       setSelectedColors((prevColors) => prevColors.filter((c) => c !== color));
+      setIsModified(true);
     } else {
       setSelectedColors((prevColors) => [...prevColors, color]);
+      setIsModified(true);
     }
+    console.log('IS MODIFIED AFTER COLORS : ', isModified)
   };
 
   const handleSavePress = async () => {
     // ajoutez async ici
 
-    if (imageUri !== animal.image) {
+    if (imageUri !== animal.image.url) {
       dispatch(updateAnimalImage({ animalId, image: imageUri }));
     }
 
-    if(isDocModified){
-      const message = 'Un nouveau document est disponible pour l\'animal : ' + (animal?.name || animal?.id);
-      const userIds = ['oo1qP9CNSYNvgzingDITVJ4XL3a2', 'zcsYehEmnLStL5twOUlP4Ee7FyK2', '4jEvW3mzCqO6GtLt4vHfYZxCHDI3'];
+    if (isDocModified) {
+      const message =
+        "Un nouveau document est disponible pour l'animal : " +
+        (animal?.name || animal?.id);
+      const userIds = [
+        "oo1qP9CNSYNvgzingDITVJ4XL3a2",
+        "zcsYehEmnLStL5twOUlP4Ee7FyK2",
+        "4jEvW3mzCqO6GtLt4vHfYZxCHDI3",
+      ];
       dispatch(createAndSendNotification({ userIds, message }));
-
     }
-      dispatch(updateAnimal({ animalId, animalData: updatedAnimal }));
+    dispatch(updateAnimal({ animalId, animalData: updatedAnimal }));
 
     setIsModified(false);
     setIsDocModified(false);
@@ -204,7 +231,6 @@ const EditAnimalDetails = ({ route, navigation }) => {
     setAlertVisible(true); // Affiche la modale d'alerte
     // dispatch(fetchAnimalsByCanal(animal.canalId))
     // navigation.navigate(-1);
-
   };
 
   // If animal is not yet loaded, display a loading text
@@ -217,11 +243,10 @@ const EditAnimalDetails = ({ route, navigation }) => {
       <HeaderEditAnimal navigation={navigation} animalName={animal.name} />
       <ScrollView style={styles.editAnimal}>
         <View style={styles.iconTrash}>
-          <TouchableOpacity  onPress={handleSuppAnimal}>
+          <TouchableOpacity onPress={handleSuppAnimal}>
             <Icon name="trash-outline" size={30} color="#C40030" />
           </TouchableOpacity>
         </View>
-
 
         <View style={styles.imgNameAge}>
           <View style={styles.editElt}>
@@ -273,7 +298,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
           <View style={styles.containerUnicalSection}>
             {/* Select citySector */}
             <View style={styles.editEltSelects}>
-            <Text style={styles.editEltLabel}>Secteur : </Text>
+              <Text style={styles.editEltLabel}>Secteur : </Text>
               <CitySectorAndSectorSelect
                 citiesSector={citiesSector}
                 selectedCitySectorId={citySectorId}
@@ -310,7 +335,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
                 }
                 value={updatedAnimal.isSick}
                 trackColor={{ true: "#d15e41" }}
-                 thumbColor={"#d15e41"}
+                thumbColor={"#d15e41"}
               />
             </View>
           </View>
@@ -330,7 +355,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
                 }
                 value={updatedAnimal.hasIdNumber}
                 trackColor={{ true: "#d15e41" }}
-                 thumbColor={"#d15e41"}
+                thumbColor={"#d15e41"}
               />
             </View>
 
@@ -364,7 +389,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
                 }
                 value={updatedAnimal.isBelonged}
                 trackColor={{ true: "#d15e41" }}
-                 thumbColor={"#d15e41"}
+                thumbColor={"#d15e41"}
               />
             </View>
           </View>
@@ -384,7 +409,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
                 }
                 value={updatedAnimal.isFamily}
                 trackColor={{ true: "#d15e41" }}
-                 thumbColor={"#d15e41"}
+                thumbColor={"#d15e41"}
               />
             </View>
 
@@ -397,18 +422,26 @@ const EditAnimalDetails = ({ route, navigation }) => {
                 }
                 value={updatedAnimal.isMother}
                 trackColor={{ true: "#d15e41" }}
-                 thumbColor={"#d15e41"}
+                thumbColor={"#d15e41"}
               />
             </View>
 
             {/* TextInput motherAppId */}
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>AppID de la mère : </Text>
+              {/* <Text style={styles.editEltLabel}>AppID de la mère : </Text>
               <TextInput
                 value={updatedAnimal.motherAppId}
                 onChangeText={(text) => handleInputChange("motherAppId", text)}
                 style={styles.textInputWhite}
+              /> */}
+
+              <MotherSelect
+                animals={motherAnimals}
+                selectedAnimalId={motherId}
+                onAnimalChange={handleObjectFormAnimalChange}
+                needsLabel={true}
               />
+
             </View>
           </View>
         </View>
@@ -447,14 +480,16 @@ const EditAnimalDetails = ({ route, navigation }) => {
 
         <View style={styles.editUnicalSection}>
           {/* <View style={styles.editEltDocuments}> */}
-            <Text style={styles.editUnicalSectionTitle}>Documents</Text>
-            <View style={styles.containerUnicalSection}>
-              <EditableDocumentList
-                documents={documents}
-                setDocuments={setDocuments}
-                setIsDocModified={setIsDocModified}
-              />
-            </View>
+          <Text style={styles.editUnicalSectionTitle}>Documents</Text>
+          <View style={styles.containerUnicalSection}>
+            <EditableDocumentList
+              documents={documents}
+              setDocuments={setDocuments}
+              setIsDocModified={setIsDocModified}
+              setIsModified={setIsModified}
+              animalName = {animal.name}
+            />
+          </View>
           {/* </View> */}
         </View>
 
@@ -498,7 +533,7 @@ const styles = {
     // padding: 5,
     flexDirection: "column",
     rowGap: 50,
-    marginBottom: 40
+    marginBottom: 40,
   },
   editUnicalSection: {
     flexDirection: "column",
@@ -540,7 +575,7 @@ const styles = {
   editEltSelects: {
     marginHorizontal: 15,
     flexDirection: "column",
-    rowGap: 20
+    rowGap: 20,
   },
   // editEltDocuments: {
   //   marginHorizontal: 15,
@@ -567,12 +602,12 @@ const styles = {
   },
   textInputWhite: {
     borderBottomWidth: 1,
-    borderBottomColor: '#fff',
+    borderBottomColor: "#fff",
     height: "100%",
     width: "60%",
     padding: 1,
     textAlign: "center",
-    color: '#fff',
+    color: "#fff",
     fontFamily: "WixMadeforDisplay-Regular",
   },
   buttonsPicker: {
@@ -615,7 +650,7 @@ const styles = {
   },
   btnSave: {
     // backgroundColor: 'green'
-    width: '100%'
+    width: "100%",
   },
   buttonIcon: {
     // marginRight: 5,
@@ -630,12 +665,12 @@ const styles = {
   buttonIconElt: {
     margin: 7,
   },
-  iconTrash:{
+  iconTrash: {
     alignItems: "flex-end",
     marginTop: 5,
     padding: 10,
-    width: '100%',
-  }
+    width: "100%",
+  },
 };
 
 export default EditAnimalDetails;

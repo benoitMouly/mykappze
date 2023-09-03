@@ -113,8 +113,17 @@ const CitySectorDetails: React.FC = () => {
   const { data: users, status: usersStatus } = useSelector(
     (state: RootState) => state.canalUsers
   );
-  const citySector = citiesSector.find((citySector) => citySector.id === citySectorId);
+
+  const femaleAnimals = animals.filter((animal) => animal.sex === "Femelle");
+  const femaleAnimalsSterilized = femaleAnimals.filter(
+    (animal) => animal.isSterilise === true
+  );
+
+  const citySector = citiesSector.find(
+    (citySector) => citySector.id === citySectorId
+  );
   const canal = canals.find((asso) => asso.id === canalId);
+  const [activeTab, setActiveTab] = useState("animaux");
   // const citySectorName = citySector.id;
 
   const [citySectorName, setCitySectorName] = useState(citySector?.name);
@@ -128,7 +137,8 @@ const CitySectorDetails: React.FC = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [editCitySectorMode, setEditCitySectorMode] = useState(false);
   const [editedCitySectorName, setEditedCitySectorName] = useState("");
-  const [currentCitySectorName, setCurrentCitySectorName] = useState(citySectorName);
+  const [currentCitySectorName, setCurrentCitySectorName] =
+    useState(citySectorName);
   const [isConfirmationVisible, setConfirmationVisible] = useState(false);
   const [isTextUpdateVisible, setTextUpdateVisible] = useState(false);
   const [isAlertVisible, setAlertVisible] = useState(false);
@@ -158,6 +168,9 @@ const CitySectorDetails: React.FC = () => {
   const numIsBelongedCats = animals.filter(
     (animal) => !animal.isBelonged
   ).length;
+  const sterilizationPercentage = (numSterilizedCats / animals.length) * 100;
+  const sterilizationFemalePercentage =
+    (femaleAnimalsSterilized.length / femaleAnimals.length) * 100;
   // const archiveType = linkedCitySectorId;
 
   //   useEffect(() => {
@@ -229,7 +242,10 @@ const CitySectorDetails: React.FC = () => {
   const handleEditCitySector = async (newName) => {
     await dispatch(updateCitySector({ id: citySector.id, name: newName }));
     await dispatch(
-      updateAnimalCitySectorName({ citySectorId: citySector.id, newCitySectorName: newName })
+      updateAnimalCitySectorName({
+        citySectorId: citySector.id,
+        newCitySectorName: newName,
+      })
     );
     setCurrentCitySectorName(newName); // Update the current citySector name
     console.log("EDIT CITY NAME : ", newName);
@@ -274,7 +290,8 @@ const CitySectorDetails: React.FC = () => {
           )}
           <View style={styles.header1st}>
             <Text style={styles.title}>
-              Secteur : {citySector.name ? citySector.name : editedCitySectorName}
+              Secteur :{" "}
+              {citySector.name ? citySector.name : editedCitySectorName}
             </Text>
           </View>
           <ConfirmationModal
@@ -298,40 +315,150 @@ const CitySectorDetails: React.FC = () => {
               onPress={() => handleCopy}
               style={styles.sectionShare_button}
             >
-              <Text style={styles.sectionShare_buttonText}>
-                {canal?.id}
-              </Text>
+              <Text style={styles.sectionShare_buttonText}>{canal?.id}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.containerSection}>
-          {isOpenBlock1 && <View style={styles.sectionCitySector}></View>}
-          <TouchableOpacity
-            onPress={() => setIsOpenBlock4(!isOpenBlock4)}
-            style={styles.sectionHeader}
-          >
-            <Text style={styles.sectionTitle}>
-              Animaux : ({animals.length})
-            </Text>
-            <Icon
-              name={isOpenBlock4 ? "chevron-down" : "chevron-forward"}
-              size={24}
-              color="#000"
-            />
-          </TouchableOpacity>
-          {isOpenBlock4 && <View style={styles.section}>
-            <Text> Il y a {animals.length} chat(s) dans ce secteur</Text>
-            <Text>Dont : </Text>
-            <Text>{numSterilizedCats} sont stérilisé(s)</Text>
-            <Text>{numNotIdentifiedCats} n'étant pas identifié(s)</Text>
-            <Text>{numIsBelongedCats} n'ayant été réclamé(s) par aucun propriétaire</Text>
-            </View>}
+          <View style={styles.contentAnimaux}>
+            <View style={styles.statAnimal}>
+              <View style={styles.dataAnimal}>
+                <Text style={styles.dataAnimalText}>{animals.length}</Text>
+              </View>
+              <View>
+                <Text style={styles.labelAnimal}>Chat(s)</Text>
+                <Text style={styles.labelAnimalMore}>
+                  dont {femaleAnimals.length} femelles répertoriées
+                </Text>
+              </View>
+            </View>
+            {numNotIdentifiedCats > 0 ? (
+              <View style={styles.statAnimal}>
+                <View style={styles.dataAnimal}>
+                  <Text style={styles.dataAnimalText}>
+                    {numNotIdentifiedCats}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={styles.labelAnimal}>Chats non identifiés</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.statAnimal}>
+                <View
+                  style={styles.dataAnimal}
+                  // style={{ backgroundColor: "#2f4f4f" }}
+                >
+                  <Text style={styles.dataAnimalText}>OK</Text>
+                </View>
+                <View>
+                  <Text style={styles.labelAnimal}>
+                    Tous les chats sont identifiés.
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {sterilizationFemalePercentage > 0 &&
+              (sterilizationFemalePercentage > 75 ? (
+                <View style={styles.statAnimal}>
+                  <View
+                    style={styles.dataAnimalSuccess}
+                    // style={{ backgroundColor: "#2f4f4f" }}
+                  >
+                    <Text style={styles.dataAnimalTextSuccess}>
+                      {sterilizationFemalePercentage}%
+                    </Text>
+                  </View>
+                  <View>
+                    <Text style={styles.labelAnimal}>
+                      Taux de femelles stérilisées
+                    </Text>
+                    <Text style={styles.labelAnimalMore}>
+                      soit un total de {femaleAnimalsSterilized.length} femelles
+                      stérilisées / {femaleAnimals.length} répertoriées
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={styles.statAnimal}>
+                  <View style={styles.dataAnimal}>
+                    <Text style={styles.dataAnimalText}>
+                      {sterilizationFemalePercentage}%
+                    </Text>
+                  </View>
+                  <View>
+                    <Text style={styles.labelAnimal}>
+                      Taux de femelles stérilisées
+                    </Text>
+                    <Text style={styles.labelAnimalMore}>
+                      soit un total de {femaleAnimalsSterilized.length} femelles
+                      stérilisées / {femaleAnimals.length} répertoriées
+                    </Text>
+                  </View>
+                </View>
+              ))}
+
+            {numSterilizedCats > 0 ? (
+              <View style={styles.statAnimal}>
+                <View style={styles.dataAnimal}>
+                  <Text style={styles.dataAnimalText}>{numSterilizedCats}</Text>
+                </View>
+                <View>
+                  <Text style={styles.labelAnimal}>Chats stérilisés</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.statAnimal}>
+                <View style={styles.dataAnimalDanger}>
+                  <Text style={styles.dataAnimalText}>{numSterilizedCats}</Text>
+                </View>
+                <View>
+                  <Text style={styles.labelAnimal}>Chats stérilisés</Text>
+                </View>
+              </View>
+            )}
+
+            {sterilizationPercentage > 75 ? (
+              <View style={styles.statAnimal}>
+                <View style={styles.dataAnimal}>
+                  <Text style={{ color: "#fff" }}>
+                    {sterilizationPercentage}%
+                  </Text>
+                </View>
+                <View>
+                  <Text style={styles.labelAnimal}>
+                    Taux de stérilisation global
+                  </Text>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.statAnimal}>
+                <View
+                  style={styles.dataAnimalDanger}
+                  // style={{ borderColor: "#872929" }}
+                >
+                  <Text style={styles.dataAnimalText}>
+                    {sterilizationPercentage}%
+                  </Text>
+                </View>
+                <View>
+                  <Text style={styles.labelAnimal}>
+                    Taux de stérilisation global
+                  </Text>
+                </View>
+              </View>
+            )}
+          </View>
         </View>
 
         <View style={styles.line} />
 
-        <AnimalFilters animals={animals} archiveType={archiveType} />
+<View style={{backgroundColor: "#2f4f4f"}}>
+<AnimalFilters animals={animals} archiveType={archiveType} />
+
+</View>
       </ScrollView>
       {userIsAdmin && (
         <View style={styles.footer}>
@@ -522,6 +649,116 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 10,
     marginTop: 10,
+  },
+  tabs: {
+    display: "flex",
+    flexDirection: "row",
+    // justifyContent: "space-around",
+    backgroundColor: "#2f4f4f",
+  },
+  labeltabs: {
+    backgroundColor: "#2f4f4f",
+    borderRadius: 2,
+  },
+  tab: {
+    fontSize: 16,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    padding: 10,
+    backgroundColor: "#2f4f4f",
+    color: "#fff",
+    borderRadius: 2,
+  },
+  activeTab: {
+    backgroundColor: "rgb(242,242,242)",
+    fontSize: 16,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    padding: 10,
+    color: "#2f4f4f",
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
+  },
+  tabsContent: {
+    padding: 0,
+    backgroundColor: "rgb(242,242,242)",
+  },
+  contentAnimaux: {
+    display: "flex", // implicitement défini pour tous les éléments React Native
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start", // centré verticalement
+    justifyContent: "space-between",
+    padding: 12,
+    // columnGap: 20
+  },
+  contentSecteurs: {
+    padding: 10,
+  },
+  statAnimal: {
+    width: "48%", // moins que 50% pour tenir compte de justifyContent: 'space-between'
+    marginVertical: 5, // pour simuler rowGap
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 5,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    maxWidth: 200,
+  },
+  dataAnimal: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#2f4f4f", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "transparent", // Fond transparent
+    marginTop: 10,
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  dataAnimalSuccess: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#2f4f4f", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "#2f4f4f", // Fond transparent
+    marginTop: 10,
+  },
+  dataAnimalDanger: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#872929", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "transparent", // Fond transparent
+    marginTop: 10,
+  },
+  dataAnimalText: {
+    fontWeight: "bold",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  dataAnimalTextSuccess: {
+    fontWeight: "bold",
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  labelAnimal: {
+    textAlign: "center",
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontSize: 14,
+  },
+  labelAnimalMore: {
+    fontSize: 12,
+    textAlign: "center",
+    // flex: 1,
+    flexWrap: "wrap",
+    fontFamily: "WixMadeforDisplay-Regular",
   },
 });
 

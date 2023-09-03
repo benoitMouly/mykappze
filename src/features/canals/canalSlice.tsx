@@ -18,6 +18,8 @@ import {
 } from "firebase/firestore";
 import * as FileSystem from 'expo-file-system';
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { v4 as uuidv4 } from 'uuid'; // à installer avec npm ou yarn
+
 
 
 interface Canal {
@@ -274,6 +276,7 @@ export const joinCanal = createAsyncThunk(
 export const uploadImage = async (imageUri, imageName) => {
   try {
     const storage = getStorage();
+    const imageName = uuidv4(); // générer un nom unique pour l'image
     const storageRef = ref(storage, `images/${imageName}`);
 
     // Convertir l'image en blob
@@ -507,7 +510,7 @@ const canalsSlice = createSlice({
           canal.image = imageUrl;
         }
         if (state.selectedAnimal && state.selectedAnimal.id === canalId) {
-          state.selectedAnimal.image = imageUrl;
+          state.selectedAnimal.image.url = imageUrl;
         }
       })
       .addCase(updateCanalImage.rejected, (state, action) => {

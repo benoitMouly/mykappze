@@ -91,7 +91,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
   };
 
   const citySectorOptions = [
-    { id: "", label: "Toutes" },
+    { id: "", label: "Tous" },
     ...citiesSector.map((citySector) => ({ id: citySector.id, label: citySector.name })),
   ];
 
@@ -166,12 +166,12 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
         >
           {/* <Text style={styles.sectionBtns_btnText}>Filter</Text> */}
           {/* <ion-icon name="options-outline"></ion-icon> */}
-          <Icon name={"options-outline"} size={24} color="#000" />
+          <Icon name={"options-outline"} size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
@@ -181,13 +181,13 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
         <View
           style={{
             flex: 1,
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            backgroundColor: "rgba(0, 0, 0, 0.2)",
             justifyContent: "center",
           }}
         >
           <ScrollView style={styles.modalView}>
             <View style={styles.filterContainer}>
-              <Text style={styles.filterLabel}>Nom : </Text>
+              <Text style={styles.filterLabel}>Nom </Text>
               <TextInput
                 style={styles.filterInput}
                 value={filters.text}
@@ -196,7 +196,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
             </View>
             {archiveType === "canal" ? (
               <View style={styles.filterContainer}>
-                <Text style={styles.filterLabel}>Secteur :</Text>
+                <Text style={styles.filterLabel}>Secteur </Text>
                 <Picker
                   style={{ height: 50, width: 150 }}
                   selectedValue={selectedCitySectorId}
@@ -218,7 +218,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
 
 
             <View style={styles.filterContainer}>
-              <Text style={styles.filterLabel}>Robe :</Text>
+              <Text style={styles.filterLabel}>Robe </Text>
               <Picker
                 style={{ height: 50, width: 150 }}
                 selectedValue={selectedColor}
@@ -232,13 +232,13 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
             </View>
 
             <View style={styles.filterContainer}>
-              <Text style={styles.filterLabel}>Sexe :</Text>
+              <Text style={styles.filterLabel}>Sexe </Text>
               <Picker
                 style={{ height: 50, width: 150 }}
                 selectedValue={filterBySex}
                 onValueChange={handleSexChange}
               >
-                <Picker.Item label="Toutes" value={""} />
+                <Picker.Item label="Tous" value={""} />
                 <Picker.Item label="Mâle" value={"Mâle"} />
                 <Picker.Item label="Femelle" value={"Femelle"} />
                 <Picker.Item label="Inconnu" value={"Inconnu"} />
@@ -246,7 +246,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
             </View>
 
             <View style={styles.filterContainer}>
-              <Text style={styles.filterLabel}>Stérilisés :</Text>
+              <Text style={styles.filterLabel}>Stérilisés </Text>
               <Picker
                 style={{ height: 50, width: 150 }}
                 selectedValue={filterBySterilization}
@@ -259,7 +259,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
             </View>
 
             <View style={styles.filterContainer}>
-              <Text style={styles.filterLabel}>Maladies :</Text>
+              <Text style={styles.filterLabel}>Maladies </Text>
               <Picker
                 style={{ height: 50, width: 150 }}
                 selectedValue={filterByDisease}
@@ -272,7 +272,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
             </View>
 
             <View style={styles.filterContainer}>
-              <Text style={styles.filterLabel}>Identifié :</Text>
+              <Text style={styles.filterLabel}>Identifié </Text>
               <Picker
                 style={{ height: 50, width: 150 }}
                 selectedValue={filterByIdentification}
@@ -286,7 +286,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
 
             <View style={styles.filterContainer}>
               <Text style={styles.filterLabel}>
-                Appartient à un propriétaire :
+                Appartient à un propriétaire 
               </Text>
               <Picker
                 style={{ height: 50, width: 150 }}
@@ -300,7 +300,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
             </View>
 
             <View style={styles.filterContainer}>
-              <Text style={styles.filterLabel}>Est une mère :</Text>
+              <Text style={styles.filterLabel}>Est une mère </Text>
               <Picker
                 style={{ height: 50, width: 150 }}
                 selectedValue={filterByMom}
@@ -333,6 +333,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
+    padding: 5
   },
   filterLabel: {
     flex: 1,
@@ -373,6 +374,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     color: "#FFF",
     borderWidth: 2,
+    borderColor: '#fff',
     paddingTop: 2,
     paddingBottom: 2,
     paddingRight: 15,
@@ -397,7 +399,7 @@ const styles = StyleSheet.create({
   sectionBtns_btnText: {
     color: "#FFF",
     fontFamily: "WixMadeforDisplay-Bold",
-    fontSize: 10,
+    fontSize: 14,
   },
 });
 

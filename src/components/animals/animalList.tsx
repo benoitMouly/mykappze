@@ -89,7 +89,7 @@ const AnimalList: React.FC<AnimalListProps> = ({ animals }) => {
             disabled={currentPage === 1}
           >
             {/* <Text style={styles.paginationButtonText}>Précédent</Text> */}
-            <Icon name={"chevron-back-outline"} size={24} color="#000" />
+            <Icon name={"chevron-back-outline"} size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.paginationText}>
             {currentPage} / {totalPages}
@@ -100,7 +100,7 @@ const AnimalList: React.FC<AnimalListProps> = ({ animals }) => {
             disabled={currentPage === totalPages}
           >
             {/* <Text style={styles.paginationButtonText}>Suivant</Text> */}
-            <Icon name={"chevron-forward-outline"} size={24} color="#000" />
+            <Icon name={"chevron-forward-outline"} size={24} color="#fff" />
           </TouchableOpacity>
         </View>
       ) : null}
@@ -144,6 +144,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginHorizontal: 5,
+    color: '#fff'
   },
 });
 

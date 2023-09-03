@@ -14,6 +14,7 @@ import {
   Line,
   G,
   ClipPath,
+  Rect
 } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { processFontFamily } from "expo-font";
@@ -122,8 +123,8 @@ const FamilyTree = ({ currentAnimalId }) => {
   treeLayout(root);
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
-  const containerWidth = root.height * 400 + 400;
-
+  // const containerWidth = root.height * 400 + 400; // container large
+  const containerWidth = root.height * 400 + 100;
   const xOffset = screenWidth / 2 + 400;
   const yOffset = 50; // Ajout d'un décalage pour la marge du haut
   root.each((node) => {
@@ -135,7 +136,7 @@ const FamilyTree = ({ currentAnimalId }) => {
   const links = root.links();
 
   return (
-    <View style={{ backgroundColor: "#2f2f2f" }}>
+    <View style={{ backgroundColor: "#2f4f4f", margin: 5 }}>
       <ScrollView
         horizontal
         directionalLockEnabled={false}
@@ -154,7 +155,7 @@ const FamilyTree = ({ currentAnimalId }) => {
               } ${link.source.y}, ${(link.source.x + link.target.x) / 2} ${
                 link.target.y
               }, ${link.target.x} ${link.target.y}`}
-              stroke="#555"
+              stroke="#fff"
               fill="transparent"
             />
           ))}
@@ -177,14 +178,14 @@ const FamilyTree = ({ currentAnimalId }) => {
             </G>
           ))}
 
-          {nodes.map((node, index) => (
+          {/* {nodes.map((node, index) => (
             <G
               key={index}
               onPress={() =>
                 navigation.navigate("AnimalDetails", { animalId: node.data.id })
               }
             >
-              <G x={node.x - 10} y={node.y + 60}>
+              <G x={node.x + 30} y={node.y + 10}>
                 <IconComponent sex={node.data.sex} />
               </G>
               <Text
@@ -199,7 +200,46 @@ const FamilyTree = ({ currentAnimalId }) => {
                 {node.data.name ? node.data.name : node.data.id}
               </Text>
             </G>
-          ))}
+          ))
+          
+          
+          } */}
+
+{nodes.map((node, index) => (
+  <G
+    key={index}
+    onPress={() =>
+      navigation.navigate("AnimalDetails", { animalId: node.data.id })
+    }
+  >
+    <G x={node.x + 30} y={node.y + 5}>
+      <IconComponent sex={node.data.sex} />
+    </G>
+    {node.data.id === currentAnimalId && (
+    <Rect
+    x={node.x - 30} // starting x position
+    y={node.y + 30} // starting y position just above the text
+    width={(node.data.name ? node.data.name : node.data.id).length * 10 + 10} // approximate width based on character count
+    height={30} // height of the rectangle
+    fill="#FFF"
+  />
+    )}
+
+    <Text
+      x={node.x - 20}
+      y={node.y + 50}
+      fill={node.data.id === currentAnimalId ? "#2f4f4f" : "#FFF"}
+      textAnchor="start"
+      fontSize={15}
+      fontFamily={processFontFamily("WixMadeforDisplay-Regular")}
+      fontWeight={600}
+    >
+      {node.data.name ? node.data.name : node.data.id}
+    </Text>
+  </G>
+))}
+
+
         </Svg>
       </ScrollView>
     </View>

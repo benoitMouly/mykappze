@@ -19,7 +19,7 @@ import {
 } from "react-native";
 import TextInputModal from "../../components/general/TextUpdateModal";
 import Icon from "react-native-vector-icons/Ionicons";
-import { createAndSendNotification } from "../../features/user/userSlice";
+import { createAndSendNotification } from "../../features/notifications/notificationSlice";
 // import { Modal, Button, View, StyleSheet } from 'react-native';
 
 const CommentForm = ({ animalId, animalName }) => {
@@ -217,7 +217,8 @@ const CommentSection = ({ animalId, commentsLength, animalName }) => {
         onPress={handleModalToggle}
         style={styles.sectionBtns_btn}
       >
-        <Text style={{ color: "white" }}>COMMENTAIRES ({commentsLength})</Text>
+        {/* <Text style={{ color: "white" }}>COMMENTAIRES ({commentsLength})</Text> */}
+        <Icon name="chatbox-ellipses-outline" size={24} color="#fff" /><Text style={styles.commentsLength}> {commentsLength}</Text>
       </TouchableOpacity>
 
       <Modal
@@ -298,6 +299,19 @@ const styles = StyleSheet.create({
     fontFamily: "WixMadeforDisplay-Regular",
     fontSize: 11,
   },
+  sectionBtns_btn:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: 12,
+
+  },
+  commentsLength: {
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Bold",
+    fontSize: 18,
+    marginBottom: 5
+  }
 });
 
 export default CommentSection;

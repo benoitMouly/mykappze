@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { registerForPushNotificationsAsync } from "../notifications/notificationSlice.tsx";
+import { createAndSendNotification } from "../notifications/notificationSlice.tsx";
 import axios from "axios";
 
 import firebase from "firebase/compat/app";
@@ -72,6 +73,11 @@ import { addLicense } from "../licences/licenceSlice.tsx";
 //   }
 // }
 
+
+
+
+/*
+
 export const createAndSendNotification = createAsyncThunk(
   "notifications/createAndSend",
   async ({ userIds, message }, thunkAPI) => {
@@ -92,7 +98,12 @@ export const createAndSendNotification = createAsyncThunk(
       return thunkAPI.rejectWithValue(error.toString());
     }
   }
-);
+); */
+
+
+
+
+
 
 export const loginUser = createAsyncThunk<
   { uid: string; email: string | null },
@@ -130,10 +141,6 @@ export const loginUser = createAsyncThunk<
       try {
         // Obtenir le token Expo Push
         const expoPushToken = await registerForPushNotificationsAsync();
-
-        // Stocker le token dans Firestore
-        // const db = getFirestore();
-        // const userRef = doc(db, 'users', user.uid);
         await updateDoc(userRef, { expoPushToken });
       } catch (error) {
         console.error(
@@ -156,6 +163,7 @@ export const loginUser = createAsyncThunk<
           isAssociation,
           mairieName,
           associationName,
+          notificationsEnabled
         } = docSnapshot.data();
         // console.log('name, surname', name, surname);
         dispatch(setName(name));
@@ -166,6 +174,7 @@ export const loginUser = createAsyncThunk<
         dispatch(setMairieName(mairieName));
         dispatch(setAssociationName(associationName));
         dispatch(setRegistrationDate(registrationDateJS));
+        dispatch(setNotificationsEnabled(notificationsEnabled))
       }
 
       // Si la connexion est réussie, mettez à jour AsyncStorage
@@ -216,6 +225,7 @@ export const checkUserAuthStatus = createAsyncThunk(
               isAssociation,
               mairieName,
               associationName,
+              notificationsEnabled
             } = docSnapshot.data();
             // console.log('name, surname', name, surname);
             dispatch(setName(name));
@@ -225,6 +235,7 @@ export const checkUserAuthStatus = createAsyncThunk(
             dispatch(setIsAssociation(isAssociation));
             dispatch(setMairieName(mairieName));
             dispatch(setAssociationName(associationName));
+            dispatch(setNotificationsEnabled(notificationsEnabled));
             // dispatch(setRegistrationDate(registrationDateJS));
 
             // Si la connexion est réussie, mettez à jour AsyncStorage
@@ -594,6 +605,9 @@ const authSlice = createSlice({
     setAssociationName: (state, action) => {
       state.associationName = action.payload;
     },
+    setNotificationsEnabled: (state, action) => {
+      state.notificationsEnabled = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(createAndSendNotification.rejected, (state, action) => {
@@ -736,7 +750,8 @@ export const {
   setAssociationName,
   setMairieName,
   setRegistrationDate,
-  setStripeCustomerId
+  setStripeCustomerId,
+  setNotificationsEnabled
 } = authSlice.actions;
 // export const selectIsLoggedIn = (state) => state.user.isLoggedIn;
 export default authSlice.reducer;

@@ -9,6 +9,7 @@ import axios from 'axios';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import CustomAlert from "../components/general/CustomAlert";
+import Icon from "react-native-vector-icons/Ionicons";
 
 
 
@@ -235,7 +236,7 @@ export const CheckoutForm = () => {
         <ScrollView style={{ padding: 20 }}>
             {licenseError && <Text style={{ color: 'red' }}>{licenseError}</Text>}
 
-            <Text style={styles.title1}>Achat d'une licence :</Text>
+            <Text style={styles.title1}>Acheter une licence</Text>
             <View style={styles.checkoutForm}>
                 <Text style={styles.titleSection}>Facturation : </Text>
                 <TextInput
@@ -303,6 +304,7 @@ export const CheckoutForm = () => {
                 </TouchableOpacity> */}
                 {!isLoading ? (<TouchableOpacity style={styles.btnPayment} title="Payer" onPress={handleSubmit}>
                     <Text style={styles.btnPayment_text}>Payer</Text>
+                    <Icon name={"card-outline"} size={24} color="#fff" />
                 </TouchableOpacity>) : (<TouchableOpacity style={styles.btnPaymentLoader} title="Payer" onPress={handleSubmit}>
                     <Text style={styles.btnPayment_text}>Paiement en cours .. </Text>
                 </TouchableOpacity>)}
@@ -337,10 +339,11 @@ const styles = {
         paddingBottom: 100
     },
     title1: {
-        color: "#FFF",
-        fontSize: 32,
+        fontSize: 20,
+        // fontWeight: "bold",
+        color: "white",
+        marginBottom: 5,
         fontFamily: "WixMadeforDisplay-Bold",
-        fontWeight: "600",
     },
     titleSection: {
         color: "#2f2f2f",
@@ -358,7 +361,9 @@ const styles = {
         marginTop: 20,
         flexDirection: 'column',
         rowGap: 10,
-        borderRadius: 2
+        borderRadius: 2,
+ 
+        width: '100%'
     },
     textInput: {
         // backgroundColor: 'blue',
@@ -368,8 +373,14 @@ const styles = {
         fontFamily: "WixMadeforDisplay-Regular",
     },
     btnPayment: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         backgroundColor: '#d15e41',
         padding: 8,
+        maxWidth: 150,
+        width: '100%',
+        alignItems: 'center',
+        alignSelf: 'center'
     },
     btnPaymentLoader: {
         backgroundColor: '#000',

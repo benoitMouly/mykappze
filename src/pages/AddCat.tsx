@@ -31,7 +31,7 @@ import { ScrollView } from "react-native-gesture-handler";
 import * as ImagePicker from "expo-image-picker";
 import CustomAlert from "../components/general/CustomAlert";
 import EditableDocumentList from "../components/general/EditableDocuments";
-import { createAndSendNotification } from "../features/user/userSlice";
+import { createAndSendNotification } from "../features/notifications/notificationSlice";
 import LoadingScreen from "../components/general/loadingPage";
 
 interface Canal {
@@ -158,7 +158,7 @@ const ObjectForm = (props) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    let imageUrl = "";
+    let imageUrl = {};
     let documentUrls = [];
     if (!name.trim()) {
       // Si le champ name est vide ou n'a que des espaces blancs
@@ -202,7 +202,7 @@ const ObjectForm = (props) => {
       const animalId = createdAnimal.payload.id;
       if (documents.length > 0) {
         const uploadedDocuments = await Promise.all(
-          documents.map(uploadSingleFile)
+          documents.map(uploadSingleFile, name)
         );
         await dispatch(
           addDocumentToAnimal({
@@ -496,6 +496,7 @@ const ObjectForm = (props) => {
               <EditableDocumentList
                 documents={documents}
                 setDocuments={setDocuments}
+                animalName={name}
               />
             </View>
           </View>

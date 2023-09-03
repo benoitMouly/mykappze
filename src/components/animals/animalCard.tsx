@@ -52,7 +52,7 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
             style={styles.image}
             source={
               props.animal.image
-                ? { uri: props.animal.image }
+                ? { uri: props.animal.image.url }
                 : require("../../assets/kappze_logo_without_square_bw.png")
             }
           />

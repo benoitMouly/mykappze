@@ -24,12 +24,14 @@ import * as Permissions from "expo-permissions";
 import * as WebBrowser from "expo-web-browser";
 import logoCatDefault from "../assets/kappze_logo_without_square_bw.png";
 import { fetchComments } from "../features/animals/commentsSlice.tsx";
+import EditableDocumentList from "../components/general/EditableDocuments.tsx";
+import DocumentSection from "../components/animals/documents.tsx";
 
 const AnimalDetails = ({ route }) => {
   const { animalId } = route?.params;
   const comments = useSelector((state) => state.comments);
   const { data: users } = useSelector((state) => state.canalUsers);
-
+  const [documents, setDocuments] = useState([]);
   const { name, uid, isAuthenticated } = useSelector((state) => state.auth);
   const [currentAnimalId, setCurrentAnimalId] = useState(null);
   const [filteredAnimals, setFilteredAnimals] = useState([]);
@@ -41,6 +43,9 @@ const AnimalDetails = ({ route }) => {
 
   const dispatch = useAppDispatch();
   const [userIsAdmin, setUserRole] = useState({});
+  const [activeTab, setActiveTab] = useState("general-infos");
+  const [isModified, setIsModified] = useState(false);
+  const [isDocModified, setIsDocModified] = useState(false);
 
   const navigation = useNavigation();
 
@@ -140,9 +145,13 @@ const AnimalDetails = ({ route }) => {
   if (!animal) {
     return (
       <View style={styles.modalView}>
-        <Text style={styles.modalText}>L'animal que vous cherchez n'existe pas.</Text>
-        <Image source={require('../assets/transparent-without-circle.png')} style={styles.logo} /> 
-
+        <Text style={styles.modalText}>
+          L'animal que vous cherchez n'existe pas.
+        </Text>
+        <Image
+          source={require("../assets/transparent-without-circle.png")}
+          style={styles.logo}
+        />
       </View>
     );
   }
@@ -150,12 +159,11 @@ const AnimalDetails = ({ route }) => {
   return (
     <>
       <ScrollView style={styles.container}>
-        {/* Bloc green */}
         <View style={styles.header}>
           <View style={styles.header1st}>
             <View>
               {animal?.image ? (
-                <Image source={{ uri: animal.image }} style={styles.image} />
+                <Image source={{ uri: animal.image.url }} style={styles.image} />
               ) : (
                 <Image source={logoCatDefault} style={styles.image} />
               )}
@@ -165,7 +173,7 @@ const AnimalDetails = ({ route }) => {
               <Text style={styles.title}>
                 {animal?.name ? animal.name : "Aucun nom"}
               </Text>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={() => {
                   copyToClipboard(animal.id);
                 }}
@@ -174,7 +182,7 @@ const AnimalDetails = ({ route }) => {
                 <Text style={styles.sectionShare_buttonText} selectable={true}>
                   {isCopied ? "Copié !" : animal?.id}
                 </Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
             <View style={styles.settingsBtn}>
@@ -207,7 +215,6 @@ const AnimalDetails = ({ route }) => {
               ) : (
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                   <Text style={styles.subtitle}>Sexe inconnu </Text>
-                  {/* <Icon name={"female-outline"} size={20} color="#fff" /> */}
                 </View>
               )}
 
@@ -226,7 +233,7 @@ const AnimalDetails = ({ route }) => {
                 />
                 <Text style={styles.subtitle}>
                   {animal.citySectorName
-                    ? updateAnimalCitySectorName
+                    ? animal.citySectorName
                     : "Secteur inconnu"}
                 </Text>
               </View>
@@ -234,20 +241,80 @@ const AnimalDetails = ({ route }) => {
           </View>
         </View>
 
-        {/* Bloc General d'infos */}
-        <View style={styles.infos}>
-          {/* Bloc General 1 */}
-          <TouchableOpacity onPress={() => toggleBlock("infoGeneral")}>
-            <View style={styles.blocInfos}>
-              <View style={styles.blocTitle}>
-                <Text style={styles.blocInfosTitle}>
-                  Informations générales
-                </Text>
-                {renderIcon("infoGeneral")}
-              </View>
+        {/* MODULE */}
 
-              {blocksOpen.infoGeneral && (
-                <>
+        <View style={styles.module}>
+          <View style={styles.tabs}>
+            <TouchableOpacity
+              style={styles.labeltabs}
+              onPress={() => setActiveTab("general-infos")}
+            >
+              <Text
+                style={
+                  activeTab === "general-infos" ? styles.activeTab : styles.tab
+                }
+              >
+                <Icon
+                  name="information-circle-outline"
+                  size={24}
+                  color={activeTab === "general-infos" ? "#2f4f4f" : "#fff"}
+                />
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.labeltabs}
+              onPress={() => setActiveTab("identification")}
+            >
+              <Text
+                style={
+                  activeTab === "identification" ? styles.activeTab : styles.tab
+                }
+              >
+                <Icon
+                  name="reader-outline"
+                  size={24}
+                  color={activeTab === "identification" ? "#2f4f4f" : "#fff"}
+                />
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.labeltabs}
+              onPress={() => setActiveTab("relations")}
+            >
+              <Text
+                style={
+                  activeTab === "relations" ? styles.activeTab : styles.tab
+                }
+              >
+                <Icon
+                  name="pricetag-outline"
+                  size={24}
+                  color={activeTab === "relations" ? "#2f4f4f" : "#fff"}
+                />
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.labeltabs}
+              onPress={() => setActiveTab("autre")}
+            >
+              <Text
+                style={activeTab === "autre" ? styles.activeTab : styles.tab}
+              >
+                <Icon
+                  name="ellipsis-horizontal-outline"
+                  size={24}
+                  color={activeTab === "autre" ? "#2f4f4f" : "#fff"}
+                />
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <View style={styles.tabsContent}>
+              {activeTab === "general-infos" && (
+                <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>Canal : </Text>
                     <Text style={styles.infosLabel_text}>
@@ -256,21 +323,19 @@ const AnimalDetails = ({ route }) => {
                   </View>
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>Couleurs : </Text>
-                    {animal.colors && animal.colors.length > 0 && (
-                      <>
-                        {animal.colors.map((color, index) => (
+                    {animal.colors && animal.colors.length > 0
+                      ? animal.colors.map((color, index) => (
                           <Text key={index} style={styles.infosLabel_text}>
                             {color}
                           </Text>
-                        ))}
-                      </>
-                    )}
+                        ))
+                      : null}
                   </View>
 
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>Est stérilisé : </Text>
                     <Text style={styles.infosLabel_text}>
-                      {animal.isSterilized ? "Oui" : "Non"}
+                      {animal.isSterilise ? "Oui" : "Non"}
                     </Text>
                   </View>
 
@@ -280,21 +345,11 @@ const AnimalDetails = ({ route }) => {
                       {animal.isSick ? "Oui" : "Non"}
                     </Text>
                   </View>
-                </>
+                </View>
               )}
-            </View>
-          </TouchableOpacity>
 
-          {/* Bloc General 2 */}
-          <TouchableOpacity onPress={() => toggleBlock("identification")}>
-            <View style={styles.blocInfos}>
-              <View style={styles.blocTitle}>
-                <Text style={styles.blocInfosTitle}>Identification</Text>
-                {renderIcon("identification")}
-              </View>
-
-              {blocksOpen.identification && (
-                <>
+              {activeTab === "identification" && (
+                <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>Est identifié : </Text>
                     <Text style={styles.infosLabel_text}>
@@ -304,7 +359,16 @@ const AnimalDetails = ({ route }) => {
 
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>
-                      Date d'identification :{" "}
+                      Numéro d'identification :{" "}
+                    </Text>
+                    <Text style={styles.infosLabel_text}>
+                      {animal.idNumber ? animal.idNumber : "Non renseigné"}
+                    </Text>
+                  </View>
+
+                  <View style={styles.unicalInfo}>
+                    <Text style={styles.infosLabel}>
+                      Date d'identification :
                     </Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.identificationDate
@@ -315,30 +379,37 @@ const AnimalDetails = ({ route }) => {
 
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>
-                      Appartient à un propriétaire :{" "}
+                      Appartient à un propriétaire :
                     </Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.isBelonged ? "Oui" : "Non"}
                     </Text>
                   </View>
-                </>
+
+                  <View style={styles.unicalInfo}>
+                    <Text style={styles.infosLabel}>KappzeID :</Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        copyToClipboard(animal.id);
+                      }}
+                      style={styles.sectionShare_button}
+                    >
+                      <Text
+                        style={styles.sectionShare_buttonText}
+                        selectable={true}
+                      >
+                        {isCopied ? "Copié !" : animal?.id}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               )}
-            </View>
-          </TouchableOpacity>
 
-          {/* Bloc General 3 */}
-          <TouchableOpacity onPress={() => toggleBlock("relations")}>
-            <View style={styles.blocInfos}>
-              <View style={styles.blocTitle}>
-                <Text style={styles.blocInfosTitle}>Relations</Text>
-                {renderIcon("relations")}
-              </View>
-
-              {blocksOpen.relations && (
-                <>
+              {activeTab === "relations" && (
+                <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>
-                      Est lié à une famille :{" "}
+                      Est lié à une famille :
                     </Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.isFamily ? "Oui" : "Non"}
@@ -353,26 +424,14 @@ const AnimalDetails = ({ route }) => {
                   </View>
 
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>AppID de la mère : </Text>
-                    <Text style={styles.infosLabel_text}>
-                      {animal.motherAppId}
-                    </Text>
+                    <Text style={styles.infosLabel}>Nom de la mère : </Text>
+                    <Text style={styles.infosLabel_text}>{animal.mother}</Text>
                   </View>
-                </>
+                </View>
               )}
-            </View>
-          </TouchableOpacity>
 
-          {/* Bloc General 4 */}
-          <TouchableOpacity onPress={() => toggleBlock("autre")}>
-            <View style={styles.blocInfos}>
-              <View style={styles.blocTitle}>
-                <Text style={styles.blocInfosTitle}>Autre</Text>
-                {renderIcon("autre")}
-              </View>
-
-              {blocksOpen.autre && (
-                <>
+              {activeTab === "autre" && (
+                <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>Maladies : </Text>
                     <Text style={styles.infosLabel_text}>
@@ -386,52 +445,20 @@ const AnimalDetails = ({ route }) => {
                       {animal.particularities}
                     </Text>
                   </View>
-                </>
-              )}
-            </View>
-          </TouchableOpacity>
-
-          {/* Bloc General 5 */}
-          <TouchableOpacity onPress={() => toggleBlock("documents")}>
-            <View style={styles.blocInfos}>
-              <View style={styles.blocTitle}>
-                <Text style={styles.blocInfosTitle}>Documents</Text>
-                {renderIcon("documents")}
-              </View>
-
-              {blocksOpen.documents && animal.documents && (
-                <View style={{ marginTop: 10 }}>
-                  {animal.documents.map((document, index) => (
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginTop: 10,
-                      }}
-                    >
-                      <Text style={styles.infosLabel_text} key={index}>
-                        {document.name}
-                      </Text>
-                      <TouchableOpacity
-                        style={styles.downloadButton}
-                        onPress={() => handleDownload(document)}
-                      >
-                        <Icon name="download-outline" size={24} color="#000" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
                 </View>
               )}
             </View>
-          </TouchableOpacity>
+          </View>
         </View>
-        <View>
+
+        {/* MODULE END */}
+
+        <View style={{ backgroundColor: "#2f4f4f", paddingTop: 20 }}>
           {filteredAnimals.length > 0 ? (
             <>
               <View style={styles.sectionListingFilters}>
                 <Text style={styles.sectionListingFilters_title}>
-                  Descendance
+                  De la famille
                 </Text>
                 <AnimalFilters animals={filteredAnimals} />
               </View>
@@ -441,7 +468,6 @@ const AnimalDetails = ({ route }) => {
                 </Text>
                 <Genealogy currentAnimalId={animal.id} />
               </View>
-              {/* </ScrollView> */}
             </>
           ) : (
             <>
@@ -456,6 +482,15 @@ const AnimalDetails = ({ route }) => {
             animalId={animal.id}
             commentsLength={comments.length}
             animalName={animal?.name}
+          />
+          <DocumentSection
+            documents={documents}
+            setDocuments={setDocuments}
+            setIsDocModified={setIsDocModified}
+            setIsModified={setIsModified}
+            animal={animal}
+            documentsLength={animal?.documents?.length}
+            userIsAdmin={userIsAdmin}
           />
         </View>
       ) : null}
@@ -472,7 +507,7 @@ const styles = {
   header: {
     flexDirection: "column",
     backgroundColor: "#2F4F4F",
-    padding: 30,
+    padding: 20,
   },
   header1st: {
     flexDirection: "row",
@@ -482,6 +517,8 @@ const styles = {
     paddingTop: 20,
   },
   nameId: {
+    display: "flex",
+    alignItems: "center",
     rowGap: 15,
   },
   settingsBtn: {
@@ -500,6 +537,7 @@ const styles = {
   container: {
     padding: 0,
     height: "100%",
+    backgroundColor: "#2f4f4f",
   },
   title: {
     color: "#FFF",
@@ -514,7 +552,7 @@ const styles = {
   image: {
     width: 100,
     height: 100,
-    marginRight: 10,
+    marginRight: 20,
     borderRadius: 100,
   },
   infos: {
@@ -523,14 +561,16 @@ const styles = {
     backgroundColor: "#2F4F4F",
   },
   infosLabel: {
+    display: 'flex',
+    flexDirection : 'row',
     fontFamily: "WixMadeforDisplay-Regular",
     fontWeight: "bold",
     color: "#2f4f4f",
-    // textDecorationLine: "underline",
     marginRight: 10,
   },
   infosLabel_text: {
     fontFamily: "WixMadeforDisplay-Regular",
+    marginRight: 10,
   },
   blocInfos: {
     marginLeft: 20,
@@ -553,6 +593,7 @@ const styles = {
   },
   unicalInfo: {
     flexDirection: "row",
+    alignItems: 'center',
     marginTop: 10,
   },
   sectionShare: {
@@ -576,7 +617,8 @@ const styles = {
     backgroundColor: "#fff",
     color: "#000",
     padding: 5,
-    width: "100%",
+    borderRadius: 2
+    // width: "100%",
   },
   sectionShare_buttonText: {
     color: "#000",
@@ -598,12 +640,12 @@ const styles = {
     borderRadius: 40,
   },
   sectionListingFilters: {
-    // backgroundColor: '#FFF',
+    // backgroundColor: 'red',
     // padding: 30
   },
   sectionListingFilters_title: {
     fontSize: 18,
-    color: "#2F4F4F",
+    color: "#fff",
     paddingTop: 10,
     paddingLeft: 30,
     paddingBottom: 0,
@@ -612,7 +654,7 @@ const styles = {
   },
   sectionListingFilters_title_genealogie: {
     fontSize: 18,
-    color: "#2F4F4F",
+    color: "#fff",
     // paddingTop: 80,
     paddingLeft: 30,
     paddingBottom: 20,
@@ -654,7 +696,7 @@ const styles = {
     width: 40,
     height: 40,
     // marginRight: 10,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 60,
     zIndex: 100,
     shadowColor: "#000",
@@ -678,6 +720,125 @@ const styles = {
     marginBottom: 15,
     textAlign: "center",
     fontFamily: "WixMadeforDisplay-Bold",
-    fontSize: 20
+    fontSize: 20,
+  },
+  module: {
+    paddingHorizontal: 25,
+    backgroundColor: "#2f4f4f",
+    // backgroundColor: "red",
+    paddingVertical: 20,
+  },
+  tabs: {
+    display: "flex",
+    flexDirection: "row",
+    // justifyContent: "space-around",
+    backgroundColor: "#2f4f4f",
+  },
+  labeltabs: {
+    backgroundColor: "#2f4f4f",
+    borderRadius: 2,
+    // marginRight: 20
+  },
+  tab: {
+    fontSize: 16,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    padding: 10,
+    backgroundColor: "#2f4f4f",
+    color: "#fff",
+    borderRadius: 2,
+    marginRight: 20,
+    maxWidth: 140,
+  },
+  activeTab: {
+    backgroundColor: "rgb(242,242,242)",
+    fontSize: 16,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    padding: 10,
+    color: "#2f4f4f",
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
+    marginRight: 20,
+  },
+  tabsContent: {
+    padding: 0,
+    backgroundColor: "rgb(242,242,242)",
+  },
+  contentAnimaux: {
+    display: "flex", // implicitement défini pour tous les éléments React Native
+    flexDirection: "column",
+    flexWrap: "wrap",
+    alignItems: "flex-start", // centré verticalement
+    justifyContent: "space-between",
+    padding: 12,
+    // columnGap: 20
+  },
+  contentSecteurs: {
+    padding: 10,
+  },
+  statAnimal: {
+    width: "48%", // moins que 50% pour tenir compte de justifyContent: 'space-between'
+    marginVertical: 5, // pour simuler rowGap
+    display: "flex",
+    flexDirection: "column",
+    rowGap: 5,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    maxWidth: 200,
+  },
+  dataAnimal: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#2f4f4f", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "transparent", // Fond transparent
+    marginTop: 10,
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  dataAnimalSuccess: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#2f4f4f", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "#2f4f4f", // Fond transparent
+    marginTop: 10,
+  },
+  dataAnimalDanger: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60, // Largeur fixe pour un cercle parfait
+    height: 60, // Hauteur fixe pour un cercle parfait
+    borderWidth: 4, // Largeur de la bordure
+    borderColor: "#872929", // Couleur de la bordure
+    borderRadius: 30, // Rayon pour un cercle parfait (la moitié de la largeur/hauteur)
+    backgroundColor: "transparent", // Fond transparent
+    marginTop: 10,
+  },
+  dataAnimalText: {
+    fontWeight: "bold",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  dataAnimalTextSuccess: {
+    fontWeight: "bold",
+    color: "#fff",
+    fontFamily: "WixMadeforDisplay-Regular",
+  },
+  labelAnimal: {
+    textAlign: "center",
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontSize: 14,
+  },
+  labelAnimalMore: {
+    fontSize: 12,
+    textAlign: "center",
+    flexWrap: "wrap",
+    fontFamily: "WixMadeforDisplay-Regular",
   },
 };

@@ -68,11 +68,12 @@ const ForgotPasswordForm = () => {
         <View style={styles.subContainer}>
           <Text style={styles.title}>Mot de passe oublié ?</Text>
           <View style={styles.form}>
-            <Text style={styles.label}>Email:</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
+              placeholder="Email"
+              placeholderTextColor="#FFF"
             />
             {/* <Button title="Envoyer l'email de réinitialisation" onPress={handleSubmit} /> */}
 
@@ -172,12 +173,12 @@ const styles = StyleSheet.create({
     color: "white",
   },
   input: {
+    height: 40,
+    borderColor: "gray",
     borderWidth: 1,
-    borderColor: "grey",
-    borderRadius: 5,
-    padding: 10,
     marginBottom: 10,
-    color: "#fff",
+    padding: 10,
+    color: "white",
   },
   message: {
     fontSize: 16,

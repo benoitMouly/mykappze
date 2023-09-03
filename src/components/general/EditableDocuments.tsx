@@ -3,7 +3,7 @@ import { Button, TouchableOpacity, View, Text } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { uploadSingleFile } from "../../features/animals/animalSlice";
 
-const EditableDocumentList = ({ documents, setDocuments, setIsDocModified }) => {
+const EditableDocumentList = ({ animalName, documents, setDocuments, setIsDocModified, setIsModified }) => {
 
   console.log('documents props : ', documents)
   const openMultipleDocumentPicker = async () => {
@@ -24,11 +24,12 @@ const EditableDocumentList = ({ documents, setDocuments, setIsDocModified }) => 
           size: doc.assets[0].size
         };
 
-        const uploadedDoc = await uploadSingleFile(adaptedDoc);
+        const uploadedDoc = await uploadSingleFile(adaptedDoc, animalName);
         uploadedDocuments.push(uploadedDoc);
       }
       setDocuments([...documents, ...uploadedDocuments]);
       setIsDocModified(true)
+      setIsModified(true)
     } catch (err) {
       console.log(err);
     }
@@ -36,10 +37,13 @@ const EditableDocumentList = ({ documents, setDocuments, setIsDocModified }) => 
 
   // Fonction pour supprimer un document de la liste
   const handleRemoveDocument = (documentToRemove) => {
+    // const truc = documents.filter((document) => document.url !== documentToRemove.url)
+    // console.log('TRRUUC', documentToRemove.url)
     setDocuments(
-      documents.filter((document) => document.uri !== documentToRemove.uri)
+      documents.filter((document) => document.url !== documentToRemove.url)
     );
-    // setIsDocModified(true)
+    setIsDocModified(true)
+    setIsModified(true)
   };
 
   return (
