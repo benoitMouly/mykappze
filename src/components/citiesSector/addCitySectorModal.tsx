@@ -14,7 +14,7 @@ import {
 import { useAppDispatch } from "../../store/store";
 import { addCitySector } from "../../features/citiesSector/citySectorSlice";
 // import { addCitySector } from '../../features/citiesSector/citySectorSlice';
-
+import Icon from "react-native-vector-icons/Ionicons";
 interface Canal {
   id: string;
   data: any[]; // Changez `any` en type approprié
@@ -88,10 +88,9 @@ const AddCitySectorModal = (props) => {
         style={styles.sectionBtns_btn}
       >
         <View style={styles.buttonGroupIcons}>
-          <Image
-            source={require("../../assets/icons/icon-city.png")}
-            style={styles.buttonIcon}
-          />
+
+          
+        <Icon name="trail-sign-outline" size={24} style={{marginRight: 10}} color="#ddd" />
           <Text style={{color : 'white'}}>+</Text>
           </View>
       </TouchableOpacity>
@@ -107,13 +106,13 @@ const AddCitySectorModal = (props) => {
         <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.8)', justifyContent: "center" }}>
           <View style={styles.modalView}>
             <Text style={styles.modalText}>
-              Ajouter une nouvelle ville à votre canal
+              Ajouter un nouveau secteur à votre canal
             </Text>
             <TextInput
               style={styles.input}
               onChangeText={setCitySectorName}
               value={citySectorName}
-              placeholder="Nom de la ville"
+              placeholder="Nom du secteur"
             />
             <View style={styles.buttonContainer}>
             <Pressable style={styles.buttonCancel} onPress={() => setModalVisible(false)}>
@@ -139,10 +138,12 @@ const styles = StyleSheet.create({
   sectionBtns_btn: {
     flexDirection: 'row',
     columnGap: 8,
-    backgroundColor: '#000',
+    // backgroundColor: '#000',
     color: '#FFF',
     padding: 10,
-    borderRadius: 2
+    borderRadius: 2,
+    // borderWidth: 1,
+    // borderColor: '#fff'
     
   },
   sectionBtns_btnText:{
@@ -225,8 +226,8 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginRight: 5,
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
   },
 });
 

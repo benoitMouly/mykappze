@@ -144,21 +144,21 @@ const styles = {
     marginBottom: 10
   },
   labelText: {
-    color: "#2f2f2f",
+    color: "#122121",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
     marginLeft: 20,
   },
   text: {
-    color: "#2f2f2f",
+    color: "#122121",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Regular",
     // fontWeight: "600",
     marginLeft: 20,
   },
   link: {
-    color: "#2f2f2f",
+    color: "#122121",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",

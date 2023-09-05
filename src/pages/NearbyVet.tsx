@@ -314,7 +314,7 @@ export default Veterinaires;
 const styles = StyleSheet.create({
   title1: {
     fontSize: 17,
-    color: "#2f2f2f",
+    color: "#122121",
     padding: 10,
     marginTop: 0,
     fontFamily: "WixMadeforDisplay-Bold",
@@ -331,14 +331,14 @@ const styles = StyleSheet.create({
   },
   labels: {
     fontSize: 15,
-    color: "#2f2f2f",
+    color: "#122121",
     padding: 10,
     marginTop: 0,
     fontFamily: "WixMadeforDisplay-Bold",
   },
   data: {
     fontSize: 15,
-    color: "#2f2f2f",
+    color: "#122121",
     padding: 10,
     marginTop: 0,
     fontFamily: "WixMadeforDisplay-Regular",

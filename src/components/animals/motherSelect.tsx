@@ -19,19 +19,22 @@ const MotherSelect = ({ animals, selectedAnimalId, currentAnimal, onAnimalChange
 
     return (
         <View style={styles.container}>
-            {needsLabel && (<Text style={styles.label}>Sélectionner une mère</Text>)}
+            {needsLabel && (<Text style={styles.label}>Sélectionner la mère</Text>)}
             
+            <View style={styles.pickerContainer}>
             <Picker
                 selectedValue={selectedAnimalId}
                 onValueChange={handleAnimalChange}
                 style={styles.picker}
-                prompt="Choisir un animal"
+                prompt="Choisir une mère"
             >
-                <Picker.Item label="Choisir une mère" value="" />
+                {/* <Picker.Item label="Choisir une mère" value="" style={styles.pickerItems}/> */}
                 {animals.map((animal, index) => (
-                    <Picker.Item key={index} label={animal.name ? animal.name : animal.id} value={animal.id} />
+                    <Picker.Item key={index} label={animal.name ? animal.name : animal.id} value={animal.id} style={styles.pickerItems} />
                 ))}
             </Picker>
+            </View>
+
         </View>
     );
 };
@@ -39,15 +42,34 @@ const MotherSelect = ({ animals, selectedAnimalId, currentAnimal, onAnimalChange
 const styles = StyleSheet.create({
     container: {
         maxWidth: 250,
-        marginBottom: 20,
+        marginBottom: 30,
+        marginTop: 10
+        // backgroundColor: '#fff',
+        // padding: 20
     },
     label: {
-        fontSize: 16,
-        marginBottom: 8,
+        marginBottom: 15,
+        color: "#fff",
+        fontSize: 15,
+        fontFamily: "WixMadeforDisplay-Bold",
+        fontWeight: "600",
+    },
+    pickerContainer: {
+        padding: 0,
+        backgroundColor: '#fff',
+        borderRadius: 2
     },
     picker: {
-        // Vous pouvez ajouter d'autres styles si nécessaire
+        color: '#000',
+        fontFamily: "WixMadeforDisplay-Regular",
+        padding: 0
     },
+    pickerItems: {
+        color: '#000',
+        fontFamily: "WixMadeforDisplay-Regular",
+        // padding: 150
+        
+    }
 });
 
 export default MotherSelect;

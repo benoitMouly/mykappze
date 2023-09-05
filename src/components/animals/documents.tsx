@@ -94,7 +94,7 @@ const DocumentSection = ({ animal, animalId, documentsLength, animalName, userIs
         style={styles.sectionBtns_btn}
       >
         {/* <Text style={{ color: "white" }}>COMMENTAIRES ({commentsLength})</Text> */}
-        <Icon name="document-attach-outline" size={24} color="#fff" />
+        <Icon name="document-attach-outline" size={24} color="#ddd" />
         <Text style={styles.commentsLength}> {documentsLength}</Text>
       </TouchableOpacity>
 
@@ -114,7 +114,7 @@ const DocumentSection = ({ animal, animalId, documentsLength, animalName, userIs
               style={styles.buttonIconElt}
               name="close"
               size={28}
-              color="#2f2f2f"
+              color="#122121"
             />
           </TouchableOpacity>
 
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   btnComments: {
-    backgroundColor: "#2f2f2f",
+    backgroundColor: "#122121",
   },
   // footer: {
   //   position: "absolute",
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   //   padding: 10,
   // },
   closeModalComment: {
-    // backgroundColor: '#2f2f2f',
+    // backgroundColor: '#122121',
     flexDirection: "row",
     justifyContent: "flex-end",
     padding: 8,
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
     columnGap: 12,
   },
   commentsLength: {
-    color: "#fff",
+    color: "#ddd",
     fontFamily: "WixMadeforDisplay-Bold",
     fontSize: 18,
     marginBottom: 5,

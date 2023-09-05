@@ -346,7 +346,7 @@ const styles = {
         fontFamily: "WixMadeforDisplay-Bold",
     },
     titleSection: {
-        color: "#2f2f2f",
+        color: "#122121",
         fontSize: 15,
         fontFamily: "WixMadeforDisplay-Bold",
         fontWeight: "600",

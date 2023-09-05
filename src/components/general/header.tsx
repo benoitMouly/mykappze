@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({ navigation }) => {
         <Text style={styles.title}>Kappze</Text>
       </View>
       <TouchableOpacity onPress={() => navigation.toggleDrawer()} style={styles.menuButton}>
-        <Icon name="menu-outline" size={30} color="#000" />
+        <Icon name="menu-outline" size={30} color="#ddd" />
       </TouchableOpacity>
     </View>
   );
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#122121',
   },
   logoContainer: {
     flexDirection: 'row',
@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: "WixMadeforDisplay-Bold",
     fontSize: 20,
+    color: '#ddd'
   },
   menuButton: {
     padding: 10,

@@ -290,7 +290,7 @@ const toggleSwitch = async () => {
                 value={isEnabled}
                 onValueChange={toggleSwitch}
                 trackColor={{ true: "#d15e41" }}
-                thumbColor={"#2F2F2F"}
+                thumbColor={"#122121"}
               />
         </View>
         <View style={{ padding: 20 }}>
@@ -683,14 +683,14 @@ const styles = {
     flexDirection: "column",
   },
   editEltLabel: {
-    color: "#2F2F2F",
+    color: "#122121",
     fontSize: 15,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
   },
   textInput: {},
   buttonsPicker: {
-    backgroundColor: "#2F2F2F",
+    backgroundColor: "#122121",
     padding: 5,
     borderRadius: 3,
   },
@@ -771,7 +771,7 @@ const styles = {
   },
 
   buttonInvoices: {
-    backgroundColor: "#2f2f2f",
+    backgroundColor: "#122121",
     padding: 8,
     marginTop: 16,
     borderRadius: 2,

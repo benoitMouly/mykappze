@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   buttonsPicker: {
-    backgroundColor: "#2F2F2F",
+    backgroundColor: "#122121",
     padding: 5,
     borderRadius: 3,
   },

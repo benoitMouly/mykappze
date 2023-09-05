@@ -168,7 +168,7 @@ const FamilyTree = ({ currentAnimalId }) => {
                 width="50"
                 height="50"
                 preserveAspectRatio="xMidYMid slice"
-                href={node.data.image ? node.data.image : logoCatDefault}
+                href={node.data.image ? node.data.image.url : logoCatDefault}
                 onPress={() =>
                   navigation.navigate("AnimalDetails", {
                     animalId: node.data.id,

@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useAppDispatch } from "../store/store";
 import {
   fetchAnimalById,
@@ -110,6 +117,21 @@ const AnimalDetails = ({ route }) => {
     }
   }, [animalId, dispatch]);
 
+  const [refreshing, setRefreshing] = useState(false);
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    // Simuler une requête de réseau
+    wait(2000).then(() => {
+      setRefreshing(false), dispatch(fetchAnimalById(animalId));
+      dispatch(fetchAnimalsByCanal(animal.canalId));
+      setCurrentAnimalId(animalId);
+      dispatch(fetchComments(animalId));
+    });
+  }, []);
+
   useEffect(() => {
     if (animal && animal.id === animalId && animal.motherAppId) {
       dispatch(fetchMotherById(animal.motherAppId));
@@ -157,13 +179,22 @@ const AnimalDetails = ({ route }) => {
   }
 
   return (
-    <>
-      <ScrollView style={styles.container}>
+    <View>
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl progressViewOffset ={85}
+           refreshing={refreshing} onRefresh={onRefresh} style={{paddingTop: 200}} />
+        }
+      >
         <View style={styles.header}>
           <View style={styles.header1st}>
             <View>
               {animal?.image ? (
-                <Image source={{ uri: animal.image.url }} style={styles.image} />
+                <Image
+                  source={{ uri: animal.image.url }}
+                  style={styles.image}
+                />
               ) : (
                 <Image source={logoCatDefault} style={styles.image} />
               )}
@@ -483,6 +514,15 @@ const AnimalDetails = ({ route }) => {
             commentsLength={comments.length}
             animalName={animal?.name}
           />
+          <TouchableOpacity
+            onPress={() => navigation.toggleDrawer()}
+            style={styles.menuButton}
+          >
+            <Image
+              source={require("../assets/kappze_logo_circle_noir_roigne.png")}
+              style={styles.logo}
+            />
+          </TouchableOpacity>
           <DocumentSection
             documents={documents}
             setDocuments={setDocuments}
@@ -494,7 +534,7 @@ const AnimalDetails = ({ route }) => {
           />
         </View>
       ) : null}
-    </>
+    </View>
   );
 };
 
@@ -535,7 +575,8 @@ const styles = {
     rowGap: 15,
   },
   container: {
-    padding: 0,
+    paddingTop: 100,
+    paddingBottom: 50,
     height: "100%",
     backgroundColor: "#2f4f4f",
   },
@@ -554,6 +595,8 @@ const styles = {
     height: 100,
     marginRight: 20,
     borderRadius: 100,
+    backgroundColor: "#122",
+    // padding: 20
   },
   infos: {
     // marginLeft: 20,
@@ -561,8 +604,8 @@ const styles = {
     backgroundColor: "#2F4F4F",
   },
   infosLabel: {
-    display: 'flex',
-    flexDirection : 'row',
+    display: "flex",
+    flexDirection: "row",
     fontFamily: "WixMadeforDisplay-Regular",
     fontWeight: "bold",
     color: "#2f4f4f",
@@ -593,7 +636,7 @@ const styles = {
   },
   unicalInfo: {
     flexDirection: "row",
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   sectionShare: {
@@ -617,7 +660,7 @@ const styles = {
     backgroundColor: "#fff",
     color: "#000",
     padding: 5,
-    borderRadius: 2
+    borderRadius: 2,
     // width: "100%",
   },
   sectionShare_buttonText: {
@@ -667,16 +710,18 @@ const styles = {
   },
   footer: {
     position: "absolute",
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: 60, // Vous pouvez modifier cette valeur en fonction de vos besoins
-    backgroundColor: "#000", // Pour la visibilité
+    height: 100, // Vous pouvez modifier cette valeur en fonction de vos besoins
+    backgroundColor: "#122121", // Pour la visibilité
     flexDirection: "row",
     justifyContent: "space-around", // Pour espacer les boutons
     alignItems: "center",
-    padding: 10,
-    marginTop: 10,
+    // padding: 10,
+    // borderBottomWidth: 5,
+    paddingTop: 40,
+    // marginTop: 10,
   },
   commentFormContainer: {
     position: "absolute",
@@ -695,8 +740,6 @@ const styles = {
   logo: {
     width: 40,
     height: 40,
-    // marginRight: 10,
-    backgroundColor: "white",
     borderRadius: 60,
     zIndex: 100,
     shadowColor: "#000",

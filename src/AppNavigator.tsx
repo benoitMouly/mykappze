@@ -112,7 +112,7 @@ function MainStackNavigator() {
         component={AnimalDetails}
         options={{
           header: () => <Header navigation={navigation} />,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -128,7 +128,7 @@ function MainStackNavigator() {
         component={CanalDetails}
         options={{
           header: () => <Header navigation={navigation} />,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -220,11 +220,11 @@ function AppRouter() {
           <Drawer.Navigator
             screenOptions={{
               drawerStyle: {
-                backgroundColor: "#2f2f2f",
+                backgroundColor: "#122121",
                 width: 240,
               },
               drawerActiveTintColor: "red", // Couleur du texte actif
-              drawerInactiveTintColor: "white", // Couleur du texte inactif
+              drawerInactiveTintColor: "#ddd", // Couleur du texte inactif
             }}
             drawerContent={(props) => <CustomDrawerContent {...props} />}
           >
@@ -283,7 +283,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           <Image source={logoCatDefault} style={{ width: 100, height: 100 }} />
           <Text
             style={{
-              color: "#fff",
+              color: "#ddd",
               fontSize: 20,
               fontFamily: "WixMadeforDisplay-Bold",
               marginTop: 10,
@@ -298,7 +298,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
             label="Accueil"
             onPress={() => props.navigation.navigate("Main")}
             labelStyle={{
-              color: activeRouteName === "Main" ? "#2f4f4f" : "white",
+              color: activeRouteName === "Main" ? "#2f4f4f" : "#ddd",
             }}
             style={{
               backgroundColor:
@@ -313,7 +313,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
             label="Paramètres"
             onPress={() => props.navigation.navigate("UserSettings")}
             labelStyle={{
-              color: activeRouteName === "UserSettings" ? "#2f4f4f" : "white",
+              color: activeRouteName === "UserSettings" ? "#2f4f4f" : "#ddd",
             }}
             style={{
               backgroundColor:
@@ -329,7 +329,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
             label="Vétérinaires"
             onPress={() => props.navigation.navigate("NearByVet")}
             labelStyle={{
-              color: activeRouteName === "NearByVet" ? "#2f4f4f" : "white",
+              color: activeRouteName === "NearByVet" ? "#2f4f4f" : "#ddd",
             }}
             style={{
               backgroundColor:
@@ -346,7 +346,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
               label="S'abonner"
               onPress={() => props.navigation.navigate("Subscribe")}
               labelStyle={{
-                color: activeRouteName === "Subscribe" ? "#f8491dc5" : "#fff",
+                color: activeRouteName === "Subscribe" ? "#f8491dc5" : "#ddd",
               }}
               style={{
                 backgroundColor:
@@ -380,7 +380,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           <DrawerItem
             label="Déconnexion"
             onPress={() => dispatch(logoutAsync())}
-            labelStyle={{ color: "#fff" }}
+            labelStyle={{ color: "#ddd" }}
             // ... autres props
           />
         </View>

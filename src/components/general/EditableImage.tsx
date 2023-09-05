@@ -108,7 +108,7 @@ const EditableImage = ({imageUri, setImageUri, isModified}) => {
 
 const styles = {
   buttonsPicker:{
-    backgroundColor: '#2F2F2F',
+    backgroundColor: '#122121',
     padding: 5,
     borderRadius: 3,
     marginBottom: 20,

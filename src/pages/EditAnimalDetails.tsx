@@ -263,7 +263,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
           </View>
 
           <View style={styles.editElt}>
-            <Text style={styles.editEltLabelBorn}>Date de naissance : </Text>
+            <Text style={styles.editEltLabelBorn}>Date de naissance </Text>
 
             <TouchableOpacity
               onPress={() => setDatePickerVisibility2(true)}
@@ -298,7 +298,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
           <View style={styles.containerUnicalSection}>
             {/* Select citySector */}
             <View style={styles.editEltSelects}>
-              <Text style={styles.editEltLabel}>Secteur : </Text>
+              <Text style={styles.editEltLabel}>Secteur </Text>
               <CitySectorAndSectorSelect
                 citiesSector={citiesSector}
                 selectedCitySectorId={citySectorId}
@@ -307,14 +307,14 @@ const EditAnimalDetails = ({ route, navigation }) => {
             </View>
 
             <View style={styles.editEltCheckboxes}>
-              <Text style={styles.editEltLabel}>Couleurs de la robe : </Text>
+              <Text style={styles.editEltLabel}>Couleurs de la robe </Text>
               <ColorSelect
                 selectedColors={selectedColors}
                 onChange={handleColorChange}
               />
             </View>
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Est stérilisé : </Text>
+              <Text style={styles.editEltLabel}>Est stérilisé </Text>
 
               <Switch
                 onValueChange={(newValue) =>
@@ -328,7 +328,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
 
             {/* Toggle isSick */}
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Semble malade : </Text>
+              <Text style={styles.editEltLabel}>Semble malade </Text>
               <Switch
                 onValueChange={(newValue) =>
                   handleInputChange("isSick", newValue)
@@ -348,7 +348,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
           {/* Toggle isIdentificated */}
           <View style={styles.containerUnicalSection}>
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Est identifié : </Text>
+              <Text style={styles.editEltLabel}>Est identifié </Text>
               <Switch
                 onValueChange={(newValue) =>
                   handleInputChange("hasIdNumber", newValue)
@@ -361,7 +361,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
 
             {/* Date identificationDate */}
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Date d'identification : </Text>
+              <Text style={styles.editEltLabel}>Date d'identification </Text>
               <TouchableOpacity
                 onPress={() => setDatePickerVisibility(true)}
                 style={styles.buttonsPicker}
@@ -381,7 +381,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
             {/* Toggle isBelonged */}
             <View style={styles.editElt}>
               <Text style={styles.editEltLabel}>
-                Appartient à un propriétaire :{" "}
+                Appartient à un propriétaire 
               </Text>
               <Switch
                 onValueChange={(newValue) =>
@@ -402,7 +402,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
           {/* Toggle isFamily */}
           <View style={styles.containerUnicalSection}>
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Est lié à une famille : </Text>
+              <Text style={styles.editEltLabel}>Est lié à une famille </Text>
               <Switch
                 onValueChange={(newValue) =>
                   handleInputChange("isFamily", newValue)
@@ -415,7 +415,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
 
             {/* Toggle isMother */}
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Est une mère : </Text>
+              <Text style={styles.editEltLabel}>Est une mère </Text>
               <Switch
                 onValueChange={(newValue) =>
                   handleInputChange("isMother", newValue)
@@ -454,7 +454,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
 
           <View style={styles.containerUnicalSection}>
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Maladies : </Text>
+              <Text style={styles.editEltLabel}>Maladies </Text>
               <TextInput
                 value={updatedAnimal.diseases}
                 onChangeText={(text) => handleInputChange("diseases", text)}
@@ -464,7 +464,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
 
             {/* TextInput particularities */}
             <View style={styles.editElt}>
-              <Text style={styles.editEltLabel}>Particularités : </Text>
+              <Text style={styles.editEltLabel}>Particularités </Text>
               <TextInput
                 value={updatedAnimal.particularities}
                 onChangeText={(text) =>
@@ -586,6 +586,7 @@ const styles = {
     fontSize: 15,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
+    marginRight: 10
   },
   editEltLabelBorn: {
     color: "#000",
@@ -611,9 +612,9 @@ const styles = {
     fontFamily: "WixMadeforDisplay-Regular",
   },
   buttonsPicker: {
-    backgroundColor: "#2F2F2F",
+    backgroundColor: "#122121",
     padding: 5,
-    borderRadius: 3,
+    borderRadius: 2,
   },
   buttonText: {
     padding: 2,

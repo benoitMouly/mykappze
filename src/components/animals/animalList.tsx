@@ -113,7 +113,7 @@ const AnimalList: React.FC<AnimalListProps> = ({ animals }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
+    // paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 50
   },
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
   paginationButton: {
     backgroundColor: "transparent",
-    paddingVertical: 8,
+    paddingVertical: 28,
     paddingHorizontal: 12,
     borderRadius: 4,
     marginHorizontal: 5,

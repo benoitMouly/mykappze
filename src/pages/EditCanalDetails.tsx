@@ -443,6 +443,7 @@ const EditCanalDetails: React.FC = () => {
                     name="pencil-outline"
                     size={15}
                     color="#fff"
+                   
                   />
                 </View>
               </TouchableOpacity>
@@ -748,11 +749,12 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     backgroundColor: "black",
-    borderRadius: 2,
+    borderRadius: 50,
     paddingTop: 1,
   },
   buttonIconElt: {
     margin: 7,
+    borderRadius: 200
   },
   addCat: {
     flexDirection: "column",
@@ -825,6 +827,7 @@ const styles = StyleSheet.create({
   sectionAdmin_button: {
     backgroundColor: "transparent",
     padding: 5,
+    broderRadius: 50
   },
   btnSectionSuppSave: {
     position: "absolute",

@@ -288,7 +288,7 @@ const ObjectForm = (props) => {
               )}
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Sexe : </Text>
+              <Text style={styles.text}>Sexe </Text>
               <View style={styles.radioGroup}>
                 <TouchableOpacity
                   style={styles.radioButton}
@@ -329,16 +329,16 @@ const ObjectForm = (props) => {
               </View>
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Le chat est stérilisé :</Text>
+              <Text style={styles.text}>Le chat est stérilisé </Text>
               <Switch
                 value={isSterilize}
                 onValueChange={setSterilize}
                 trackColor={{ true: "#d15e41" }}
-                thumbColor={"#2F2F2F"}
+                thumbColor={"#122121"}
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Date de naissance : </Text>
+              <Text style={styles.text}>Date de naissance </Text>
               <TouchableOpacity
                 onPress={showDatePicker}
                 style={styles.buttonsPicker}
@@ -355,8 +355,8 @@ const ObjectForm = (props) => {
               />
             </View>
             <View style={styles.inputGroup && styles.checkboxes}>
-              <Text style={styles.text}>Couleurs de la robe :</Text>
-              <View style={{ backgroundColor: "#2f2f2f", margin: 10 }}>
+              <Text style={styles.text}>Couleurs de la robe </Text>
+              <View style={{ backgroundColor: "#122121", margin: 10 }}>
                 <ColorSelect
                   selectedColors={colors}
                   onChange={handleRobeChange}
@@ -365,7 +365,7 @@ const ObjectForm = (props) => {
             </View>
             <View style={styles.inputGroup}>
               <View style={styles.imagePicker}>
-                <Text style={styles.text}>Image :</Text>
+                <Text style={styles.text}>Image </Text>
                 <View style={{ margin: 10 }}>
                   <EditableImage
                     imageUri={imageUri}
@@ -384,11 +384,11 @@ const ObjectForm = (props) => {
                 value={identification}
                 onValueChange={setIdentification}
                 trackColor={{ true: "#d15e41" }}
-                thumbColor={"#2F2F2F"}
+                thumbColor={"#122121"}
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Date d'identification : </Text>
+              <Text style={styles.text}>Date d'identification </Text>
               <TouchableOpacity
                 onPress={showDatePicker2}
                 style={styles.buttonsPicker}
@@ -405,7 +405,7 @@ const ObjectForm = (props) => {
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Numéro d'identification :</Text>
+              <Text style={styles.text}>Numéro d'identification </Text>
               <TextInput
                 style={styles.input}
                 value={numberIdentification}
@@ -420,7 +420,7 @@ const ObjectForm = (props) => {
                 value={isBelonged}
                 onValueChange={setBelong}
                 trackColor={{ true: "#d15e41" }}
-                thumbColor={"#2F2F2F"}
+                thumbColor={"#122121"}
               />
             </View>
           </View>
@@ -428,25 +428,25 @@ const ObjectForm = (props) => {
           <View style={styles.form}>
             <Text style={styles.heading}>Lié à une famille</Text>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Le chat est lié à une famille :</Text>
+              <Text style={styles.text}>Le chat est lié à une famille </Text>
               <Switch
                 value={isFamily}
                 onValueChange={setFamily}
                 trackColor={{ true: "#d15e41" }}
-                thumbColor={"#2F2F2F"}
+                thumbColor={"#122121"}
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Le chat est une mère :</Text>
+              <Text style={styles.text}>Le chat est une mère </Text>
               <Switch
                 value={isMother}
                 onValueChange={setIsMother}
                 trackColor={{ true: "#d15e41" }}
-                thumbColor={"#2F2F2F"}
+                thumbColor={"#122121"}
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>appID de la mère :</Text>
+              <Text style={styles.text}>appID de la mère </Text>
               <TextInput
                 style={styles.input}
                 value={motherId}
@@ -469,11 +469,11 @@ const ObjectForm = (props) => {
                 value={isSick}
                 onValueChange={setDisease}
                 trackColor={{ true: "#d15e41" }}
-                thumbColor={"#2F2F2F"}
+                thumbColor={"#122121"}
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Maladies :</Text>
+              <Text style={styles.text}>Maladies </Text>
               <TextInput
                 style={styles.input}
                 value={diseases}
@@ -481,7 +481,7 @@ const ObjectForm = (props) => {
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>Particularités :</Text>
+              <Text style={styles.text}>Particularités </Text>
               <TextInput
                 style={styles.input}
                 value={particularities}
@@ -624,7 +624,7 @@ const styles = {
     color: "#A0A0A0",
   },
   buttonsPicker: {
-    backgroundColor: "#2F2F2F",
+    backgroundColor: "#122121",
     padding: 5,
     borderRadius: 3,
   },

@@ -214,11 +214,11 @@ const CanalDetails: React.FC = () => {
   };
 
   return (
-    <View>
+    <View style={{ backgroundColor: "#2f4f4f" }}>
       <ScrollView
         style={styles.container}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl progressViewOffset ={85} refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         <View style={styles.header}>
@@ -496,9 +496,8 @@ const CanalDetails: React.FC = () => {
             </View>
           </View>
         </View>
-        <View style={{backgroundColor: '#2f4f4f'}}>
-        <AnimalFilters animals={animals} archiveType={archiveType} />
-
+        <View style={{ backgroundColor: "#2f4f4f" }}>
+          <AnimalFilters animals={animals} archiveType={archiveType} />
         </View>
       </ScrollView>
 
@@ -508,12 +507,22 @@ const CanalDetails: React.FC = () => {
             style={styles.sectionBtns_btn}
             canalId={canal?.id}
           />
+            <TouchableOpacity
+              onPress={() => navigation.toggleDrawer()}
+              style={styles.menuButton}
+            >
+              <Image
+                source={require("../assets/kappze_logo_circle_noir_roigne.png")}
+                style={styles.logo}
+              />
+            </TouchableOpacity>
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("AddCat", { canalId: canal?.id })
             }
             style={styles.sectionBtns_btn}
           >
+
             <View style={styles.buttonGroupIcons}>
               <Image
                 source={require("../assets/icon-paw.png")}
@@ -530,7 +539,8 @@ const CanalDetails: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 0,
+    paddingTop: 100,
+    padding: 20,
     height: "100%",
   },
   header: {
@@ -543,7 +553,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     backgroundColor: "#2F4F4F",
-    paddingTop: 20,
+    // paddingTop: 20,
   },
   sectionShare: {
     flexDirection: "row",
@@ -565,7 +575,7 @@ const styles = StyleSheet.create({
   sectionShare_button: {
     backgroundColor: "#fff",
     color: "#000",
-    padding: 5,
+    // padding: 5,
     width: "60%",
   },
   sectionShare_buttonText: {
@@ -588,10 +598,12 @@ const styles = StyleSheet.create({
   sectionBtns_btn: {
     flexDirection: "row",
     columnGap: 8,
-    backgroundColor: "#000",
+    // backgroundColor: "#000",
     color: "#FFF",
     padding: 10,
     borderRadius: 2,
+    // borderWidth: 2,
+    // borderColor: '#fff'
   },
   sectionBtns_btnSettings: {
     flexDirection: "row",
@@ -653,8 +665,8 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginRight: 5,
-    width: 20,
-    height: 20,
+    width: 25,
+    height: 25,
   },
   addCat: {
     flexDirection: "column",
@@ -707,16 +719,16 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: "absolute",
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: 60, // Vous pouvez modifier cette valeur en fonction de vos besoins
-    backgroundColor: "#000", // Pour la visibilité
+    height: 100, // Vous pouvez modifier cette valeur en fonction de vos besoins
+    backgroundColor: "#122121", // Pour la visibilité
     flexDirection: "row",
     justifyContent: "space-around", // Pour espacer les boutons
     alignItems: "center",
-    padding: 10,
-    marginTop: 10,
+    paddingTop: 40,
+    // marginTop: 10,
   },
   settingsBtn: {
     position: "absolute",
@@ -730,7 +742,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   generalInfoMembersTitle: {
-    color: "#2f2f2f",
+    color: "#122121",
     fontSize: 14,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
@@ -860,6 +872,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     flexWrap: "wrap",
     fontFamily: "WixMadeforDisplay-Regular",
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    borderRadius: 60,
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
 
   // tabsContent: {
