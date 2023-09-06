@@ -182,9 +182,13 @@ const CanalDetails: React.FC = () => {
   const numIsBelongedCats = animals.filter(
     (animal) => !animal.isBelonged
   ).length;
-  const sterilizationPercentage = (numSterilizedCats / animals.length) * 100;
-  const sterilizationFemalePercentage =
-    (femaleAnimalsSterilized.length / femaleAnimals.length) * 100;
+  // const sterilizationPercentage = (numSterilizedCats / animals.length) * 100;
+  const sterilizationPercentage = Math.round((numSterilizedCats / animals.length) * 100);
+  const sterilizationFemalePercentage = Math.round((femaleAnimalsSterilized.length / femaleAnimals.length) * 100);
+
+
+  // const sterilizationFemalePercentage =
+  //   (femaleAnimalsSterilized.length / femaleAnimals.length) * 100;
   // const archiveType = linkedCitySectorId;
 
   useEffect(() => {
