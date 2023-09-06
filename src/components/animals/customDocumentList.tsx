@@ -23,19 +23,52 @@ import * as WebBrowser from "expo-web-browser";
 const CustomDocumentList = ({ animal, dispatch, userIsAdmin }) => {
   const [localDocuments, setLocalDocuments] = useState(animal.documents || []);
 
-  const handleDelete = async (documentName) => {
-    try {
-      await dispatch(deleteFileFromStorage(documentName));
-      await dispatch(
-        deleteDocumentFromAnimal({ animalId: animal.id, documentName })
-      );
-      setLocalDocuments((prevDocs) =>
-        prevDocs.filter((doc) => doc.name !== documentName)
-      );
-    } catch (error) {
-      Alert.alert("Erreur", "Impossible de supprimer le document");
-    }
+  // const handleDelete = async (documentName) => {
+  //   try {
+  //     await dispatch(deleteFileFromStorage(documentName));
+  //     await dispatch(
+  //       deleteDocumentFromAnimal({ animalId: animal.id, documentName })
+  //     );
+  //     setLocalDocuments((prevDocs) =>
+  //       prevDocs.filter((doc) => doc.name !== documentName)
+  //     );
+  //   } catch (error) {
+  //     Alert.alert("Erreur", "Impossible de supprimer le document");
+  //   }
+  // };
+  const handleDelete = (documentName) => {
+    const proceedWithDeletion = async () => {
+      try {
+        await dispatch(deleteFileFromStorage(documentName));
+        await dispatch(
+          deleteDocumentFromAnimal({ animalId: animal.id, documentName })
+        );
+        setLocalDocuments((prevDocs) =>
+          prevDocs.filter((doc) => doc.name !== documentName)
+        );
+      } catch (error) {
+        Alert.alert("Erreur", "Impossible de supprimer le document");
+      }
+    };
+  
+    Alert.alert(
+      "Confirmation",
+      "Voulez-vous vraiment supprimer ce document ?",
+      [
+        {
+          text: "Annuler",
+          onPress: () => console.log("Annulation de la suppression"),
+          style: "cancel"
+        },
+        {
+          text: "Oui, supprimer",
+          onPress: proceedWithDeletion
+        }
+      ],
+      { cancelable: false }
+    );
   };
+  
 
   const handleDownload = async (document) => {
     try {

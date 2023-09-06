@@ -136,7 +136,7 @@ function MainStackNavigator() {
         component={CitySectorDetails}
         options={{
           header: () => <Header navigation={navigation} />,
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen

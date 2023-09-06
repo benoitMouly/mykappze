@@ -115,10 +115,10 @@ const styles = StyleSheet.create({
     flex: 1,
     // paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 50
+    paddingBottom: 10
   },
   flatListContent: {
-    paddingBottom: 20,
+    // paddingBottom: 20,
   },
   paginationContainer: {
     flexDirection: "row",
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
     // marginBottom: 20,
-    paddingBottom: 40
+    // paddingBottom: 40
   },
   paginationButton: {
     backgroundColor: "transparent",

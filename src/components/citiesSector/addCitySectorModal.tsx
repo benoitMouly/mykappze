@@ -90,7 +90,7 @@ const AddCitySectorModal = (props) => {
         <View style={styles.buttonGroupIcons}>
 
           
-        <Icon name="trail-sign-outline" size={24} style={{marginRight: 10}} color="#ddd" />
+        <Icon name="trail-sign-outline" size={24} style={{marginRight: 0}} color="#ddd" />
           <Text style={{color : 'white'}}>+</Text>
           </View>
       </TouchableOpacity>
@@ -105,9 +105,12 @@ const AddCitySectorModal = (props) => {
       >
         <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.8)', justifyContent: "center" }}>
           <View style={styles.modalView}>
+          <Icon name="trail-sign-outline" size={30} style={{marginRight: 0}} color="#122" />
+
             <Text style={styles.modalText}>
               Ajouter un nouveau secteur à votre canal
             </Text>
+
             <TextInput
               style={styles.input}
               onChangeText={setCitySectorName}
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
   modalView: {
     margin: 20,
     backgroundColor: "white",
-    borderRadius: 3,
+    borderRadius: 2,
     padding: 10,
     alignItems: "center",
     rowGap: 30,
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     // elevation: 5,
   },
   modalText: {
-    marginBottom: 15,
+    marginBottom: 0,
     textAlign: "left",
     fontWeight: "bold",
   },
@@ -189,9 +192,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 32,
-    borderRadius: 4,
+    borderRadius: 2,
     // elevation: 3,
-    backgroundColor: 'black',
+    backgroundColor: '#122',
   },
   buttonAdd: {
     alignItems: 'center',
@@ -202,7 +205,7 @@ const styles = StyleSheet.create({
     // elevation: 3,
     backgroundColor: 'white',
     borderWidth: 1,
-    borderRadius: 3,
+    borderRadius: 2,
     borderColor: 'rgb(47, 79, 79)'
 
   },

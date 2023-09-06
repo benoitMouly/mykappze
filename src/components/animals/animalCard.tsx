@@ -84,10 +84,8 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
               style={{ flexDirection: "column", rowGap: 10, marginVertical: 5 }}
             >
               <View style={styles.buttonGroupIcons}>
-                <Image
-                  source={require("../../assets/icons/icon-city.png")}
-                  style={styles.buttonIcon}
-                />
+              <Icon name="trail-sign-outline" size={24} style={{marginRight: 10}} color="#122" />
+
                 <Text>{props.animal.citySectorName}</Text>
               </View>
             </View>
@@ -109,7 +107,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 3,
-    backgroundColor: "#fff",
+    backgroundColor: "#eee",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,

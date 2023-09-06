@@ -14,7 +14,7 @@ import {
   Line,
   G,
   ClipPath,
-  Rect
+  Rect,
 } from "react-native-svg";
 import { useNavigation } from "@react-navigation/native";
 import { processFontFamily } from "expo-font";
@@ -113,48 +113,74 @@ const FamilyTree = ({ currentAnimalId }) => {
     };
   };
 
-  const rootAnimal = animals.find((animal) => !animal.motherAppId);
+  const findRootAnimal = (animalId) => {
+    let currentAnimal = animals.find((animal) => animal.id === animalId);
+    while (currentAnimal && currentAnimal.motherAppId) {
+      currentAnimal = animals.find(
+        (animal) => animal.id === currentAnimal.motherAppId
+      );
+    }
+    return currentAnimal;
+  };
+  // const rootAnimal = animals.find((animal) => !animal.motherAppId);
+  const rootAnimal = currentAnimalId
+    ? findRootAnimal(currentAnimalId)
+    : animals.find((animal) => !animal.motherAppId);
+
   if (!rootAnimal) {
     return;
   }
 
   const root = d3.hierarchy(buildHierarchy(rootAnimal.id), (d) => d.children);
-  const treeLayout = d3.tree().nodeSize([200, 130]);
+  const treeLayout = d3.tree().nodeSize([110, 260]);
   treeLayout(root);
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   // const containerWidth = root.height * 400 + 400; // container large
-  const containerWidth = root.height * 400 + 100;
-  const xOffset = screenWidth / 2 + 400;
-  const yOffset = 50; // Ajout d'un décalage pour la marge du haut
-  root.each((node) => {
-    node.x += xOffset;
-    node.y += yOffset; // Application du décalage sur l'axe des y
-  });
+  // const containerWidth = root.height * 400 + 100;
+  // const xOffset = screenWidth / 2 + 100;
+  // const yOffset = 50; // Ajout d'un décalage pour la marge du haut
+  
 
   const nodes = root.descendants();
   const links = root.links();
 
+  const minX = Math.min(...nodes.map((n) => n.x));
+  const maxX = Math.max(...nodes.map((n) => n.x));
+  const minY = Math.min(...nodes.map((n) => n.y));
+  const maxY = Math.max(...nodes.map((n) => n.y));
+
+  const treeWidth = maxX - minX;
+  const treeHeight = maxY - minY;
+
+  const containerWidth = treeWidth + 900; // Utiliser screenWidth comme valeur par défaut
+
+  const containerHeight = treeHeight + 900;
+
+  const xOffset = 710;
+  const yOffset = 50;
+  root.each((node) => {
+    node.x += xOffset;
+    node.y += yOffset;
+  });
+
   return (
-    <View style={{ backgroundColor: "#2f4f4f", margin: 5 }}>
+    <View style={{ backgroundColor: "#122", margin: 0 }}>
+
       <ScrollView
         horizontal
         directionalLockEnabled={false}
         contentContainerStyle={{
           width: containerWidth,
-          height: screenHeight,
-          alignItems: "center",
+          height: containerHeight,
         }}
       >
         <Svg width={containerWidth} height={screenHeight}>
           {links.map((link, index) => (
             <Path
               key={index}
-              d={`M ${link.source.x} ${link.source.y} C ${
-                (link.source.x + link.target.x) / 2
-              } ${link.source.y}, ${(link.source.x + link.target.x) / 2} ${
-                link.target.y
-              }, ${link.target.x} ${link.target.y}`}
+              d={`M ${link.source.x} ${link.source.y} L ${link.target.x} ${link.target.y}`}
+
               stroke="#fff"
               fill="transparent"
             />
@@ -178,20 +204,34 @@ const FamilyTree = ({ currentAnimalId }) => {
             </G>
           ))}
 
-          {/* {nodes.map((node, index) => (
+          {nodes.map((node, index) => (
             <G
               key={index}
               onPress={() =>
                 navigation.navigate("AnimalDetails", { animalId: node.data.id })
               }
             >
-              <G x={node.x + 30} y={node.y + 10}>
+              <G x={node.x + 30} y={node.y + 5}>
                 <IconComponent sex={node.data.sex} />
               </G>
+              {node.data.id === currentAnimalId && (
+                <Rect
+                  x={node.x - 30} // starting x position
+                  y={node.y + 30} // starting y position just above the text
+                  width={
+                    (node.data.name ? node.data.name : node.data.id).length *
+                      10 +
+                    10
+                  } // approximate width based on character count
+                  height={30} // height of the rectangle
+                  fill="#FFF"
+                />
+              )}
+
               <Text
                 x={node.x - 20}
                 y={node.y + 50}
-                fill={node.data.id === currentAnimalId ? "#C40030" : "#FFF"}
+                fill={node.data.id === currentAnimalId ? "#2f4f4f" : "#FFF"}
                 textAnchor="start"
                 fontSize={15}
                 fontFamily={processFontFamily("WixMadeforDisplay-Regular")}
@@ -200,46 +240,7 @@ const FamilyTree = ({ currentAnimalId }) => {
                 {node.data.name ? node.data.name : node.data.id}
               </Text>
             </G>
-          ))
-          
-          
-          } */}
-
-{nodes.map((node, index) => (
-  <G
-    key={index}
-    onPress={() =>
-      navigation.navigate("AnimalDetails", { animalId: node.data.id })
-    }
-  >
-    <G x={node.x + 30} y={node.y + 5}>
-      <IconComponent sex={node.data.sex} />
-    </G>
-    {node.data.id === currentAnimalId && (
-    <Rect
-    x={node.x - 30} // starting x position
-    y={node.y + 30} // starting y position just above the text
-    width={(node.data.name ? node.data.name : node.data.id).length * 10 + 10} // approximate width based on character count
-    height={30} // height of the rectangle
-    fill="#FFF"
-  />
-    )}
-
-    <Text
-      x={node.x - 20}
-      y={node.y + 50}
-      fill={node.data.id === currentAnimalId ? "#2f4f4f" : "#FFF"}
-      textAnchor="start"
-      fontSize={15}
-      fontFamily={processFontFamily("WixMadeforDisplay-Regular")}
-      fontWeight={600}
-    >
-      {node.data.name ? node.data.name : node.data.id}
-    </Text>
-  </G>
-))}
-
-
+          ))}
         </Svg>
       </ScrollView>
     </View>

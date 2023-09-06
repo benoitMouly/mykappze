@@ -476,10 +476,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* <View style={styles.line} /> */}
-
-        <View style={styles.editUnicalSection}>
-          {/* <View style={styles.editEltDocuments}> */}
+        {/* <View style={styles.editUnicalSection}>
           <Text style={styles.editUnicalSectionTitle}>Documents</Text>
           <View style={styles.containerUnicalSection}>
             <EditableDocumentList
@@ -490,8 +487,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
               animalName = {animal.name}
             />
           </View>
-          {/* </View> */}
-        </View>
+        </View> */}
 
         {/* <View style={styles.line} /> */}
 
@@ -589,10 +585,11 @@ const styles = {
     marginRight: 10
   },
   editEltLabelBorn: {
-    color: "#000",
+    color: "#122",
     fontSize: 15,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
+    marginRight: 10
   },
   textInput: {
     borderBottomWidth: 1,

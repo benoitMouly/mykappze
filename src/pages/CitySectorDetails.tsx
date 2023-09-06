@@ -256,21 +256,31 @@ const CitySectorDetails: React.FC = () => {
     <View>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
+          <View style={styles.header1st}>
+            <Text style={styles.labelTitle}>Secteur</Text>
+            <Text style={styles.title}>
+              {citySector.name ? citySector.name : editedCitySectorName}
+            </Text>
+          </View>
           {userIsAdmin && (
             <View
               style={{
                 display: "flex",
                 flexDirection: "row",
-                justifyContent: "flex-end",
+                justifyContent: "flex-start",
                 columnGap: 20,
+                // height:
               }}
             >
               <TouchableOpacity
                 onPress={() => setEditVisible(true)}
                 style={{
                   backgroundColor: "#fff",
-                  padding: 5,
+                  paddingTop: 13.5,
+                  paddingLeft: 13.5,
                   borderRadius: 50,
+                  height: 50,
+                  width: 50
                 }}
               >
                 <Icon name="create-outline" size={24} color="#000" />
@@ -280,20 +290,18 @@ const CitySectorDetails: React.FC = () => {
                 onPress={() => handleDeleteCitySector(citySector.id)}
                 style={{
                   backgroundColor: "#fff",
-                  padding: 5,
+                  paddingTop: 13.5,
+                  paddingLeft: 13.5,
                   borderRadius: 50,
+                  height: 50,
+                  width: 50
                 }}
               >
                 <Icon name="trash-outline" size={24} color="#c40030" />
               </TouchableOpacity>
             </View>
           )}
-          <View style={styles.header1st}>
-            <Text style={styles.title}>
-              Secteur :{" "}
-              {citySector.name ? citySector.name : editedCitySectorName}
-            </Text>
-          </View>
+
           <ConfirmationModal
             visible={isConfirmationVisible}
             onClose={() => setConfirmationVisible(false)}
@@ -308,17 +316,17 @@ const CitySectorDetails: React.FC = () => {
             messageType={"Entrez le nouveau nom de la ville"}
             onChangeText={setEditedCitySectorName}
           />
-
-          <View style={styles.sectionShare}>
-            <Text style={styles.sectionShare_title}>Partager le canal : </Text>
-            <TouchableOpacity
-              onPress={() => handleCopy}
-              style={styles.sectionShare_button}
-            >
-              <Text style={styles.sectionShare_buttonText}>{canal?.id}</Text>
-            </TouchableOpacity>
-          </View>
         </View>
+
+        {/* <View style={styles.sectionShare}>
+          <Text style={styles.sectionShare_title}>Partager le canal : </Text>
+          <TouchableOpacity
+            onPress={() => handleCopy}
+            style={styles.sectionShare_button}
+          >
+            <Text style={styles.sectionShare_buttonText}>{canal?.id}</Text>
+          </TouchableOpacity>
+        </View> */}
 
         <View style={styles.containerSection}>
           <View style={styles.contentAnimaux}>
@@ -400,7 +408,7 @@ const CitySectorDetails: React.FC = () => {
                 </View>
               ))}
 
-            {numSterilizedCats > 0 ? (
+            {/* {numSterilizedCats > 0 ? (
               <View style={styles.statAnimal}>
                 <View style={styles.dataAnimal}>
                   <Text style={styles.dataAnimalText}>{numSterilizedCats}</Text>
@@ -418,12 +426,12 @@ const CitySectorDetails: React.FC = () => {
                   <Text style={styles.labelAnimal}>Chats stérilisés</Text>
                 </View>
               </View>
-            )}
+            )} */}
 
             {sterilizationPercentage > 75 ? (
               <View style={styles.statAnimal}>
                 <View style={styles.dataAnimal}>
-                  <Text style={{ color: "#fff" }}>
+                  <Text style={styles.dataAnimalText}>
                     {sterilizationPercentage}%
                   </Text>
                 </View>
@@ -431,6 +439,7 @@ const CitySectorDetails: React.FC = () => {
                   <Text style={styles.labelAnimal}>
                     Taux de stérilisation global
                   </Text>
+                  <Text style={styles.labelAnimal}>{numSterilizedCats} / {animals.length} chats</Text>
                 </View>
               </View>
             ) : (
@@ -453,27 +462,40 @@ const CitySectorDetails: React.FC = () => {
           </View>
         </View>
 
-        <View style={styles.line} />
+        {/* <View style={styles.line} /> */}
 
-<View style={{backgroundColor: "#2f4f4f"}}>
-<AnimalFilters animals={animals} archiveType={archiveType} />
-
-</View>
+        <View style={{ backgroundColor: "#2f4f4f" }}>
+          <AnimalFilters animals={animals} archiveType={archiveType} />
+        </View>
       </ScrollView>
       {userIsAdmin && (
         <View style={styles.footer}>
+          <AddCitySectorModal
+            style={styles.sectionBtns_btn}
+            canalId={canal?.id}
+          />
+            <TouchableOpacity
+              onPress={() => navigation.toggleDrawer()}
+              style={styles.menuButton}
+            >
+              <Image
+                source={require("../assets/kappze_logo_circle_noir_roigne.png")}
+                style={styles.logo}
+              />
+            </TouchableOpacity>
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("AddCat", { canalId: canal?.id })
             }
             style={styles.sectionBtns_btn}
           >
+
             <View style={styles.buttonGroupIcons}>
               <Image
                 source={require("../assets/icon-paw.png")}
                 style={styles.buttonIcon}
               />
-              <Text style={{ color: "white" }}>+</Text>
+              <Text style={{ color: "#ddd" }}>+</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -484,20 +506,26 @@ const CitySectorDetails: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 0,
-    heigt: "100%",
+    paddingTop: 100,
+    // padding: 20,
+    height: "100%",
+    backgroundColor: '#2f4f4f'
   },
   header: {
-    flexDirection: "column",
+    flexDirection: "row",
     backgroundColor: "#2F4F4F",
     padding: 30,
+    paddingBottom: 10,
+
+    justifyContent: "space-between",
+    // height: 80
   },
   header1st: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "flex-start",
     marginBottom: 20,
     backgroundColor: "#2F4F4F",
-    paddingTop: 20,
+    paddingTop: 0,
   },
   btnAdmin: {
     color: "#fff",
@@ -508,6 +536,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#2F4F4F",
     color: "#FFF",
+    paddingBottom: 10
   },
   sectionShare_title: {
     fontSize: 16,
@@ -537,13 +566,13 @@ const styles = StyleSheet.create({
   sectionBtns_btn: {
     flexDirection: "row",
     columnGap: 8,
-    backgroundColor: "#000",
-    color: "#FFF",
+    // backgroundColor: "#000",
+    color: "#ddd",
     padding: 10,
     borderRadius: 2,
   },
   sectionBtns_btnText: {
-    color: "#FFF",
+    color: "#ddd",
     fontFamily: "WixMadeforDisplay-Bold",
     fontSize: 10,
   },
@@ -553,15 +582,23 @@ const styles = StyleSheet.create({
     marginRight: 10,
     borderRadius: 50,
   },
+  labelTitle: {
+    color: "#FFF",
+    fontSize: 16,
+    fontFamily: "WixMadeforDisplay-Regular",
+    fontWeight: "600",
+    marginBottom: 10,
+  },
   title: {
     color: "#FFF",
-    fontSize: 32,
+    fontSize: 22,
     fontFamily: "WixMadeforDisplay-Bold",
     fontWeight: "600",
   },
 
   containerSection: {
     padding: 10,
+    // backgroundColor: '#ddd'
   },
 
   section: {
@@ -593,8 +630,8 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginRight: 5,
-    width: 15,
-    height: 15,
+    width: 25,
+    height: 25,
   },
   addCat: {
     flexDirection: "column",
@@ -619,7 +656,7 @@ const styles = StyleSheet.create({
   sectionBtns_btnCitySector: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#000",
+    backgroundColor: "black",
     color: "#FFF",
     padding: 10,
     borderRadius: 2,
@@ -639,16 +676,16 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: "absolute",
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: 60, // Vous pouvez modifier cette valeur en fonction de vos besoins
-    backgroundColor: "#000", // Pour la visibilité
+    height: 100, // Vous pouvez modifier cette valeur en fonction de vos besoins
+    backgroundColor: "#122121", // Pour la visibilité
     flexDirection: "row",
     justifyContent: "space-around", // Pour espacer les boutons
     alignItems: "center",
-    padding: 10,
-    marginTop: 10,
+    paddingTop: 40,
+    paddingBottom: 10,
   },
   tabs: {
     display: "flex",
@@ -690,6 +727,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start", // centré verticalement
     justifyContent: "space-between",
     padding: 12,
+    backgroundColor: '#ddd'
     // columnGap: 20
   },
   contentSecteurs: {
@@ -759,6 +797,16 @@ const styles = StyleSheet.create({
     // flex: 1,
     flexWrap: "wrap",
     fontFamily: "WixMadeforDisplay-Regular",
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    borderRadius: 60,
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
 });
 

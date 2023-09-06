@@ -258,10 +258,7 @@ const AnimalDetails = ({ route }) => {
 
             <View style={styles.headerInfo_col}>
               <View style={styles.buttonGroupIcons}>
-                <Image
-                  source={require("../assets/icons/icon-city.png")}
-                  style={styles.buttonIcon}
-                />
+              <Icon name="trail-sign-outline" size={24} style={{marginRight: 10}} color="#ddd" />
                 <Text style={styles.subtitle}>
                   {animal.citySectorName
                     ? animal.citySectorName
@@ -489,7 +486,7 @@ const AnimalDetails = ({ route }) => {
             <>
               <View style={styles.sectionListingFilters}>
                 <Text style={styles.sectionListingFilters_title}>
-                  De la famille
+                  De la même famille
                 </Text>
                 <AnimalFilters animals={filteredAnimals} />
               </View>
@@ -497,6 +494,7 @@ const AnimalDetails = ({ route }) => {
                 <Text style={styles.sectionListingFilters_title_genealogie}>
                   Généalogie
                 </Text>
+                <Text style={styles.sectionListingFilters_title_genealogie_more}>Au besoin, défilé le carré de la droite vers la gauche. Il y a {filteredAnimals.length + 1} animaux dans cet arbre.</Text>
                 <Genealogy currentAnimalId={animal.id} />
               </View>
             </>
@@ -698,11 +696,16 @@ const styles = {
   sectionListingFilters_title_genealogie: {
     fontSize: 18,
     color: "#fff",
-    // paddingTop: 80,
     paddingLeft: 30,
     paddingBottom: 20,
     fontFamily: "WixMadeforDisplay-Bold",
-    // position: "absolute",
+  },
+  sectionListingFilters_title_genealogie_more: {
+    fontSize: 10,
+    color: "#fff",
+    paddingLeft: 30,
+    paddingBottom: 20,
+    fontFamily: "WixMadeforDisplay-Bold",
   },
   parentContainer: {
     flex: 1,
@@ -721,6 +724,7 @@ const styles = {
     // padding: 10,
     // borderBottomWidth: 5,
     paddingTop: 40,
+    paddingBottom: 10
     // marginTop: 10,
   },
   commentFormContainer: {

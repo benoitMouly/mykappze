@@ -218,20 +218,29 @@ const CanalDetails: React.FC = () => {
       <ScrollView
         style={styles.container}
         refreshControl={
-          <RefreshControl progressViewOffset ={85} refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            progressViewOffset={85}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
         }
       >
         <View style={styles.header}>
           <View style={styles.header1st}>
-            {canal.image ? (
-              <Image style={styles.image} source={{ uri: canal.image }} />
-            ) : (
-              <Image
-                style={styles.image}
-                source={require("../assets/kappze_logo_without_square_bw.png")}
-              />
-            )}
-            <Text style={styles.title}>{canal?.name}</Text>
+            <View>
+              {canal.image ? (
+                <Image style={styles.image} source={{ uri: canal.image }} />
+              ) : (
+                <Image
+                  style={styles.image}
+                  source={require("../assets/kappze_logo_without_square_bw.png")}
+                />
+              )}
+            </View>
+            <View>
+              <Text style={styles.title}>{canal?.name}</Text>
+            </View>
+
             <View style={styles.settingsBtn}>
               {userIsAdmin && (
                 <TouchableOpacity
@@ -240,9 +249,13 @@ const CanalDetails: React.FC = () => {
                       canalId: canal?.id,
                     })
                   }
-                  style={styles.sectionBtns_btnSettings}
+                  style={{
+                    backgroundColor: "#fff",
+                    padding: 5,
+                    borderRadius: 50,
+                  }}
                 >
-                  <Icon name={"settings-outline"} size={24} color="#fff" />
+                  <Icon name={"settings-outline"} size={24} color="#000" />
                 </TouchableOpacity>
               )}
             </View>
@@ -507,22 +520,21 @@ const CanalDetails: React.FC = () => {
             style={styles.sectionBtns_btn}
             canalId={canal?.id}
           />
-            <TouchableOpacity
-              onPress={() => navigation.toggleDrawer()}
-              style={styles.menuButton}
-            >
-              <Image
-                source={require("../assets/kappze_logo_circle_noir_roigne.png")}
-                style={styles.logo}
-              />
-            </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.toggleDrawer()}
+            style={styles.menuButton}
+          >
+            <Image
+              source={require("../assets/kappze_logo_circle_noir_roigne.png")}
+              style={styles.logo}
+            />
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={() =>
               navigation.navigate("AddCat", { canalId: canal?.id })
             }
             style={styles.sectionBtns_btn}
           >
-
             <View style={styles.buttonGroupIcons}>
               <Image
                 source={require("../assets/icon-paw.png")}
@@ -540,8 +552,9 @@ const CanalDetails: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     paddingTop: 100,
-    padding: 20,
+    paddingBottom: 50,
     height: "100%",
+    backgroundColor: "#2f4f4f",
   },
   header: {
     flexDirection: "column",
@@ -553,7 +566,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
     backgroundColor: "#2F4F4F",
-    // paddingTop: 20,
+    paddingTop: 20,
   },
   sectionShare: {
     flexDirection: "row",
@@ -576,7 +589,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     color: "#000",
     // padding: 5,
-    width: "60%",
+    width: "55%",
   },
   sectionShare_buttonText: {
     color: "#000",
@@ -728,7 +741,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around", // Pour espacer les boutons
     alignItems: "center",
     paddingTop: 40,
-    // marginTop: 10,
+    paddingBottom: 10,
   },
   settingsBtn: {
     position: "absolute",
@@ -761,8 +774,10 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   module: {
-    // padding : 25,
+    paddingHorizontal: 25,
     backgroundColor: "#2f4f4f",
+    // backgroundColor: "red",
+    paddingVertical: 20,
   },
   tabs: {
     display: "flex",
@@ -782,6 +797,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#2f4f4f",
     color: "#fff",
     borderRadius: 2,
+    marginRight: 20,
+    maxWidth: 140,
   },
   activeTab: {
     backgroundColor: "rgb(242,242,242)",

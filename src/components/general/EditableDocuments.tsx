@@ -95,9 +95,9 @@ const styles = {
     alignItems: "center",
   },
   deleteButton: {
-    backgroundColor: "#FF0000", // couleur rouge
+    backgroundColor: "#872929", // couleur rouge
     padding: 5,
-    borderRadius: 3,
+    borderRadius: 2,
     marginLeft: 10,
   },
   buttonText: {

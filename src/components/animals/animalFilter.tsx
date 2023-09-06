@@ -166,7 +166,7 @@ const AnimalFilters: React.FC<AnimalFiltersProps> = ({
         >
           {/* <Text style={styles.sectionBtns_btnText}>Filter</Text> */}
           {/* <ion-icon name="options-outline"></ion-icon> */}
-          <Icon name={"options-outline"} size={24} color="#fff" />
+          <Icon name={"options-outline"} size={24} color="#ddd" />
         </TouchableOpacity>
       </View>
 
@@ -338,6 +338,7 @@ const styles = StyleSheet.create({
   filterLabel: {
     flex: 1,
     fontWeight: "bold",
+    color: "#2f4f4f"
   },
   filterInput: {
     flex: 2,
@@ -349,7 +350,7 @@ const styles = StyleSheet.create({
   modalView: {
     margin: 20,
     backgroundColor: "white",
-    borderRadius: 3,
+    borderRadius: 4,
     padding: 10,
     // alignItems: "center",
     rowGap: 30,
@@ -386,7 +387,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     // justifyContent: "flex-end",
     columnGap: 8,
-    backgroundColor: "black",
+    backgroundColor: "#122",
     color: "#FFF",
     borderWidth: 2,
     paddingTop: 10,
