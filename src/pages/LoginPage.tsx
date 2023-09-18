@@ -126,7 +126,7 @@ const LoginPage: React.FC = () => {
           <TextInput
             style={styles.input}
             secureTextEntry
-            placeholder="Password"
+            placeholder="Mot de passe"
             placeholderTextColor="#FFF"
             onChangeText={(text) => setPassword(text)}
           />

@@ -88,6 +88,22 @@ const AnimalCard: React.FC<AnimalProps> = (props) => {
 
                 <Text>{props.animal.citySectorName}</Text>
               </View>
+
+              {props.animal.isSterilise && (
+              <View style={styles.buttonGroupIcons}>
+              <Icon name="checkmark-outline" size={24} style={{marginRight: 10, }} color="#2f4f4f" />
+
+                <Text style={{fontWeight: '600', color:'#2f4f4f'}}>Stérilisé</Text>
+              </View>
+              )}
+              {!props.animal.isSterilise && (
+              <View style={styles.buttonGroupIcons}>
+              <Icon name="close-outline" size={24} style={{marginRight: 10}} color="#872929" />
+
+                <Text style={{fontWeight: '600', flexShrink: 1, color:'#872929'}}>Non stérilisé</Text>
+              </View>
+              )}
+              
             </View>
             <TouchableOpacity style={styles.button} onPress={handlePress}>
               <Icon name={"arrow-forward-outline"} size={20} color="#000" />

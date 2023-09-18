@@ -36,7 +36,9 @@ import MotherSelect from "../components/animals/motherSelect";
 const EditAnimalDetails = ({ route, navigation }) => {
   const { animalId } = route.params;
   const [animal_id, setAnimalId] = useState("");
-  const { data: animals } = useSelector((state) => state.animals)
+  const { data: animals } = useSelector((state) => state.animals);
+  const { data: users } = useSelector((state) => state.canalUsers);
+
   const dispatch = useDispatch();
   const { data: citiesSector } = useSelector(
     (state: RootState) => state.citiesSector
@@ -51,11 +53,11 @@ const EditAnimalDetails = ({ route, navigation }) => {
   const [documents, setDocuments] = useState([]);
   // const [message, setMessage] = useState('');
   const [isAlertVisible, setAlertVisible] = useState(false);
+  const [isAlertModifiedVisible, setAlertModifiedVisible] = useState(false);
   const [isConfirmationVisible, setConfirmationVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [dateBirthdate, setBirthdate] = useState("");
   const [dateId, setDateId] = useState("");
-
   // const navigation = useNavigation();
 
   // Fetch animal information
@@ -161,6 +163,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
     setMother(name);
     setMotherId(id);
     handleInputChange("motherAppId", id)
+    handleInputChange("mother", name)
   };
 
 
@@ -203,17 +206,17 @@ const EditAnimalDetails = ({ route, navigation }) => {
       const message =
         "Un nouveau document est disponible pour l'animal : " +
         (animal?.name || animal?.id);
-      const userIds = [
-        "oo1qP9CNSYNvgzingDITVJ4XL3a2",
-        "zcsYehEmnLStL5twOUlP4Ee7FyK2",
-        "4jEvW3mzCqO6GtLt4vHfYZxCHDI3",
-      ];
+        let userIds = [];
+        users.forEach(user => {
+          userIds.push(user?.id)
+        });
       dispatch(createAndSendNotification({ userIds, message }));
     }
     dispatch(updateAnimal({ animalId, animalData: updatedAnimal }));
 
     setIsModified(false);
     setIsDocModified(false);
+    setAlertModifiedVisible(true);
   };
 
   const handleSuppAnimal = async () => {
@@ -251,7 +254,7 @@ const EditAnimalDetails = ({ route, navigation }) => {
         <View style={styles.imgNameAge}>
           <View style={styles.editElt}>
             <View>
-              <EditableImage imageUri={imageUri} setImageUri={setImageUri} />
+              <EditableImage imageUri={imageUri} setImageUri={setImageUri} isModified={setIsModified}/>
             </View>
           </View>
           <View style={styles.editElt}>
@@ -511,6 +514,13 @@ const EditAnimalDetails = ({ route, navigation }) => {
           <Text style={styles.buttonSaveText}>SAUVEGARDER</Text>
         </TouchableOpacity>
       </View>
+
+      <CustomAlert
+        visible={isAlertModifiedVisible}
+        message={"Animal modifié avec succès ! "}
+        onClose={() => setAlertModifiedVisible(false)}
+      />
+
     </View>
   );
 };

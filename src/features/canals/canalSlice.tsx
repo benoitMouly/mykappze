@@ -18,7 +18,8 @@ import {
 } from "firebase/firestore";
 import * as FileSystem from 'expo-file-system';
 import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
-import { v4 as uuidv4 } from 'uuid'; // à installer avec npm ou yarn
+import uuid from 'react-native-uuid';
+import { deleteImageFromStorage, uploadImage } from "../animals/animalSlice";
 
 
 
@@ -273,42 +274,54 @@ export const joinCanal = createAsyncThunk(
 //   }
 // };
 
-export const uploadImage = async (imageUri, imageName) => {
-  try {
-    const storage = getStorage();
-    const imageName = uuidv4(); // générer un nom unique pour l'image
-    const storageRef = ref(storage, `images/${imageName}`);
-
-    // Convertir l'image en blob
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-
-    // Télécharger le blob sur Firebase Storage
-    await uploadBytes(storageRef, blob);
-    const imageUrl = await getDownloadURL(storageRef);
-    return imageUrl;
-  } catch (error) {
-    throw new Error(
-      `Une erreur s'est produite lors du téléchargement de l'image : ${error.message}`
-    );
-  }
-};
 
 /*
  * Update animal image
  ***
  */
 
+
+// export const updateCanalImage = createAsyncThunk(
+//   "animals/updateCanalImage",
+//   async ({ canalId, image }, { rejectWithValue }) => {
+//     try {
+//       const imageUrl = await uploadImage(image);
+//       const db = getFirestore();
+//       const animalRef = doc(db, "canals", canalId);
+//       await updateDoc(animalRef, { image: imageUrl });
+
+//       return { canalId, imageUrl };
+//     } catch (error) {
+//       return rejectWithValue(error.message);
+//     }
+//   }
+// );
+
+
+
 export const updateCanalImage = createAsyncThunk(
   "animals/updateCanalImage",
-  async ({ canalId, image }, { rejectWithValue }) => {
+  async ({ canalId, image }, { rejectWithValue, dispatch }) => {
     try {
-      const imageUrl = await uploadImage(image);
       const db = getFirestore();
       const animalRef = doc(db, "canals", canalId);
-      await updateDoc(animalRef, { image: imageUrl });
 
-      return { canalId, imageUrl };
+      // Récupérer l'image actuelle de l'animal
+      const animalDoc = await getDoc(animalRef);
+      const animalData = animalDoc.data();
+
+      // Si l'animal a déjà une image, la supprimer de Firebase Storage
+      if (animalData && animalData.image && animalData.image.name) {
+        dispatch(deleteImageFromStorage(animalData.image.name));
+      }
+
+      // Uploader la nouvelle image
+      const newImageUrl = await uploadImage(image);
+
+      // Mettre à jour la référence de l'image dans Firestore
+      await updateDoc(animalRef, { image: newImageUrl });
+
+      return { canalId, imageUrl: newImageUrl };
     } catch (error) {
       return rejectWithValue(error.message);
     }

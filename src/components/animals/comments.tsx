@@ -24,6 +24,7 @@ import { createAndSendNotification } from "../../features/notifications/notifica
 
 const CommentForm = ({ animalId, animalName }) => {
   const { surname, uid } = useSelector((state) => state.auth);
+  const { data: users } = useSelector((state) => state.canalUsers);
   const dispatch = useDispatch();
   const [comment, setComment] = useState("");
 
@@ -44,7 +45,11 @@ const CommentForm = ({ animalId, animalName }) => {
     }
 
     const message = 'Un commentaire a été ajouté pour l\'animal :  ' + animalName;
-    const userIds = ['oo1qP9CNSYNvgzingDITVJ4XL3a2', 'zcsYehEmnLStL5twOUlP4Ee7FyK2', '4jEvW3mzCqO6GtLt4vHfYZxCHDI3'];
+    let userIds = [];
+    users.forEach(user => {
+      userIds.push(user?.id)
+    });
+
     dispatch(createAndSendNotification({ userIds, message }));
   };
 

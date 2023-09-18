@@ -20,7 +20,7 @@ import {
 import TextInputModal from "../../components/general/TextUpdateModal";
 import Icon from "react-native-vector-icons/Ionicons";
 import { createAndSendNotification } from "../../features/notifications/notificationSlice";
-import EditableDocumentList from "../general/EditableDocuments";
+// import EditableDocumentList from "../general/EditableDocuments";
 import CustomDocumentList from "./customDocumentList";
 // import { Modal, Button, View, StyleSheet } from 'react-native';
 
@@ -105,7 +105,6 @@ const DocumentSection = ({ animal, animalId, documentsLength, animalName, userIs
         onRequestClose={handleModalToggle}
       >
         <View style={styles.modalContainer}>
-          {/* <Button title="Fermer" onPress={handleModalToggle} /> */}
           <TouchableOpacity
             style={styles.closeModalComment}
             onPress={handleModalToggle}

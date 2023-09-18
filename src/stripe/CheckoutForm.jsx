@@ -237,7 +237,10 @@ export const CheckoutForm = () => {
             {licenseError && <Text style={{ color: 'red' }}>{licenseError}</Text>}
 
             <Text style={styles.title1}>Acheter une licence</Text>
+            
             <View style={styles.checkoutForm}>
+            <Text style={styles.titleSection}>Prix : 50€ / an. </Text>
+            <Text style={styles.titleSection}>Renouvellement automatique désactivé.</Text>
                 <Text style={styles.titleSection}>Facturation : </Text>
                 <TextInput
                     placeholder="Nom complet"
@@ -296,18 +299,26 @@ export const CheckoutForm = () => {
                     style={{ height: 50, marginVertical: 30 }}
                 />
 
-
-
-
-                {/* <TouchableOpacity style={styles.btnPayment} title="Payer" onPress={handleSubmit}>
-                    <Text style={styles.btnPayment_text}>Payer</Text>
-                </TouchableOpacity> */}
                 {!isLoading ? (<TouchableOpacity style={styles.btnPayment} title="Payer" onPress={handleSubmit}>
                     <Text style={styles.btnPayment_text}>Payer</Text>
                     <Icon name={"card-outline"} size={24} color="#fff" />
                 </TouchableOpacity>) : (<TouchableOpacity style={styles.btnPaymentLoader} title="Payer" onPress={handleSubmit}>
                     <Text style={styles.btnPayment_text}>Paiement en cours .. </Text>
                 </TouchableOpacity>)}
+            </View>
+
+            <View style={{marginTop: 20}}>
+            <Text style={{color: '#ddd'}}>- Le prix pour une licence est de 50€ / an. Une fois le paiement validé, votre licence est automatiquement activée.</Text>
+            <Text style={{color: '#ddd'}}>Une re-connexion au compte actuel peut être nécessaire pour qu'il soit pris en compte.</Text>
+                   <Text style={{color: '#ddd'}}>- Le renouvellement automatique n'est pas disponible. 
+                    Vous serez notifié 2 mois à l'avance de la fin de votre licence. </Text>
+                    <Text style={{color: '#ddd'}}>Passé ce délai sans renouvellement, votre canal ne sera qu'en simple lecture et les données ne pourront être modifiées.</Text>
+                    <Text style={{color: '#ddd'}}>Le renouvellement prendra effet à la date de fin du précédent. En cas de renouvellement après la date de fin effective du précédent, la licence prendra effet à la date du nouvel achat.</Text>
+                    <Text style={{color: '#ddd'}}>- La mise à jour des informations de facturation pourront s'effectuer directement lors du prochain renouvellement.
+                    Au moment du paiement il vous sera alors demandé si vous validez les nouvelles informations de facturation.</Text>
+                    <Text style={{color: '#ddd'}}>Etant donné le caractére unique de l'achat, vous disposez d'un délai de remboursement de 30j après la confirmation d'achat.</Text>
+                    <Text style={{color: '#ddd'}}>- A partir de votre profil, vous pouvez accéder à vos 10 derniers paiments. Contactez le support "support@kappze.com" pour plus d'informations.</Text>
+                    <Text style={{color: '#ddd'}}>Pour tout autres questions relatives aux paiements, vous pouvez consuler notre politique commerciale, ou contacter directement le support par mail au "support@kappze.com". Le délai de réponse est sous 24h.</Text>
             </View>
 
             <CustomAlert
@@ -374,10 +385,11 @@ const styles = {
     },
     btnPayment: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
+        columnGap: 20,
         backgroundColor: '#d15e41',
         padding: 8,
-        maxWidth: 150,
+        // maxWidth: 150,
         width: '100%',
         alignItems: 'center',
         alignSelf: 'center'

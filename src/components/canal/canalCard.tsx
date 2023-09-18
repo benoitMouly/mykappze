@@ -53,7 +53,7 @@ const CanalCard = ({ canal }) => {
     <View style={styles.container}>
       <TouchableOpacity  style={styles.touchable} onPress={handlePress}>
       {canal.image ? (
-        <Image style={styles.image} source={{ uri: canal.image }} />
+        <Image style={styles.image} source={{ uri: canal.image.url }} />
       ) : (
         <Image
           style={styles.image}

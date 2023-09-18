@@ -28,7 +28,7 @@ const MotherSelect = ({ animals, selectedAnimalId, currentAnimal, onAnimalChange
                 style={styles.picker}
                 prompt="Choisir une mère"
             >
-                {/* <Picker.Item label="Choisir une mère" value="" style={styles.pickerItems}/> */}
+                <Picker.Item label="Choisir une mère" value="" style={styles.pickerItems}/>
                 {animals.map((animal, index) => (
                     <Picker.Item key={index} label={animal.name ? animal.name : animal.id} value={animal.id} style={styles.pickerItems} />
                 ))}
@@ -43,7 +43,8 @@ const styles = StyleSheet.create({
     container: {
         maxWidth: 250,
         marginBottom: 30,
-        marginTop: 10
+        marginTop: 10,
+        marginLeft: 0
         // backgroundColor: '#fff',
         // padding: 20
     },

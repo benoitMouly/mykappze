@@ -142,7 +142,7 @@ const ProfileUser = () => {
                 onPress={() => setEditVisible(true)}
                 style={styles.buttonJoinCanal}
               >
-                <Text style={styles.buttonText}>Rejoindre</Text>
+                <Text style={styles.buttonText}>Rejoindre un canal</Text>
                 <View style={styles.buttonGroupIcons}>
                   <Icon name="enter-outline" size={24} color="#fff" />
                   <Text style={styles.text}>+</Text>
@@ -233,6 +233,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     rowGap: 3,
     marginVertical: 20,
   },
@@ -266,6 +267,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginHorizontal: 5,
     width: "100%",
+    maxWidth: 200,
     columnGap: 5,
     borderWidth: 1,
     borderColor: "#e0e0e0",

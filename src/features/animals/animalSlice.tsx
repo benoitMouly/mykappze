@@ -20,7 +20,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from "firebase/storage";
-import { v4 as uuidv4 } from "uuid"; // à installer avec npm ou yarn
+import uuid from 'react-native-uuid';
 
 /*
  * Retrieve animals by Canal
@@ -259,7 +259,7 @@ export const uploadImage = async (imageUri) => {
     const blob = await response.blob();
 
     const storage = getStorage();
-    const imageName = uuidv4(); // générer un nom unique pour l'image
+    const imageName = uuid.v4(); // générer un nom unique pour l'image
     const storageRef = ref(storage, `images/${imageName}`);
 
     await uploadBytes(storageRef, blob);
@@ -413,6 +413,8 @@ export const uploadDocumentsAndUpdateAnimal = createAsyncThunk(
 
 export const uploadSingleFile = async (file, animalName) => {
   console.log("dans uploadSingleFile");
+  console.log(file)
+  console.log('uploadsingle file animal name  : ', animalName)
   try {
     const storage = getStorage();
     const fileName = animalName + "_" + file.name + "_" + Date.now();
@@ -858,11 +860,6 @@ const animalsSlice = createSlice({
       })
       .addCase(deleteImageFromStorage.fulfilled, (state, action) => {
         state.status = "succeeded";
-        console.log('SELECTED ANIMAL IMAGE : ', state.selectedAnimal.image)
-        // supprimer l'entrée correspondante de documents dans le state
-        state.selectedAnimal.image = state.selectedAnimal.image.filter(
-          (image) => image.name !== action.payload
-        );
       })
       .addCase(deleteImageFromStorage.rejected, (state, action) => {
         state.status = "failed";

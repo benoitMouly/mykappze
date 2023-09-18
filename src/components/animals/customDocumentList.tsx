@@ -19,23 +19,11 @@ import {
 import { createAndSendNotification } from "../../features/notifications/notificationSlice";
 import { ScrollView } from "react-native-gesture-handler";
 import * as WebBrowser from "expo-web-browser";
+import { useSelector } from "react-redux";
 
 const CustomDocumentList = ({ animal, dispatch, userIsAdmin }) => {
   const [localDocuments, setLocalDocuments] = useState(animal.documents || []);
-
-  // const handleDelete = async (documentName) => {
-  //   try {
-  //     await dispatch(deleteFileFromStorage(documentName));
-  //     await dispatch(
-  //       deleteDocumentFromAnimal({ animalId: animal.id, documentName })
-  //     );
-  //     setLocalDocuments((prevDocs) =>
-  //       prevDocs.filter((doc) => doc.name !== documentName)
-  //     );
-  //   } catch (error) {
-  //     Alert.alert("Erreur", "Impossible de supprimer le document");
-  //   }
-  // };
+  const { data: users } = useSelector((state) => state.canalUsers);
   const handleDelete = (documentName) => {
     const proceedWithDeletion = async () => {
       try {
@@ -105,6 +93,7 @@ const CustomDocumentList = ({ animal, dispatch, userIsAdmin }) => {
           size: doc.assets[0].size,
         };
 
+        console.log('ADAPTED DOC')
         const uploadedDoc = await uploadSingleFile(adaptedDoc, animal.name);
         uploadedDocuments.push(uploadedDoc);
       }
@@ -120,12 +109,11 @@ const CustomDocumentList = ({ animal, dispatch, userIsAdmin }) => {
       setLocalDocuments((prevDocs) => [...prevDocs, ...uploadedDocuments]);
       const message =
         "Un document a été ajouté pour l'animal :  " + animal.name;
-      const userIds = [
-        "oo1qP9CNSYNvgzingDITVJ4XL3a2",
-        "zcsYehEmnLStL5twOUlP4Ee7FyK2",
-        "4jEvW3mzCqO6GtLt4vHfYZxCHDI3",
-      ];
-      dispatch(createAndSendNotification({ userIds, message }));
+        let userIds = [];
+        users.forEach(user => {
+          userIds.push(user?.id)
+        });
+        dispatch(createAndSendNotification({ userIds, message }));
     } catch (error) {
       Alert.alert("Erreur", "Impossible d'ajouter le document");
       console.log(error);
@@ -157,13 +145,6 @@ const CustomDocumentList = ({ animal, dispatch, userIsAdmin }) => {
           </View>
         ))}
       </ScrollView>
-
-      {/* <Button
-        title="Ajouter un document"
-        onPress={handleAddDocument}
-        style={styles.btnAddDoc}
-      /> */}
-
       <TouchableOpacity onPress={handleAddDocument} style={styles.btnAddDoc}>
         <Text style={styles.btnAddDocText}>Ajouter un document</Text>
       </TouchableOpacity>

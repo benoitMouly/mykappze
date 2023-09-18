@@ -233,7 +233,7 @@ const CanalDetails: React.FC = () => {
           <View style={styles.header1st}>
             <View>
               {canal.image ? (
-                <Image style={styles.image} source={{ uri: canal.image }} />
+                <Image style={styles.image} source={{ uri: canal.image.url }} />
               ) : (
                 <Image
                   style={styles.image}

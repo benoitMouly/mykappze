@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { WebView } from 'react-native-webview';
 import {
   Image,
   RefreshControl,
@@ -25,13 +26,9 @@ import CommentSection from "../components/animals/comments.tsx";
 import { fetchAnimalsByMother } from "../features/animals/parentAnimalSlice";
 import Icon from "react-native-vector-icons/Ionicons";
 import * as Clipboard from "expo-clipboard";
-import * as FileSystem from "expo-file-system";
-import * as MediaLibrary from "expo-media-library";
-import * as Permissions from "expo-permissions";
 import * as WebBrowser from "expo-web-browser";
 import logoCatDefault from "../assets/kappze_logo_without_square_bw.png";
 import { fetchComments } from "../features/animals/commentsSlice.tsx";
-import EditableDocumentList from "../components/general/EditableDocuments.tsx";
 import DocumentSection from "../components/animals/documents.tsx";
 
 const AnimalDetails = ({ route }) => {
@@ -115,7 +112,7 @@ const AnimalDetails = ({ route }) => {
       setCurrentAnimalId(animalId);
       dispatch(fetchComments(animalId));
     }
-  }, [animalId, dispatch]);
+  }, [animalId, animals, dispatch]);
 
   const [refreshing, setRefreshing] = useState(false);
   const wait = (timeout) => {
@@ -344,13 +341,13 @@ const AnimalDetails = ({ route }) => {
               {activeTab === "general-infos" && (
                 <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Canal : </Text>
+                    <Text style={styles.infosLabel}>Canal</Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.canalName ? animal.canalName : null}
                     </Text>
                   </View>
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Couleurs : </Text>
+                    <Text style={styles.infosLabel}>Couleurs</Text>
                     {animal.colors && animal.colors.length > 0
                       ? animal.colors.map((color, index) => (
                           <Text key={index} style={styles.infosLabel_text}>
@@ -361,14 +358,14 @@ const AnimalDetails = ({ route }) => {
                   </View>
 
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Est stérilisé : </Text>
+                    <Text style={styles.infosLabel}>Est stérilisé</Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.isSterilise ? "Oui" : "Non"}
                     </Text>
                   </View>
 
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Semble malade : </Text>
+                    <Text style={styles.infosLabel}>Semble malade</Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.isSick ? "Oui" : "Non"}
                     </Text>
@@ -379,15 +376,15 @@ const AnimalDetails = ({ route }) => {
               {activeTab === "identification" && (
                 <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Est identifié : </Text>
+                    <Text style={styles.infosLabel}>Est identifié</Text>
                     <Text style={styles.infosLabel_text}>
-                      {animal.isIdentificated ? "Oui" : "Non"}
+                      {animal.hasIdNumber ? "Oui" : "Non"}
                     </Text>
                   </View>
 
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>
-                      Numéro d'identification :{" "}
+                      Numéro d'identification
                     </Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.idNumber ? animal.idNumber : "Non renseigné"}
@@ -396,18 +393,18 @@ const AnimalDetails = ({ route }) => {
 
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>
-                      Date d'identification :
+                      Date d'identification
                     </Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.identificationDate
                         ? animal.identificationDate
-                        : null}
+                        : 'Non renseigné'}
                     </Text>
                   </View>
 
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>
-                      Appartient à un propriétaire :
+                      Appartient à un propriétaire
                     </Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.isBelonged ? "Oui" : "Non"}
@@ -415,7 +412,7 @@ const AnimalDetails = ({ route }) => {
                   </View>
 
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>KappzeID :</Text>
+                    <Text style={styles.infosLabel}>KappzeID</Text>
                     <TouchableOpacity
                       onPress={() => {
                         copyToClipboard(animal.id);
@@ -426,7 +423,8 @@ const AnimalDetails = ({ route }) => {
                         style={styles.sectionShare_buttonText}
                         selectable={true}
                       >
-                        {isCopied ? "Copié !" : animal?.id}
+                        {/* {isCopied ? "Copié !" : animal?.id} */}
+                        {isCopied ? "Copié !" : 'vF75uOTD56zzDuzI7'}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -437,7 +435,7 @@ const AnimalDetails = ({ route }) => {
                 <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
                     <Text style={styles.infosLabel}>
-                      Est lié à une famille :
+                      Est lié à une famille
                     </Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.isFamily ? "Oui" : "Non"}
@@ -445,14 +443,14 @@ const AnimalDetails = ({ route }) => {
                   </View>
 
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Est une mère : </Text>
+                    <Text style={styles.infosLabel}>Est une mère</Text>
                     <Text style={styles.infosLabel_text}>
                       {animal.isMother ? "Oui" : "Non"}
                     </Text>
                   </View>
 
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Nom de la mère : </Text>
+                    <Text style={styles.infosLabel}>Nom de la mère</Text>
                     <Text style={styles.infosLabel_text}>{animal.mother}</Text>
                   </View>
                 </View>
@@ -461,16 +459,16 @@ const AnimalDetails = ({ route }) => {
               {activeTab === "autre" && (
                 <View style={styles.contentAnimaux}>
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Maladies : </Text>
+                    <Text style={styles.infosLabel}>Maladies</Text>
                     <Text style={styles.infosLabel_text}>
-                      {animal.diseases}
+                      {animal.diseases ? (animal.diseases) : ('Non renseigné')}
                     </Text>
                   </View>
 
                   <View style={styles.unicalInfo}>
-                    <Text style={styles.infosLabel}>Particularités : </Text>
+                    <Text style={styles.infosLabel}>Particularités</Text>
                     <Text style={styles.infosLabel_text}>
-                      {animal.particularities}
+                      {animal.particularities ? (animal.particularities) : ('Non renseigné')}
                     </Text>
                   </View>
                 </View>
@@ -495,12 +493,15 @@ const AnimalDetails = ({ route }) => {
                   Généalogie
                 </Text>
                 <Text style={styles.sectionListingFilters_title_genealogie_more}>Au besoin, défilé le carré de la droite vers la gauche. Il y a {filteredAnimals.length + 1} animaux dans cet arbre.</Text>
-                <Genealogy currentAnimalId={animal.id} />
+                
+                {/* {animals && (<Genealogy currentAnimalId={currentAnimalId} animals={animals} />)} */}
+                <Genealogy currentAnimalId={currentAnimalId} animals={animals} />
+                
               </View>
             </>
           ) : (
             <>
-              <Text>Cet animal n'a pas de relations</Text>
+              <Text style={{color: '#fff', marginLeft: 25}}>Cet animal n'a pas de relations connues.</Text>
             </>
           )}
         </View>

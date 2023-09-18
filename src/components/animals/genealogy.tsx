@@ -20,6 +20,8 @@ import { useNavigation } from "@react-navigation/native";
 import { processFontFamily } from "expo-font";
 import Icon from "react-native-vector-icons/Ionicons";
 import logoCatDefault from "../../assets/kappze_logo_without_square_bw.png";
+import logoCatMale from "../../assets/kappze_logo_circle_redblack_roigne.png";
+import logoCatFemale from "../../assets/kappze_logo_circle_pinkdarker_roigne.png";
 
 const MaleIcon = ({ fill = "none", stroke = "#fff", size = 20 }) => (
   <Svg
@@ -178,12 +180,12 @@ const FamilyTree = ({ currentAnimalId }) => {
         <Svg width={containerWidth} height={screenHeight}>
           {links.map((link, index) => (
             <Path
-              key={index}
-              d={`M ${link.source.x} ${link.source.y} L ${link.target.x} ${link.target.y}`}
+  key={index}
+  d={`M ${link.source.x} ${link.source.y} C ${link.source.x} ${(link.source.y + link.target.y) / 2}, ${link.target.x} ${(link.source.y + link.target.y) / 2}, ${link.target.x} ${link.target.y}`}
+  stroke="#fff"
+  fill="transparent"
+/>
 
-              stroke="#fff"
-              fill="transparent"
-            />
           ))}
 
           {nodes.map((node, index) => (
@@ -194,7 +196,8 @@ const FamilyTree = ({ currentAnimalId }) => {
                 width="50"
                 height="50"
                 preserveAspectRatio="xMidYMid slice"
-                href={node.data.image ? node.data.image.url : logoCatDefault}
+                // href={node.data.image ? node.data.image.url : logoCatDefault}
+                href={node.data.sex === 'Mâle' ? logoCatMale : node.data.sex === 'Femelle' ? logoCatFemale : logoCatDefault}
                 onPress={() =>
                   navigation.navigate("AnimalDetails", {
                     animalId: node.data.id,

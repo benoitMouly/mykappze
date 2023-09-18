@@ -23,6 +23,7 @@ import {
   Switch,
   TouchableOpacity,
   Image,
+  Alert,
 } from "react-native";
 import { RadioButton } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
@@ -78,9 +79,8 @@ interface RootState {
 const ObjectForm = (props) => {
   const route = useRoute();
   const { uid } = useSelector((state: RootState) => state.auth);
-  //   const { canalId } = props.canalId;
+  const { data: users } = useSelector((state) => state.canalUsers);
   const { canalId } = route.params;
-  // console.log("ASSOCIATION ID : ", canalId)
   const { data: canals, status } = useSelector(
     (state: RootState) => state.canals
   );
@@ -148,6 +148,7 @@ const ObjectForm = (props) => {
   const [image, setImage] = useState(null);
   const [imageUri, setImageUri] = useState(null);
   const [documents, setDocuments] = useState([]);
+  const [isModified, setIsModified] = useState(null)
 
   const dispatch = useAppDispatch();
   const currentDate = new Date();
@@ -156,6 +157,7 @@ const ObjectForm = (props) => {
   const [showCitySectorForm, setShowCitySectorForm] = useState(false);
   const navigation = useNavigation();
 
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
     let imageUrl = {};
@@ -167,7 +169,7 @@ const ObjectForm = (props) => {
     }
 
     if (imageUri) {
-      imageUrl = await uploadImage(imageUri);
+      imageUrl = await uploadImage(imageUri, `image_${Date.now()}.jpg`);
     }
 
     // console.log("IMAGE URL :", imageUrl);
@@ -175,7 +177,7 @@ const ObjectForm = (props) => {
       userCreatorId: uid,
       addedDate: currentDate.toString(),
       canalId: canalId,
-      canalName: canalInfos.name,
+      canalName: canalInfos?.name,
       name: name,
       sex: sexAnimal,
       age: selectedDate,
@@ -194,15 +196,21 @@ const ObjectForm = (props) => {
       isFamily: isFamily,
       isMother: isMother,
       motherAppId: motherId,
+      mother: mother
     };
 
     try {
       setIsLoading(true); // Activer le loader
       const createdAnimal = await dispatch(addAnimal(data));
+
+
+
       const animalId = createdAnimal.payload.id;
+
+
       if (documents.length > 0) {
         const uploadedDocuments = await Promise.all(
-          documents.map(uploadSingleFile, name)
+          documents.map((document) => uploadSingleFile(document, name))
         );
         await dispatch(
           addDocumentToAnimal({
@@ -214,11 +222,10 @@ const ObjectForm = (props) => {
       setIsLoading(false); // Désactiver le loader après tout traitement
 
       const message = "Un nouvel animal a été ajouté " + data.name;
-      const userIds = [
-        "oo1qP9CNSYNvgzingDITVJ4XL3a2",
-        "zcsYehEmnLStL5twOUlP4Ee7FyK2",
-        "4jEvW3mzCqO6GtLt4vHfYZxCHDI3",
-      ];
+      let userIds = [];
+      users.forEach(user => {
+        userIds.push(user?.id)
+      });
       dispatch(createAndSendNotification({ userIds, message }));
 
       setIsAlertVisible(true);
@@ -370,6 +377,7 @@ const ObjectForm = (props) => {
                   <EditableImage
                     imageUri={imageUri}
                     setImageUri={setImageUri}
+                    isModified={setIsModified}
                   />
                 </View>
               </View>
@@ -446,14 +454,8 @@ const ObjectForm = (props) => {
               />
             </View>
             <View style={styles.inputGroup}>
-              <Text style={styles.text}>appID de la mère </Text>
-              <TextInput
-                style={styles.input}
-                value={motherId}
-                onChangeText={setMotherId}
-              />
+              <Text style={styles.text}>Si la mère est connue : </Text>
             </View>
-
             <MotherSelect
               animals={motherAnimals}
               selectedAnimalId={motherId}
@@ -497,21 +499,26 @@ const ObjectForm = (props) => {
                 documents={documents}
                 setDocuments={setDocuments}
                 animalName={name}
+                viewType={'addCat'}
+              
               />
             </View>
           </View>
           
 
+<View style={{flexDirection: 'column', alignItems: 'flex-end', marginLeft: 20}}>
           <View style={styles.handleSubmit}>
             <TouchableOpacity
               onPress={handleSubmit}
               style={styles.buttonsValidateCat}
             >
               
-              {!isLoading ? (<Text style={styles.buttonTextSubmit}>Ajouter</Text>) : (<Text style={styles.buttonTextSubmit}>Envoi ..</Text>)}
+              {!isLoading ? (<Text style={styles.buttonTextSubmit}>Ajouter le chat</Text>) : (<Text style={styles.buttonTextSubmit}>Envoi ..</Text>)}
               
             </TouchableOpacity>
             
+          </View>
+
           </View>
         </View>
       </ScrollView>
@@ -541,7 +548,7 @@ const styles = {
     fontSize: 20,
     marginLeft: 10,
     marginTop: 30,
-    marginBottom: 30,
+    marginBottom: 15,
     fontFamily: "WixMadeforDisplay-Bold",
   },
   addCatSection: {
@@ -559,7 +566,7 @@ const styles = {
     fontSize: 18,
     fontFamily: "WixMadeforDisplay-Bold",
     marginBottom: 10,
-    textDecorationLine: "underline",
+    // textDecorationLine: "underline",
   },
   text: {
     fontFamily: "WixMadeforDisplay-Regular",
@@ -569,7 +576,7 @@ const styles = {
     flexWrap: "wrap",
     alignItems: "center",
     marginBottom: 10,
-    // marginRight: 10
+    marginTop: 10
   },
   checkboxes: {
     // flexDirection: 'row'
@@ -589,6 +596,8 @@ const styles = {
   radioGroup: {
     flexDirection: "row",
     alignItems: "center",
+    marginLeft: 10,
+    marginTop: 10
   },
   radioButton: {
     flexDirection: "row",
@@ -626,16 +635,18 @@ const styles = {
   buttonsPicker: {
     backgroundColor: "#122121",
     padding: 5,
-    borderRadius: 3,
+    borderRadius: 2,
+    marginLeft: 10
   },
   buttonText: {
     padding: 2,
+    fontSize: 16,
     color: "white",
-    fontFamily: "WixMadeforDisplay-Bold",
+    fontFamily: "WixMadeforDisplay-Regular",
   },
   handleSubmit: {
     marginRight: 10,
-    alignItems: "center",
+    alignItems: "right",
   },
   buttonTextSubmit: {
     padding: 10,

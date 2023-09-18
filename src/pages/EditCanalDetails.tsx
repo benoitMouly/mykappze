@@ -138,7 +138,7 @@ const EditCanalDetails: React.FC = () => {
   const [editableFields, setEditableFields] = useState<string[]>([]);
   const [userIsAdmin, setUserRole] = useState<boolean>(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [imageUri, setImageUri] = useState(canal?.image);
+  const [imageUri, setImageUri] = useState(canal?.image.url);
   const [isEditNameCanalVisible, setEditVisible] = useState(false);
   const [isEditEmailCanalVisible, setEditVisibleEmail] = useState(false);
   const [isEditCitySectorCanalVisible, setEditVisibleCitySector] = useState(false);
@@ -146,7 +146,7 @@ const EditCanalDetails: React.FC = () => {
     useState(false);
   const [editedCanalName, setEditedCanalName] = useState("");
   const [editedCanalEmail, setEditedCanalEmail] = useState("");
-  const [editedCanalCitySector, setEditedCanalCitySector] = useState("Ville inconnu");
+  const [editedCanalCitySector, setEditedCanalCitySector] = useState("Ville inconnue");
   const [editedCanalPostalCode, setEditedCanalPostalCode] =
     useState("");
   const [isModalVisible, setModalVisible] = useState(false);
@@ -347,7 +347,10 @@ const EditCanalDetails: React.FC = () => {
     try {
       const updatedData = { name: newName };
       const message = 'Notre nom canal a changé ! Il est désormais ' + newName;
-      const userIds = ['oo1qP9CNSYNvgzingDITVJ4XL3a2', 'zcsYehEmnLStL5twOUlP4Ee7FyK2', '4jEvW3mzCqO6GtLt4vHfYZxCHDI3'];
+      let userIds = [];
+      users.forEach(user => {
+        userIds.push(user?.id)
+      });
       
       setCurrentCanalName(newName);
       
@@ -465,7 +468,7 @@ const EditCanalDetails: React.FC = () => {
               </TouchableOpacity>
             </View>
             <View style={styles.editEltGroup}>
-              <Text style={styles.text}>{canal?.citySector}</Text>
+              <Text style={styles.text}>{canal?.citySector ? (canal.citySector) : ('Ville non renseignée')}</Text>
               <TouchableOpacity
                 onPress={() => setEditVisibleCitySector(true)}
                 style={styles.sectionHeader}
@@ -572,7 +575,7 @@ const EditCanalDetails: React.FC = () => {
                               style={styles.buttonIconElt}
                               name="close-outline"
                               size={15}
-                              color="#C40030"
+                              color="#872929"
                             />
                           </View>
                         </TouchableOpacity>
