@@ -583,6 +583,8 @@ const authSlice = createSlice({
       state.surname = null;
       state.error = null;
       state.isLoggedIn = false;
+      state.uid = null;
+      state.email = null;
     },
     setName: (state, action) => {
       state.name = action.payload;
