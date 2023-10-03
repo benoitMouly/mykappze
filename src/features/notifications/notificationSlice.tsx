@@ -76,38 +76,77 @@ const fetchNotifications = createAsyncThunk(
 
 
 
+// export const createAndSendNotification = createAsyncThunk(
+//   "notifications/createAndSend",
+//   async ({ userIds, message }, thunkAPI) => {
+//       try {
+//           const db = getFirestore();
+//           const notificationsEnabledUsers = [];
+
+//           // Parcourez chaque userId et vérifiez la préférence de notification
+//           for (let userId of userIds) {
+//               const userRef = doc(db, "users", userId);
+//               const userDoc = await getDoc(userRef);
+//               const userData = userDoc.data();
+
+//               if (userData && userData.notificationsEnabled) {
+//                   notificationsEnabledUsers.push(userId);
+//               }
+//           }
+
+//           // Créez la notification dans Firestore uniquement pour les utilisateurs qui ont activé les notifications
+//           // if (notificationsEnabledUsers.length > 0) {
+//               const notificationsCollection = collection(db, "notifications");
+//               await addDoc(notificationsCollection, {
+//                   userIds,
+//                   message,
+//                   view: false,
+//                   date: Date.now(),
+//               });
+//           // }
+//       } catch (error) {
+//           console.log(error);
+//           return thunkAPI.rejectWithValue(error.toString());
+//       }
+//   }
+// );
+
 export const createAndSendNotification = createAsyncThunk(
   "notifications/createAndSend",
-  async ({ userIds, message }, thunkAPI) => {
-      try {
-          const db = getFirestore();
-          const notificationsEnabledUsers = [];
+  async ({ userIds, message, subject }, thunkAPI) => {
+    try {
+      const db = getFirestore();
+      const notificationsEnabledUsers = [];
 
-          // Parcourez chaque userId et vérifiez la préférence de notification
-          for (let userId of userIds) {
-              const userRef = doc(db, "users", userId);
-              const userDoc = await getDoc(userRef);
-              const userData = userDoc.data();
+      // Parcourez chaque userId et vérifiez la préférence de notification
+      for (let userId of userIds) {
+        const userRef = doc(db, "users", userId);
+        const userDoc = await getDoc(userRef);
+        const userData = userDoc.data();
 
-              if (userData && userData.notificationsEnabled) {
-                  notificationsEnabledUsers.push(userId);
-              }
-          }
+        if (userData && userData.notificationsEnabled === true) {
+          notificationsEnabledUsers.push(userId);
 
-          // Créez la notification dans Firestore uniquement pour les utilisateurs qui ont activé les notifications
-          // if (notificationsEnabledUsers.length > 0) {
-              const notificationsCollection = collection(db, "notifications");
-              await addDoc(notificationsCollection, {
-                  userIds,
-                  message,
-                  view: false,
-                  date: Date.now(),
-              });
-          // }
-      } catch (error) {
-          console.log(error);
-          return thunkAPI.rejectWithValue(error.toString());
+          console.log('notificationsEnabledUsers -> ', notificationsEnabledUsers)
+          console.log('userIds -> ', userIds)
+        }
       }
+
+      // Créez la notification dans Firestore uniquement pour les utilisateurs qui ont activé les notifications
+      // if (notificationsEnabledUsers.length > 0) {
+      const notificationsCollection = collection(db, "notifications");
+      await addDoc(notificationsCollection, {
+        notificationsEnabledUsers,
+        message,
+        subject,
+        view: false,
+        date: Date.now(),
+      });
+      // }
+    } catch (error) {
+      console.log(error);
+      return thunkAPI.rejectWithValue(error.toString());
+    }
   }
 );
 

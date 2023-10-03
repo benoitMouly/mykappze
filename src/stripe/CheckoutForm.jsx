@@ -317,8 +317,8 @@ export const CheckoutForm = () => {
                     <Text style={{color: '#ddd'}}>- La mise à jour des informations de facturation pourront s'effectuer directement lors du prochain renouvellement.
                     Au moment du paiement il vous sera alors demandé si vous validez les nouvelles informations de facturation.</Text>
                     <Text style={{color: '#ddd'}}>Etant donné le caractére unique de l'achat, vous disposez d'un délai de remboursement de 30j après la confirmation d'achat.</Text>
-                    <Text style={{color: '#ddd'}}>- A partir de votre profil, vous pouvez accéder à vos 10 derniers paiments. Contactez le support "benoit@kappze.com" pour plus d'informations.</Text>
-                    <Text style={{color: '#ddd'}}>Pour tout autres questions relatives aux paiements, vous pouvez consuler notre politique commerciale, ou contacter directement le support par mail au "benoit@kappze.com". Le délai de réponse est sous 24h.</Text>
+                    <Text style={{color: '#ddd'}}>- A partir de votre profil, vous pouvez accéder à vos 10 derniers paiments. Contactez le support "support@kappze.com" pour plus d'informations.</Text>
+                    <Text style={{color: '#ddd'}}>Pour tout autres questions relatives aux paiements, vous pouvez consuler notre politique commerciale, ou contacter directement le support par mail au "support@kappze.com". Le délai de réponse est sous 24h.</Text>
             </View>
 
             <CustomAlert
